@@ -1,0 +1,332 @@
+:root {
+  --bg-primary: #0a0f1d;
+  --bg-secondary: #121829;
+  --bg-card: #182238;
+  --bg-card-hover: #1f2c49;
+  --border-color: #263554;
+  --text-main: #f0f4fc;
+  --text-muted: #94a3b8;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  line-height: 1.5;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.logo-group h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-alarm {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+}
+
+.badge-sla {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green);
+}
+
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+select, button {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+select:hover, button:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--accent-blue);
+}
+
+button.btn-primary {
+  background-color: var(--accent-blue);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+button.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+button.btn-success {
+  background-color: var(--accent-green);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+button.btn-danger {
+  background-color: var(--accent-red);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+/* Grid Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Topology Visualizer */
+.topology-canvas {
+  width: 100%;
+  height: 380px;
+  background: radial-gradient(circle, #151e33 10%, #0d1322 90%);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #1e293b;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}
+
+.node-circle {
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.node-circle:hover {
+  transform: scale(1.15);
+}
+
+.node-text {
+  font-size: 11px;
+  fill: #e2e8f0;
+  text-anchor: middle;
+  pointer-events: none;
+  font-weight: 600;
+}
+
+.link-line {
+  stroke-width: 2.5;
+  stroke: #334155;
+  transition: all 0.3s ease;
+}
+
+.link-failing {
+  stroke: var(--accent-red) !important;
+  stroke-dasharray: 6 3;
+  animation: pulse-red 1.2s infinite;
+}
+
+.link-standby {
+  stroke: var(--accent-amber);
+  stroke-dasharray: 4 4;
+}
+
+@keyframes pulse-red {
+  0% { stroke-opacity: 0.4; stroke-width: 2; }
+  50% { stroke-opacity: 1; stroke-width: 4; }
+  100% { stroke-opacity: 0.4; stroke-width: 2; }
+}
+
+/* Agent Trace Console */
+.agent-trace {
+  height: 380px;
+  overflow-y: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.84rem;
+  background-color: #0b101c;
+  border-radius: 8px;
+  padding: 14px;
+  border: 1px solid #1a233a;
+}
+
+.trace-step {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-blue);
+  background-color: rgba(24, 34, 56, 0.6);
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.step-phase-deterministic {
+  color: var(--accent-cyan);
+}
+
+.step-phase-llm {
+  color: var(--accent-purple);
+}
+
+.step-observation {
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  background-color: rgba(0,0,0,0.3);
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+/* KPI Table */
+.kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.kpi-table th {
+  text-align: left;
+  padding: 10px;
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.kpi-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-complete {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+}
+
+.status-incomplete {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--accent-red);
+}
+
+.status-uncertain {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-amber);
+}
+
+/* HITL Action Card */
+.action-box {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px dashed var(--accent-amber);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.action-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.action-desc {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  margin-bottom: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}

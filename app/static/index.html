@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network Intelligence Platform | Role-Based AI Agents</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Platform Header -->
+    <header>
+      <div class="logo-group">
+        <h1>
+          <span>📡</span> Telecom Network Intelligence Platform
+          <span class="badge badge-alarm">INCIDENT AT 10:05 UTC</span>
+          <span class="badge badge-sla">SLA &lt; 2s (p95)</span>
+        </h1>
+      </div>
+      <div class="controls-group">
+        <div>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block;">Active Tenant Scope</label>
+          <select id="tenantSelect">
+            <option value="customer_a" selected>Customer A (Strict Isolation)</option>
+            <option value="customer_b">Customer B (Isolated Boundary)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.75rem; color:var(--text-muted); display:block;">Active Agent Role (RBAC)</label>
+          <select id="roleSelect">
+            <option value="alarm_management" selected>Alarm Management Agent</option>
+            <option value="performance_analysis">Performance Analysis Agent</option>
+            <option value="change_planning">Change Planning Agent</option>
+            <option value="human_operator">Human Operator (Approver)</option>
+          </select>
+        </div>
+        <button id="btnRunInvestigation" class="btn-primary" style="margin-top:14px;">
+          ⚡ Investigate 10:05 UTC Incident
+        </button>
+      </div>
+    </header>
+
+    <!-- Top Grid: Topology & Agent Console -->
+    <div class="dashboard-grid">
+      <!-- Card 1: Temporal Topology Visualizer -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🗺️</span> Topology Engine: Bi-Temporal Graph (as of 10:05 UTC)
+          </div>
+          <span id="topologyLatencyBadge" class="badge badge-sla">Latency: -- ms</span>
+        </div>
+        <div class="topology-canvas" id="topologyCanvas">
+          <svg id="topoSvg" viewBox="0 0 650 360">
+            <!-- Dynamic SVG content rendered via app.js -->
+          </svg>
+        </div>
+        <div style="margin-top:10px; font-size:0.78rem; color:var(--text-muted); display:flex; gap:16px;">
+          <span>🔴 Affected Cells (CELL_001..003)</span>
+          <span>🟠 Shared Router (CSR_ALPHA_01)</span>
+          <span>⚡ Failing Fiber (LINK_09)</span>
+          <span>🟡 Standby Microwave</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Autonomous Agent Investigation Console -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🤖</span> Alarm Management Agent: Investigation Trace
+          </div>
+          <span id="agentSlaBadge" class="badge badge-sla">Agent SLA: &lt; 30s</span>
+        </div>
+        <div class="agent-trace" id="agentTraceConsole">
+          <div style="color:var(--text-muted); text-align:center; padding:40px 10px;">
+            Click <strong>"⚡ Investigate 10:05 UTC Incident"</strong> above to launch the autonomous role-based agent workflow.<br><br>
+            The agent will traverse bounded 2-hop topology, correlate shared transport backhaul, inspect pre/post KPIs, verify telemetry completeness, and stage a human-in-the-loop action.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Grid: KPI Data Quality & HITL Remediation Gate -->
+    <div class="dashboard-grid">
+      <!-- Card 3: KPI Engine & Data Quality Verification -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>📊</span> KPI Engine: Telemetry Integrity &amp; Quality
+          </div>
+          <span class="badge" style="background:#1e293b; color:#38bdf8;">15-Min Windows</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="kpi-table" id="kpiTable">
+            <thead>
+              <tr>
+                <th>Entity ID</th>
+                <th>Interval</th>
+                <th>KPI Name</th>
+                <th>Value</th>
+                <th>Quality Status</th>
+                <th>Completeness</th>
+              </tr>
+            </thead>
+            <tbody id="kpiTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+        <div id="uncertaintyCallout" style="margin-top:14px; font-size:0.82rem; background:rgba(30,41,59,0.7); padding:10px; border-radius:6px; border-left:3px solid var(--accent-cyan);">
+          <strong>Evidence Integrity Note:</strong> Cells 001, 002, and 003 have <strong>100% counter completeness</strong> (genuine backhaul failure). Control cell <code>CELL_099</code> has <strong>33% completeness</strong> (data gap / uncertainty, declining remediation).
+        </div>
+      </div>
+
+      <!-- Card 4: Human-In-The-Loop Approval & Governance -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🛡️</span> Governance &amp; Human-In-The-Loop Approval Gate
+          </div>
+          <span id="actionStatusBadge" class="badge" style="background:#334155; color:#cbd5e1;">AWAITING PROPOSAL</span>
+        </div>
+        <div id="hitlContainer">
+          <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:12px;">
+            Production network changes strictly require human authorization. Agents stage remediation in <code>PENDING_APPROVAL</code> state.
+          </p>
+          <div id="stagedActionView" style="display:none;" class="action-box">
+            <div class="action-row">
+              <strong id="actionIdText" style="color:var(--accent-amber);">ACT-XXXXXX</strong>
+              <span id="actionTypeText" class="badge" style="background:rgba(245,158,11,0.2); color:var(--accent-amber);">REROUTE</span>
+            </div>
+            <div class="action-desc" id="actionJustification"></div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">
+              <strong>Blast Radius:</strong> <span id="actionBlastRadius"></span><br>
+              <strong>Rollback:</strong> <span id="actionRollback"></span>
+            </div>
+            <div class="action-buttons">
+              <button id="btnApproveAction" class="btn-success">✅ Approve &amp; Execute Reroute</button>
+              <button id="btnRejectAction" class="btn-danger">❌ Reject Recommendation</button>
+            </div>
+          </div>
+          <div id="hitlAuditTrail" style="margin-top:14px; font-family:monospace; font-size:0.78rem; color:#94a3b8; max-height:120px; overflow-y:auto;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
