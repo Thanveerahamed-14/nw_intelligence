@@ -8,6 +8,7 @@ import KpiTable from './components/KpiTable';
 import HitlApprovalCard from './components/HitlApprovalCard';
 import VectorSearchModal from './components/VectorSearchModal';
 import Neo4jExplorerModal from './components/Neo4jExplorerModal';
+import LangGraphModal from './components/LangGraphModal';
 import ExecutiveStoryView from './components/ExecutiveStoryView';
 import { Eye, Sliders } from 'lucide-react';
 
@@ -23,6 +24,7 @@ export default function App() {
   const [systemStatus, setSystemStatus] = useState(null);
   const [isVectorModalOpen, setIsVectorModalOpen] = useState(false);
   const [isNeo4jModalOpen, setIsNeo4jModalOpen] = useState(false);
+  const [isLangGraphModalOpen, setIsLangGraphModalOpen] = useState(false);
 
   // Load data on mount & tenant switch
   useEffect(() => {
@@ -229,6 +231,7 @@ export default function App() {
         systemStatus={systemStatus}
         onOpenVectorSearch={() => setIsVectorModalOpen(true)}
         onOpenNeo4jModal={() => setIsNeo4jModalOpen(true)}
+        onOpenLangGraphModal={() => setIsLangGraphModalOpen(true)}
       />
 
       {/* VIEW MODE 1: SIMPLE STORY VIEW */}
@@ -291,6 +294,12 @@ export default function App() {
         isOpen={isNeo4jModalOpen}
         onClose={() => setIsNeo4jModalOpen(false)}
         systemStatus={systemStatus}
+      />
+
+      {/* LangGraph State Machine Visualization Modal */}
+      <LangGraphModal
+        isOpen={isLangGraphModalOpen}
+        onClose={() => setIsLangGraphModalOpen(false)}
       />
     </div>
   );

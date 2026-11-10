@@ -271,6 +271,31 @@ def run_investigation(req: InvestigationRequest, principal: Principal = Depends(
     except Exception as e:
         _raise_http(e)
 
+@router.get("/investigation/graph")
+def get_investigation_graph():
+    """
+    Returns the compiled LangGraph state machine structure, nodes, edges,
+    and Mermaid flowchart for the incident investigation workflow.
+    """
+    try:
+        alarm_agent = orchestration_hub.alarm_agent
+        workflow = alarm_agent.graph
+        drawn = workflow.graph.get_graph()
+        return {
+            "orchestrator": "LangGraph (StateGraph)",
+            "nodes": list(drawn.nodes.keys()) if hasattr(drawn.nodes, 'keys') else list(drawn.nodes),
+            "edges": [{"source": e.source, "target": e.target} for e in drawn.edges],
+            "mermaid": workflow.to_mermaid(),
+            "state_schema": [
+                "tenant_id", "affected_cells", "incident_time", "agent_id",
+                "steps", "shared_entities", "kpi_observations", "quality_eval",
+                "is_genuine", "has_uncertainty", "decision", "target_id",
+                "root_cause_summary", "staged_action"
+            ]
+        }
+    except Exception as e:
+        _raise_http(e)
+
 @router.post("/change/simulate")
 def simulate_change(req: ChangeSimulationRequest, principal: Principal = Depends(get_principal)):
     try:

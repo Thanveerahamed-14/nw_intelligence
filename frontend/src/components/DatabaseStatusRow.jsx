@@ -1,10 +1,11 @@
 import React from 'react';
-import { Cpu, Database, Network, Server, Search, Terminal } from 'lucide-react';
+import { Cpu, Database, Network, Server, Search, Terminal, GitFork } from 'lucide-react';
 
 export default function DatabaseStatusRow({
   systemStatus,
   onOpenVectorSearch,
-  onOpenNeo4jModal
+  onOpenNeo4jModal,
+  onOpenLangGraphModal
 }) {
   if (!systemStatus) return null;
 
@@ -30,6 +31,14 @@ export default function DatabaseStatusRow({
             {ai.ai_provider}
           </span>
           <span className="text-[11px] text-purple-600 font-mono">({ai.model})</span>
+        </div>
+
+        {/* LangGraph State Machine */}
+        <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-indigo-50/80 border border-indigo-200/80">
+          <GitFork className="w-3.5 h-3.5 text-indigo-600" />
+          <span className="text-slate-600 text-[11px]">Workflow:</span>
+          <span className="text-indigo-700 font-semibold">LangGraph</span>
+          <span className="text-[11px] text-indigo-600 font-mono">(StateGraph)</span>
         </div>
 
         {/* Vector DB Status */}
@@ -62,6 +71,14 @@ export default function DatabaseStatusRow({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2">
+        <button
+          onClick={onOpenLangGraphModal}
+          className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
+        >
+          <GitFork className="w-3.5 h-3.5 text-indigo-600" />
+          LangGraph Workflow
+        </button>
+
         <button
           onClick={onOpenVectorSearch}
           className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
