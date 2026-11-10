@@ -50,3 +50,9 @@ Thumbs.db
 tmp/
 scratch/
 
+# Node & Frontend
+node_modules/
+.npm
+dist/
+
+
