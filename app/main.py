@@ -4,9 +4,9 @@ Initializes the FastAPI service, Model Context Protocol (MCP) server,
 seeds multi-tenant topologies, and serves the interactive dashboard.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from contextlib import asynccontextmanager
 import os
 
@@ -73,12 +73,32 @@ if os.path.exists(assets_dir):
 # Mount API routes
 app.include_router(api_router, prefix="/api/v1")
 
+# Favicon handler to eliminate browser 404 noise
+@app.get("/favicon.ico")
+def get_favicon():
+    svg_icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📡</text></svg>'
+    return Response(content=svg_icon, media_type="image/svg+xml")
+
+@app.get("/vite.svg")
+def get_vite_icon():
+    svg_icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚡</text></svg>'
+    return Response(content=svg_icon, media_type="image/svg+xml")
+
 @app.get("/")
 def get_dashboard():
     index_path = os.path.join(static_dir, "index.html")
     return FileResponse(index_path)
 
+# SPA catch-all fallback for non-API client-side routes
+@app.get("/{full_path:path}")
+def catch_all_spa(full_path: str):
+    # Only route GET requests that don't match /api to index.html
+    if not full_path.startswith("api/"):
+        index_path = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+    return Response(content='{"detail":"Not Found"}', status_code=404, media_type="application/json")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app.main:app", host=settings.HOST, port=settings.PORT, reload=False)
-
