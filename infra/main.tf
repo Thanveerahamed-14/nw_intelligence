@@ -140,3 +140,4 @@ resource "google_service_account" "change_agent_sa" {
   account_id   = "change-planning-agent"
   display_name = "Change Planning Agent Service Account"
 }
+

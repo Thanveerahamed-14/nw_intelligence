@@ -55,4 +55,9 @@ node_modules/
 .npm
 dist/
 
+# Vector Store
+data/vector_store/
+*.sqlite3
+
+
 

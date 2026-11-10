@@ -202,7 +202,16 @@ class AlarmManagementAgent:
                 "Automated ticket opened for Telemetry Ingestion Pipeline verification."
             )
         else:
-            # Identify the shared bottleneck
+            # 1. Retrieve relevant incident runbooks from ChromaDB Vector Store
+            from app.vector_store import get_vector_store
+            from app.ai import get_ai_service
+            
+            vector_store = get_vector_store()
+            matched_runbooks = vector_store.search_runbooks(
+                "optical fiber backhaul discard packet loss cell availability drop", top_k=2
+            )
+
+            # 2. Identify the shared bottleneck
             shared_router_or_link = None
             for s in shared_entities:
                 if s.get("entity_type") in ["router", "transport_link"]:
@@ -212,11 +221,15 @@ class AlarmManagementAgent:
             target_id = shared_router_or_link["id"] if shared_router_or_link else primary_cell
             target_name = shared_router_or_link["name"] if shared_router_or_link else primary_cell
 
-            root_cause_summary = (
-                f"CORRELATED ROOT CAUSE CONFIRMED: High packet loss (spiked to >90%) detected on shared transport infrastructure "
-                f"'{target_name}' (ID: {target_id}). This upstream backhaul failure caused catastrophic availability drops across "
-                f"cells {affected_cells} at Site Alpha. Counter completeness is 100% (high evidence integrity)."
+            # 3. Generate AI Synthesis (Google Gemini or Deterministic Domain Engine)
+            ai_service = get_ai_service()
+            synthesis = ai_service.generate_incident_synthesis(
+                affected_cells=affected_cells,
+                shared_dependencies=shared_entities,
+                kpi_summary={"csr_packet_loss": "94.2%", "cell_availability": "0.0%"},
+                matched_runbooks=matched_runbooks
             )
+            root_cause_summary = synthesis["root_cause"]
 
             # Stage action via propose_remediation_action tool (requiring HITL approval)
             action_res = self.registry.execute_tool(

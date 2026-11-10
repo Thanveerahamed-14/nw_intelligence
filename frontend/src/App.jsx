@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
+import DatabaseStatusRow from './components/DatabaseStatusRow';
 import KpiMetricsRow from './components/KpiMetricsRow';
 import TopologyMap from './components/TopologyMap';
 import AgentTraceConsole from './components/AgentTraceConsole';
 import KpiTable from './components/KpiTable';
 import HitlApprovalCard from './components/HitlApprovalCard';
+import VectorSearchModal from './components/VectorSearchModal';
 
 export default function App() {
   const [tenant, setTenant] = useState('customer_a');
@@ -14,13 +16,28 @@ export default function App() {
   const [stagedAction, setStagedAction] = useState(null);
   const [investigationReport, setInvestigationReport] = useState(null);
   const [isInvestigating, setIsInvestigating] = useState(false);
+  const [systemStatus, setSystemStatus] = useState(null);
+  const [isVectorModalOpen, setIsVectorModalOpen] = useState(false);
 
   // Load data on mount & tenant switch
   useEffect(() => {
     loadTopology();
     loadKPIs();
     loadStagedActions();
+    loadSystemStatus();
   }, [tenant]);
+
+  async function loadSystemStatus() {
+    try {
+      const res = await fetch('/api/v1/system/status');
+      if (res.ok) {
+        const data = await res.json();
+        setSystemStatus(data);
+      }
+    } catch (e) {
+      console.error('Failed to load system status', e);
+    }
+  }
 
   async function loadTopology() {
     try {
@@ -167,6 +184,12 @@ export default function App() {
         onRunInvestigation={handleRunInvestigation}
       />
 
+      {/* Database & AI Engine Status Row */}
+      <DatabaseStatusRow
+        systemStatus={systemStatus}
+        onOpenVectorSearch={() => setIsVectorModalOpen(true)}
+      />
+
       {/* KPI Metric Summary Row */}
       <KpiMetricsRow
         latencyMs={topologyData.latency_ms}
@@ -198,6 +221,12 @@ export default function App() {
           role={role}
         />
       </div>
+
+      {/* ChromaDB Vector Search Modal */}
+      <VectorSearchModal
+        isOpen={isVectorModalOpen}
+        onClose={() => setIsVectorModalOpen(false)}
+      />
     </div>
   );
 }

@@ -34,3 +34,4 @@ steps:
 
 images:
   - 'gcr.io/$PROJECT_ID/network-intelligence-platform:$COMMIT_SHA'
+

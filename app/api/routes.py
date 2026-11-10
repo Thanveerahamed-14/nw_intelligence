@@ -53,6 +53,62 @@ def health_check():
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
+@router.get("/system/status")
+def system_status():
+    from app.ai import get_ai_service
+    from app.vector_store import get_vector_store
+    from app.graph_db import get_graph_db
+    from app.config import settings
+
+    ai = get_ai_service()
+    vs = get_vector_store()
+    gdb = get_graph_db()
+
+    return {
+        "ai": ai.get_status(),
+        "vector_db": {
+            "type": settings.VECTOR_DB_TYPE,
+            "engine": "ChromaDB (Persistent Local Vector Store)",
+            "persist_directory": settings.CHROMA_PERSIST_DIRECTORY,
+            "indexed_runbooks_count": vs.collection.count(),
+            "status": "ONLINE"
+        },
+        "graph_db": gdb.get_status(),
+        "relational_db": {
+            "url": settings.DATABASE_URL,
+            "status": "ONLINE"
+        },
+        "multi_tenancy": {
+            "tenants": settings.get_allowed_tenants(),
+            "isolation": "STRICT_PER_CUSTOMER"
+        }
+    }
+
+@router.get("/vector/search")
+def search_vector_runbooks(
+    query: str = Query(default="fiber optical transceiver packet loss drop", description="Semantic query text"),
+    top_k: int = Query(default=3, ge=1, le=10)
+):
+    from app.vector_store import get_vector_store
+    vs = get_vector_store()
+    results = vs.search_runbooks(query=query, top_k=top_k)
+    return {
+        "query": query,
+        "results_count": len(results),
+        "runbooks": results
+    }
+
+@router.post("/graph/cypher")
+def run_cypher_query(query: str = Query(default="MATCH (n) RETURN n LIMIT 10")):
+    from app.graph_db import get_graph_db
+    gdb = get_graph_db()
+    res = gdb.execute_cypher(query)
+    return {
+        "query": query,
+        "results": res,
+        "engine": gdb.get_status()["engine"]
+    }
+
 # -------------------------------------------------------------
 # TOPOLOGY ENGINE ENDPOINTS
 # -------------------------------------------------------------
