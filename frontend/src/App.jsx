@@ -8,10 +8,13 @@ import KpiTable from './components/KpiTable';
 import HitlApprovalCard from './components/HitlApprovalCard';
 import VectorSearchModal from './components/VectorSearchModal';
 import Neo4jExplorerModal from './components/Neo4jExplorerModal';
+import ExecutiveStoryView from './components/ExecutiveStoryView';
+import { Sparkles, Sliders, Eye } from 'lucide-react';
 
 export default function App() {
   const [tenant, setTenant] = useState('customer_a');
   const [role, setRole] = useState('alarm_management');
+  const [viewMode, setViewMode] = useState('simple'); // 'simple' | 'technical'
   const [topologyData, setTopologyData] = useState({ nodes: [], edges: [], latency_ms: 0.85 });
   const [kpiRecords, setKpiRecords] = useState([]);
   const [stagedAction, setStagedAction] = useState(null);
@@ -186,6 +189,41 @@ export default function App() {
         onRunInvestigation={handleRunInvestigation}
       />
 
+      {/* View Switcher: Simple Story vs Technical NOC */}
+      <div className="flex items-center justify-between mb-5 px-1 flex-wrap gap-3">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800">
+          <button
+            onClick={() => setViewMode('simple')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+              viewMode === 'simple'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Eye className="w-4 h-4" />
+            Simple Overview (Executive Story)
+          </button>
+          <button
+            onClick={() => setViewMode('technical')}
+            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+              viewMode === 'technical'
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Sliders className="w-4 h-4" />
+            Technical NOC View (Engineering Deep Dive)
+          </button>
+        </div>
+
+        <div className="text-xs text-slate-400 flex items-center gap-2">
+          <span>Mode:</span>
+          <strong className="text-slate-200">
+            {viewMode === 'simple' ? 'Simple & Intuitive' : 'Deep Telemetry & Graphs'}
+          </strong>
+        </div>
+      </div>
+
       {/* Database & AI Engine Status Row */}
       <DatabaseStatusRow
         systemStatus={systemStatus}
@@ -193,37 +231,54 @@ export default function App() {
         onOpenNeo4jModal={() => setIsNeo4jModalOpen(true)}
       />
 
-      {/* KPI Metric Summary Row */}
-      <KpiMetricsRow
-        latencyMs={topologyData.latency_ms}
-        report={investigationReport}
-      />
-
-      {/* Row 1: Topology Map & Agent Investigation Trace */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-        <TopologyMap
-          nodes={topologyData.nodes}
-          edges={topologyData.edges}
-          latencyMs={topologyData.latency_ms}
+      {/* VIEW MODE 1: SIMPLE STORY VIEW */}
+      {viewMode === 'simple' ? (
+        <ExecutiveStoryView
           tenant={tenant}
-        />
-        <AgentTraceConsole
           report={investigationReport}
+          stagedAction={stagedAction}
           isInvestigating={isInvestigating}
-          onTrigger={handleRunInvestigation}
-        />
-      </div>
-
-      {/* Row 2: KPI Engine Data Quality Table & HITL Approval Console */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <KpiTable records={kpiRecords} />
-        <HitlApprovalCard
-          action={stagedAction}
+          onRunInvestigation={handleRunInvestigation}
           onApprove={handleApproveAction}
           onReject={handleRejectAction}
           role={role}
         />
-      </div>
+      ) : (
+        /* VIEW MODE 2: TECHNICAL NOC VIEW */
+        <>
+          {/* KPI Metric Summary Row */}
+          <KpiMetricsRow
+            latencyMs={topologyData.latency_ms}
+            report={investigationReport}
+          />
+
+          {/* Row 1: Topology Map & Agent Investigation Trace */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+            <TopologyMap
+              nodes={topologyData.nodes}
+              edges={topologyData.edges}
+              latencyMs={topologyData.latency_ms}
+              tenant={tenant}
+            />
+            <AgentTraceConsole
+              report={investigationReport}
+              isInvestigating={isInvestigating}
+              onTrigger={handleRunInvestigation}
+            />
+          </div>
+
+          {/* Row 2: KPI Engine Data Quality Table & HITL Approval Console */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <KpiTable records={kpiRecords} />
+            <HitlApprovalCard
+              action={stagedAction}
+              onApprove={handleApproveAction}
+              onReject={handleRejectAction}
+              role={role}
+            />
+          </div>
+        </>
+      )}
 
       {/* ChromaDB Vector Search Modal */}
       <VectorSearchModal
