@@ -84,8 +84,8 @@ class Settings(BaseSettings):
     
     # LLM Settings (Google Gemini & Vertex AI)
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-2.5-flash"
-    VERTEX_AI_MODEL: str = "gemini-1.5-flash"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
+    VERTEX_AI_MODEL: str = "gemini-2.0-flash"
     USE_MOCK_LLM_IF_NO_KEY: bool = True  # Allows deterministic fallback simulation if offline
     LLM_REQUEST_TIMEOUT_SECONDS: float = 8.0  # Hard budget for a synchronous LLM call (protects the 30s agent SLA)
 

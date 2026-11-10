@@ -53,7 +53,7 @@ To guarantee safety, predictability, and sub-30-second response times, we strict
 | **KPI Calculation & Quality Scoring** | **Deterministic (Python / BigQuery)** | Statistical rollups, divisions, and percentage calculations must be bit-exact and audit-compliant. |
 | **RBAC & Multi-Tenant Enforcement** | **Deterministic Guardrail (Python Context)** | Access control must never rely on prompt engineering or LLM goodwill. |
 | **Tool Selection & Sequence Execution** | **Scaffolded State Machine / ReAct** | Deterministic state machine handles the standard 5-step triage sequence; LLM selects exploratory tools when anomalies diverge. |
-| **Multi-Source Evidence Synthesis** | **LLM Reasoning (Gemini 1.5 Flash)** | Synthesizing unstructured syslog messages, vendor-specific alarms, and numerical telemetry into a coherent root cause narrative. |
+| **Multi-Source Evidence Synthesis** | **LLM Reasoning (Gemini 2.0 Flash)** | Synthesizing unstructured syslog messages, vendor-specific alarms, and numerical telemetry into a coherent root cause narrative with sub-second latency. |
 | **Remediation Plan Formulation** | **LLM Formulation + Deterministic Schema** | Drafting human-readable justification, blast radius explanation, and rollback instructions adhering to strict Pydantic models. |
 
 ---

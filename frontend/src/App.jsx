@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import DatabaseStatusRow from './components/DatabaseStatusRow';
+import AgentWorkspaceBanner from './components/AgentWorkspaceBanner';
 import KpiMetricsRow from './components/KpiMetricsRow';
 import TopologyMap from './components/TopologyMap';
 import AgentTraceConsole from './components/AgentTraceConsole';
-import KpiTable from './components/KpiTable';
 import HitlApprovalCard from './components/HitlApprovalCard';
+import PerformanceAnalysisConsole from './components/PerformanceAnalysisConsole';
+import ChangePlanningConsole from './components/ChangePlanningConsole';
+import ExecutiveStoryView from './components/ExecutiveStoryView';
 import VectorSearchModal from './components/VectorSearchModal';
 import Neo4jExplorerModal from './components/Neo4jExplorerModal';
 import LangGraphModal from './components/LangGraphModal';
-import ExecutiveStoryView from './components/ExecutiveStoryView';
-import { Eye, Sliders } from 'lucide-react';
+import { AlertTriangle, LineChart, Sliders, UserCheck, Eye, EyeOff } from 'lucide-react';
 
 export default function App() {
   const [tenant, setTenant] = useState('customer_a');
   const [role, setRole] = useState('alarm_management');
-  const [viewMode, setViewMode] = useState('simple'); // 'simple' | 'technical'
+  const [showIncidentPath, setShowIncidentPath] = useState(true);
   const [topologyData, setTopologyData] = useState({ nodes: [], edges: [], latency_ms: 0.85 });
   const [kpiRecords, setKpiRecords] = useState([]);
   const [stagedAction, setStagedAction] = useState(null);
@@ -180,8 +182,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-3 md:p-6 max-w-[1680px] mx-auto text-slate-800">
-      {/* Top Header */}
+    <div className="min-h-screen bg-slate-50 p-3 md:p-6 max-w-[1680px] mx-auto text-slate-800 font-sans">
+      {/* Top Application Header */}
       <Header
         tenant={tenant}
         setTenant={setTenant}
@@ -191,41 +193,6 @@ export default function App() {
         onRunInvestigation={handleRunInvestigation}
       />
 
-      {/* View Switcher: Simple Story vs Technical NOC */}
-      <div className="flex items-center justify-between mb-5 px-1 flex-wrap gap-3">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white border border-slate-200 shadow-sm">
-          <button
-            onClick={() => setViewMode('simple')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
-              viewMode === 'simple'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Eye className="w-4 h-4" />
-            Simple Overview (Executive Story)
-          </button>
-          <button
-            onClick={() => setViewMode('technical')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
-              viewMode === 'technical'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Sliders className="w-4 h-4" />
-            Technical NOC View (Deep Telemetry)
-          </button>
-        </div>
-
-        <div className="text-xs text-slate-500 font-medium flex items-center gap-2">
-          <span>Active View:</span>
-          <strong className="text-slate-800 font-semibold">
-            {viewMode === 'simple' ? 'Simple & Intuitive Story' : 'Engineering Telemetry & Graphs'}
-          </strong>
-        </div>
-      </div>
-
       {/* Database & AI Engine Status Row */}
       <DatabaseStatusRow
         systemStatus={systemStatus}
@@ -234,29 +201,101 @@ export default function App() {
         onOpenLangGraphModal={() => setIsLangGraphModalOpen(true)}
       />
 
-      {/* VIEW MODE 1: SIMPLE STORY VIEW */}
-      {viewMode === 'simple' ? (
-        <ExecutiveStoryView
-          tenant={tenant}
-          report={investigationReport}
-          stagedAction={stagedAction}
-          isInvestigating={isInvestigating}
-          onRunInvestigation={handleRunInvestigation}
-          onApprove={handleApproveAction}
-          onReject={handleRejectAction}
-          role={role}
-        />
-      ) : (
-        /* VIEW MODE 2: TECHNICAL NOC VIEW */
-        <>
-          {/* KPI Metric Summary Row */}
+      {/* Agent Workspace Navigation Bar */}
+      <div className="flex items-center justify-between mb-4 p-1.5 rounded-xl bg-white border border-slate-200 shadow-sm flex-wrap gap-2">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[11px] font-bold text-slate-400 px-2 uppercase tracking-wider">
+            Agent Role Workspace:
+          </span>
+
+          <button
+            onClick={() => setRole('alarm_management')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
+              role === 'alarm_management'
+                ? 'bg-rose-50 text-rose-700 border border-rose-200 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4 text-rose-600" />
+            1. Alarm Management Agent
+          </button>
+
+          <button
+            onClick={() => setRole('performance_analysis')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
+              role === 'performance_analysis'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <LineChart className="w-4 h-4 text-blue-600" />
+            2. Performance Analysis Agent
+          </button>
+
+          <button
+            onClick={() => setRole('change_planning')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
+              role === 'change_planning'
+                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Sliders className="w-4 h-4 text-indigo-600" />
+            3. Change Planning Agent
+          </button>
+
+          <button
+            onClick={() => setRole('human_operator')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
+              role === 'human_operator'
+                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <UserCheck className="w-4 h-4 text-emerald-600" />
+            4. Human Operator (HITL Gate)
+          </button>
+        </div>
+
+        <button
+          onClick={() => setShowIncidentPath(!showIncidentPath)}
+          className="text-xs font-medium text-slate-500 hover:text-slate-800 flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-all"
+        >
+          {showIncidentPath ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          {showIncidentPath ? 'Hide Incident Overview' : 'Show Incident Overview'}
+        </button>
+      </div>
+
+      {/* Active Agent Banner */}
+      <AgentWorkspaceBanner role={role} tenant={tenant} />
+
+      {/* Persistent Incident Summary Bar (Toggleable) */}
+      {showIncidentPath && (
+        <div className="mb-5">
+          <ExecutiveStoryView
+            tenant={tenant}
+            report={investigationReport}
+            stagedAction={stagedAction}
+            isInvestigating={isInvestigating}
+            onRunInvestigation={handleRunInvestigation}
+            onApprove={handleApproveAction}
+            onReject={handleRejectAction}
+            role={role}
+          />
+        </div>
+      )}
+
+      {/* DYNAMIC AGENT WORKSPACES */}
+
+      {/* WORKSPACE 1: ALARM MANAGEMENT AGENT */}
+      {role === 'alarm_management' && (
+        <div className="space-y-5">
           <KpiMetricsRow
             latencyMs={topologyData.latency_ms}
             report={investigationReport}
           />
 
-          {/* Row 1: Topology Map & Agent Investigation Trace */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <TopologyMap
               nodes={topologyData.nodes}
               edges={topologyData.edges}
@@ -269,18 +308,34 @@ export default function App() {
               onTrigger={handleRunInvestigation}
             />
           </div>
+        </div>
+      )}
 
-          {/* Row 2: KPI Engine Data Quality Table & HITL Approval Console */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <KpiTable records={kpiRecords} />
-            <HitlApprovalCard
-              action={stagedAction}
-              onApprove={handleApproveAction}
-              onReject={handleRejectAction}
-              role={role}
-            />
-          </div>
-        </>
+      {/* WORKSPACE 2: PERFORMANCE ANALYSIS AGENT */}
+      {role === 'performance_analysis' && (
+        <PerformanceAnalysisConsole
+          kpiRecords={kpiRecords}
+          tenant={tenant}
+        />
+      )}
+
+      {/* WORKSPACE 3: CHANGE PLANNING AGENT */}
+      {role === 'change_planning' && (
+        <ChangePlanningConsole
+          tenant={tenant}
+        />
+      )}
+
+      {/* WORKSPACE 4: HUMAN OPERATOR (HITL APPROVER) */}
+      {role === 'human_operator' && (
+        <div className="max-w-4xl mx-auto space-y-5">
+          <HitlApprovalCard
+            action={stagedAction}
+            onApprove={handleApproveAction}
+            onReject={handleRejectAction}
+            role={role}
+          />
+        </div>
       )}
 
       {/* ChromaDB Vector Search Modal */}

@@ -46,7 +46,7 @@ flowchart TD
 
     subgraph Platform["Application & AI Gateway"]
         CR_App["Cloud Run: FastAPI + MCP Server<br/>(JSON-RPC 2.0 & OpenAPI)"]
-        Vertex["Google Cloud Vertex AI<br/>(Gemini 1.5 Flash Model)"]
+        Vertex["Google Cloud Vertex AI<br/>(Gemini 2.0 Flash Model)"]
         HITL_Gate["Human-In-The-Loop Approval Gate"]
     end
 

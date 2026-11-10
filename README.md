@@ -1,26 +1,29 @@
 # Telecom Network Intelligence Platform for Role-Based AI Agents
 
-[![Tests](https://img.shields.io/badge/Test_Suite-19%2F19_Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Test_Suite-25%2F25_Passing-brightgreen.svg)]()
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)]()
+[![LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph_StateGraph-indigo.svg)]()
+[![Vector DB](https://img.shields.io/badge/Vector_DB-ChromaDB-blueviolet.svg)]()
+[![Graph DB](https://img.shields.io/badge/Graph_DB-Neo4j_Ready-emerald.svg)]()
 [![SLA](https://img.shields.io/badge/SLA_2--Hop_Topology-%3C_2.0s_(p95)-success.svg)]()
 [![Agent SLA](https://img.shields.io/badge/Agent_Investigation_SLA-%3C_30s-success.svg)]()
-[![Architecture](https://img.shields.io/badge/GCP_Architecture-Cloud_Run_%7C_BigQuery_%7C_AlloyDB-orange.svg)]()
 [![Multi-Tenancy](https://img.shields.io/badge/Multi--Tenancy-5_Isolated_Customers-purple.svg)]()
 
-> A production-grade telecommunications network intelligence platform providing **Connection Factory**, **KPI Engine**, **Bi-Temporal Topology Engine**, **Model Context Protocol (MCP)** tools, and **Role-Based Autonomous AI Agents** governed by strict **Human-In-The-Loop (HITL)** safeguards.
+> A production-grade telecommunications network intelligence platform providing **Connection Factory**, **KPI Engine**, **Bi-Temporal Topology Engine (Neo4j / NetworkX)**, **ChromaDB Vector Store**, **Model Context Protocol (MCP)** tools, and **Role-Based Autonomous AI Agents** powered by **LangGraph (`StateGraph`)** and **Google Gemini AI**, governed by strict **Human-In-The-Loop (HITL)** safeguards.
 
 ---
 
 ## 📋 Table of Contents
 1. [Scenario & Business Problem (The 10:05 UTC Incident)](#-scenario--business-problem-the-1005-utc-incident)
 2. [Key Platform Capabilities](#-key-platform-capabilities)
-3. [Architecture Overview & Technology Choices](#-architecture-overview--technology-choices)
-4. [Role-Based Access Control (RBAC) & Governance](#-role-based-access-control-rbac--governance)
-5. [Quickstart Guide (Run Locally in 60 Seconds)](#-quickstart-guide-run-locally-in-60-seconds)
-6. [Interactive Web Dashboard & Topology Console](#-interactive-web-dashboard--topology-console)
-7. [Automated Test Suite](#-automated-test-suite)
-8. [Comprehensive Documentation Index](#-comprehensive-documentation-index)
-9. [Repository Structure](#-repository-structure)
+3. [LangGraph Agent Orchestration](#-langgraph-agent-orchestration)
+4. [Architecture Overview & Technology Choices](#-architecture-overview--technology-choices)
+5. [Role-Based Access Control (RBAC) & Governance](#-role-based-access-control-rbac--governance)
+6. [Quickstart Guide (Run Locally in 60 Seconds)](#-quickstart-guide-run-locally-in-60-seconds)
+7. [Interactive Web Dashboard (Executive Story + Technical NOC)](#-interactive-web-dashboard-executive-story--technical-noc)
+8. [Automated Test Suite & Continuous Evaluation](#-automated-test-suite--continuous-evaluation)
+9. [Comprehensive Documentation Index](#-comprehensive-documentation-index)
+10. [Repository Structure](#-repository-structure)
 
 ---
 
@@ -90,7 +93,7 @@ flowchart TD
 
     subgraph Application["Core Service & AI Gateway"]
         API["Cloud Run: FastAPI + MCP Server (JSON-RPC 2.0)"]
-        Vertex["Google Cloud Vertex AI (Gemini 1.5 Flash)"]
+        Vertex["Google Cloud Vertex AI (Gemini 2.0 Flash)"]
         HITL["Human-In-The-Loop (HITL) Gatekeeper"]
     end
 
