@@ -103,19 +103,41 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
                 onClick={() => setSelectedNode({ id, ...node })}
                 className="cursor-pointer group"
               >
+                {/* Stationary transparent hit target so hover never flutters or jitters */}
                 <circle
                   cx={node.x}
                   cy={node.y}
-                  r={isSelected ? 16 : 13}
+                  r={22}
+                  fill="transparent"
+                  className="pointer-events-auto"
+                />
+
+                {/* Outer halo ring that smoothly fades in on hover without moving geometry */}
+                <circle
+                  cx={node.x}
+                  cy={node.y}
+                  r={18}
+                  fill="none"
+                  stroke={node.color}
+                  strokeWidth={2}
+                  opacity={isSelected ? 0.6 : 0}
+                  className="transition-opacity duration-200 group-hover:opacity-40 pointer-events-none"
+                />
+
+                {/* Core node circle - stationary, rock solid, zero vibration */}
+                <circle
+                  cx={node.x}
+                  cy={node.y}
+                  r={isSelected ? 15 : 12.5}
                   fill={node.color}
                   stroke="#ffffff"
                   strokeWidth={2.5}
-                  className="transition-all duration-150 group-hover:scale-110 drop-shadow-sm"
+                  className="transition-all duration-150 group-hover:stroke-slate-800 group-hover:stroke-[3px] pointer-events-none"
                 />
                 <circle
                   cx={node.x}
                   cy={node.y}
-                  r={3.5}
+                  r={3}
                   fill="#ffffff"
                   className="pointer-events-none"
                 />
@@ -123,7 +145,7 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
                   x={node.x}
                   y={node.y + 24}
                   textAnchor="middle"
-                  className="text-[10.5px] font-bold fill-slate-800 pointer-events-none"
+                  className="text-[10px] font-bold fill-slate-800 pointer-events-none select-none tracking-tight"
                 >
                   {node.label}
                 </text>
@@ -131,7 +153,7 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
                   x={node.x}
                   y={node.y + 36}
                   textAnchor="middle"
-                  className="text-[9px] font-medium fill-slate-500 pointer-events-none"
+                  className="text-[8.5px] font-medium fill-slate-500 pointer-events-none select-none"
                 >
                   {node.sub}
                 </text>
