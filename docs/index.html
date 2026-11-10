@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telecom Network Intelligence &middot; Documentation</title>
+<style>
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --faint: #7b8794;
+      --border: #e1e6ec;
+      --surface: #ffffff;
+      --page: #f5f7fa;
+      --accent: #1d4ed8;
+      --accent-soft: #eff4ff;
+      --code-bg: #f6f8fa;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .site-header .inner,
+    .pager,
+    .page {
+      width: min(920px, 100% - 32px);
+      margin: 0 auto;
+    }
+    .site-header .inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 16px;
+      padding: 14px 0;
+    }
+    .site-header .brand {
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .site-header nav {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.85rem;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration-thickness: 2px; }
+    .page {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+      margin-top: 28px;
+      margin-bottom: 28px;
+      padding: 52px 64px 64px;
+    }
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--faint);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .doc-meta a { text-transform: none; letter-spacing: 0; font-weight: 500; }
+    h1, h2, h3, h4 {
+      line-height: 1.25;
+      color: #111827;
+      font-weight: 700;
+      margin: 1.8em 0 0.6em;
+      scroll-margin-top: 20px;
+    }
+    h1 { font-size: 1.95rem; margin-top: 0.3em; letter-spacing: -0.02em; }
+    h2 {
+      font-size: 1.35rem;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.1rem; }
+    h4 { font-size: 1rem; color: var(--muted); }
+    p, ul, ol, table, pre, blockquote { margin: 0 0 1.05em; }
+    ul, ol { padding-left: 1.4em; }
+    li { margin: 0.28em 0; }
+    li > ul, li > ol { margin: 0.28em 0 0.28em; }
+    strong { color: #111827; }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2.4em 0;
+    }
+    blockquote {
+      margin-left: 0;
+      padding: 0.85em 1.1em;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+    }
+    blockquote p:last-child { margin-bottom: 0; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.86em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.1em 0.35em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      line-height: 1.5;
+      font-size: 0.85rem;
+    }
+    pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: inherit;
+      white-space: pre;
+    }
+    .highlight pre { margin: 0; }
+    .table-wrap { overflow-x: auto; margin-bottom: 1.05em; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f1f5f9; font-weight: 600; color: #111827; }
+    tbody tr:nth-child(even) { background: #fafbfc; }
+    .mermaid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px;
+      margin: 0 0 1.2em;
+      overflow-x: auto;
+      text-align: center;
+      font-family: inherit;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+    .mermaid[data-processed="true"] { white-space: normal; }
+    .mermaid svg { max-width: 100%; height: auto; }
+    .toc {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fbfcfe;
+      padding: 14px 20px 16px;
+      margin: 1.6em 0 2em;
+    }
+    .toc-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 6px;
+    }
+    .toc ul { list-style: none; padding-left: 0; margin: 0; }
+    .toc ul ul { padding-left: 1.1em; }
+    .toc li { margin: 0.18em 0; font-size: 0.88rem; }
+    .toc a { text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .pager {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      padding-bottom: 40px;
+      font-size: 0.9rem;
+    }
+    .pager a {
+      display: block;
+      flex: 1 1 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 12px 16px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .pager a:hover { border-color: var(--accent); }
+    .pager .label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 2px;
+    }
+    .pager .next { text-align: right; }
+    .pager .spacer { flex: 1 1 0; }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 1.5em;
+    }
+    .card {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px rgba(29, 78, 216, 0.08);
+    }
+    .card .num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .card h3 { margin: 2px 0 4px; font-size: 1.02rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    @media (max-width: 720px) {
+      .page { padding: 32px 22px 44px; border-radius: 0; border-left: 0; border-right: 0; }
+      .site-header .inner, .pager, .page { width: 100%; }
+      .site-header .inner { padding: 12px 16px; }
+      .pager { padding: 0 16px 32px; }
+      h1 { font-size: 1.55rem; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; font-size: 11.5pt; }
+      .site-header, .pager, .toc, .doc-meta a { display: none !important; }
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      a { color: #000; text-decoration: none; }
+      h1, h2, h3 { page-break-after: avoid; }
+      h2 { border-bottom-color: #ccc; }
+      pre, table, blockquote, .mermaid { page-break-inside: avoid; }
+      pre { background: #f7f7f7; border-color: #ddd; }
+      th { background: #f0f0f0; }
+      .mermaid { border-color: #ddd; }
+    }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">Telecom Network Intelligence &middot; Documentation</a>
+    <nav><a href="../README.md">README (Markdown)</a></nav>
+  </div>
+</header>
+<main class="page">
+  <div class="doc-meta"><span>Documentation index</span></div>
+  <h1>Telecom Network Intelligence &middot; Documentation</h1>
+  <p>Printable HTML editions of the platform design documentation. The Markdown sources remain alongside these pages as the canonical text.</p>
+  <div class="cards">
+    <a class="card" href="01_SYSTEM_ARCHITECTURE.html"><span class="num">Document 01</span><h3>01. System Architecture & Technology Choices</h3><p>The Telecom Network Intelligence Platform is an enterprise-grade operational backbone designed for five isolated telecommunication customers, managing over 25,000 radio nodes, 250,000 cells, and...</p></a>
+    <a class="card" href="02_TOPOLOGY_DATA_MODEL.html"><span class="num">Document 02</span><h3>02. Inventory & Topology Data Model</h3><p>A critical requirement of telecommunications incident root cause analysis is answering: &quot;What did the network topology look like at the exact moment this alarm occurred (10:05 UTC)?&quot;</p></a>
+    <a class="card" href="03_KPI_ENGINE_DATA_QUALITY.html"><span class="num">Document 03</span><h3>03. KPI Engine & Data Quality Specification</h3><p>Telecommunication networks generate performance counters aligned to standard 15-minute 3GPP measurement periods (e.g. 10:00–10:15 UTC). Raw telemetry counters are received at finer 1-minute or...</p></a>
+    <a class="card" href="04_API_MCP_SPECIFICATION.html"><span class="num">Document 04</span><h3>04. API & Model Context Protocol (MCP) Specification</h3><p>The platform exposes dual interfaces with shared underlying governance and security layers: 1. REST API (OpenAPI 3.0): Used by human dashboards, NOC automation workflows, and microservices for...</p></a>
+    <a class="card" href="05_AGENT_DESIGN_EVALUATION.html"><span class="num">Document 05</span><h3>05. Agent Behaviour, Safety & Evaluation Framework</h3><p>At 10:05:00 UTC, alarms fire on CELL_001, CELL_002, and CELL_003 (Availability = 0%, RRC Success = 0%). The Alarm Management Agent autonomously initiates an investigation:</p></a>
+    <a class="card" href="06_EXECUTIVE_SLIDES.html"><span class="num">Document 06</span><h3>06. Executive Presentation: Platform Overview & Incident Resolution</h3><p>Telecom Network Intelligence Platform for Role-Based AI Agents</p></a>
+    <a class="card" href="07_ASSUMPTIONS_AND_QUESTIONS.html"><span class="num">Document 07</span><h3>07. Working Assumptions, Challenges & Open Questions</h3><p>1. Human-In-The-Loop (HITL) Expiration &amp; SLA: If an agent stages an emergency reroute action in PENDING_APPROVAL and the NOC Human Operator does not respond within 15 minutes, should the action...</p></a>
+  </div>
+</main>
+</body>
+</html>

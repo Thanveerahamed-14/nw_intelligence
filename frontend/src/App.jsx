@@ -9,7 +9,7 @@ import HitlApprovalCard from './components/HitlApprovalCard';
 import VectorSearchModal from './components/VectorSearchModal';
 import Neo4jExplorerModal from './components/Neo4jExplorerModal';
 import ExecutiveStoryView from './components/ExecutiveStoryView';
-import { Sparkles, Sliders, Eye } from 'lucide-react';
+import { Eye, Sliders } from 'lucide-react';
 
 export default function App() {
   const [tenant, setTenant] = useState('customer_a');
@@ -178,7 +178,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen p-3 md:p-6 max-w-[1680px] mx-auto text-slate-100">
+    <div className="min-h-screen bg-slate-50 p-3 md:p-6 max-w-[1680px] mx-auto text-slate-800">
       {/* Top Header */}
       <Header
         tenant={tenant}
@@ -191,13 +191,13 @@ export default function App() {
 
       {/* View Switcher: Simple Story vs Technical NOC */}
       <div className="flex items-center justify-between mb-5 px-1 flex-wrap gap-3">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white border border-slate-200 shadow-sm">
           <button
             onClick={() => setViewMode('simple')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
               viewMode === 'simple'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <Eye className="w-4 h-4" />
@@ -205,21 +205,21 @@ export default function App() {
           </button>
           <button
             onClick={() => setViewMode('technical')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all ${
               viewMode === 'technical'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <Sliders className="w-4 h-4" />
-            Technical NOC View (Engineering Deep Dive)
+            Technical NOC View (Deep Telemetry)
           </button>
         </div>
 
-        <div className="text-xs text-slate-400 flex items-center gap-2">
-          <span>Mode:</span>
-          <strong className="text-slate-200">
-            {viewMode === 'simple' ? 'Simple & Intuitive' : 'Deep Telemetry & Graphs'}
+        <div className="text-xs text-slate-500 font-medium flex items-center gap-2">
+          <span>Active View:</span>
+          <strong className="text-slate-800 font-semibold">
+            {viewMode === 'simple' ? 'Simple & Intuitive Story' : 'Engineering Telemetry & Graphs'}
           </strong>
         </div>
       </div>

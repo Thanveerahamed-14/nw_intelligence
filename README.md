@@ -180,7 +180,7 @@ For deep architectural and implementation details, refer to the documentation in
 - [`03_KPI_ENGINE_DATA_QUALITY.md`](docs/03_KPI_ENGINE_DATA_QUALITY.md): 15-min aggregation windows, late data watermarking (2 hours), formula registry, evidence integrity.
 - [`04_API_MCP_SPECIFICATION.md`](docs/04_API_MCP_SPECIFICATION.md): REST API & Model Context Protocol specification, JSON-RPC schemas, query bounds, HITL approval state machine.
 - [`05_AGENT_DESIGN_EVALUATION.md`](docs/05_AGENT_DESIGN_EVALUATION.md): Incident walkthrough, deterministic vs LLM boundaries, multi-agent rationale, stopping conditions, continuous evaluation harness.
-- [`06_EXECUTIVE_SLIDES.md`](docs/06_EXECUTIVE_SLIDES.md): 5-slide executive presentation for the Chief Solution Lead.
+- [`06_EXECUTIVE_SLIDES.md`](docs/06_EXECUTIVE_SLIDES.md): 5-slide executive presentation covering platform vision, architecture, governance, and incident resolution.
 - [`07_ASSUMPTIONS_AND_QUESTIONS.md`](docs/07_ASSUMPTIONS_AND_QUESTIONS.md): Explicit assumptions, architectural challenges (MOCN, burst traffic), and open questions for stakeholders.
 
 ---

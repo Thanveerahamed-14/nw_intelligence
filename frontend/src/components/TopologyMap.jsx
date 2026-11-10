@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Network, Info, CheckCircle2, AlertTriangle, Layers } from 'lucide-react';
+import { Network, Layers } from 'lucide-react';
 
 export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
   const [selectedNode, setSelectedNode] = useState(null);
@@ -34,10 +34,10 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
 
   if (tenant === 'customer_b') {
     return (
-      <div className="clean-card p-5 border border-slate-800 bg-slate-900/80 flex flex-col items-center justify-center h-[450px] text-center">
-        <Layers className="w-12 h-12 text-slate-500 mb-3" />
-        <h3 className="text-sm font-semibold text-slate-300">Customer B Isolated Boundary</h3>
-        <p className="text-xs text-slate-400 max-w-sm mt-1.5 leading-relaxed">
+      <div className="clean-card p-5 border border-slate-200 bg-white flex flex-col items-center justify-center h-[460px] text-center shadow-sm">
+        <Layers className="w-12 h-12 text-slate-400 mb-3" />
+        <h3 className="text-sm font-bold text-slate-800">Customer B Isolated Boundary</h3>
+        <p className="text-xs text-slate-500 max-w-sm mt-1.5 leading-relaxed">
           Zero cross-tenant topology entities accessible. Customer A's 10:05 UTC incident data is strictly segregated.
         </p>
       </div>
@@ -45,28 +45,36 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
   }
 
   return (
-    <div className="clean-card p-5 border border-slate-800 bg-slate-900/80 flex flex-col h-[450px]">
+    <div className="clean-card p-5 border border-slate-200 bg-white shadow-sm flex flex-col h-[460px]">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
         <div className="flex items-center gap-2">
-          <Network className="w-4 h-4 text-blue-400" />
-          <h2 className="text-sm font-semibold text-white tracking-tight">
+          <Network className="w-5 h-5 text-blue-600" />
+          <h2 className="text-sm font-bold text-slate-900 tracking-tight">
             Network Topology Graph (as of 10:05 UTC)
           </h2>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-semibold">
             Latency: {latencyMs || 0.77} ms
           </span>
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
             SLA Met
           </span>
         </div>
       </div>
 
       {/* SVG Map Canvas */}
-      <div className="relative flex-1 bg-slate-950/60 rounded-xl border border-slate-800/80 overflow-hidden">
+      <div className="relative flex-1 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden">
         <svg viewBox="0 0 650 320" className="w-full h-full">
+          {/* Subtle Grid Lines in SVG */}
+          <defs>
+            <pattern id="lightGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e2e8f0" strokeWidth="0.8" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#lightGrid)" />
+
           {/* Links */}
           {links.map((link, idx) => {
             const p1 = layout[link.u];
@@ -79,8 +87,8 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
                 y1={p1.y}
                 x2={p2.x}
                 y2={p2.y}
-                strokeWidth={link.failing ? 3 : 2}
-                stroke={link.failing ? '#ef4444' : link.standby ? '#f59e0b' : '#334155'}
+                strokeWidth={link.failing ? 3.5 : link.standby ? 2.5 : 2}
+                stroke={link.failing ? '#dc2626' : link.standby ? '#d97706' : '#94a3b8'}
                 className={link.failing ? 'failing-link' : link.standby ? 'standby-link' : ''}
               />
             );
@@ -100,9 +108,9 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
                   cy={node.y}
                   r={isSelected ? 16 : 13}
                   fill={node.color}
-                  stroke="#1e293b"
+                  stroke="#ffffff"
                   strokeWidth={2.5}
-                  className="transition-all duration-150 group-hover:scale-110"
+                  className="transition-all duration-150 group-hover:scale-110 drop-shadow-sm"
                 />
                 <circle
                   cx={node.x}
@@ -115,7 +123,7 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
                   x={node.x}
                   y={node.y + 24}
                   textAnchor="middle"
-                  className="text-[10px] font-medium fill-slate-200 pointer-events-none"
+                  className="text-[10.5px] font-bold fill-slate-800 pointer-events-none"
                 >
                   {node.label}
                 </text>
@@ -123,7 +131,7 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
                   x={node.x}
                   y={node.y + 36}
                   textAnchor="middle"
-                  className="text-[9px] fill-slate-400 pointer-events-none"
+                  className="text-[9px] font-medium fill-slate-500 pointer-events-none"
                 >
                   {node.sub}
                 </text>
@@ -134,35 +142,35 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
 
         {/* Selected Node Inspector Overlay */}
         {selectedNode && (
-          <div className="absolute top-3 right-3 clean-card p-3.5 bg-slate-900 border border-slate-700/80 rounded-xl text-xs max-w-xs shadow-xl animate-fade-in z-20">
-            <div className="flex items-center justify-between font-bold text-white mb-1.5 border-b border-slate-800 pb-1">
+          <div className="absolute top-3 right-3 clean-card p-3.5 bg-white border border-slate-300 rounded-xl text-xs max-w-xs shadow-lg animate-fade-in z-20">
+            <div className="flex items-center justify-between font-bold text-slate-900 mb-1.5 border-b border-slate-200 pb-1">
               <span>{selectedNode.id}</span>
               <button
                 onClick={() => setSelectedNode(null)}
-                className="text-slate-400 hover:text-white px-1"
+                className="text-slate-400 hover:text-slate-800 px-1 font-bold"
               >
                 ✕
               </button>
             </div>
-            <div className="text-slate-300 space-y-1 text-[11px]">
-              <div><strong className="text-slate-400">Type:</strong> {selectedNode.type}</div>
-              <div><strong className="text-slate-400">Vendor:</strong> {selectedNode.vendor}</div>
-              <div><strong className="text-slate-400">Status:</strong> {selectedNode.sub}</div>
-              <div><strong className="text-slate-400">Valid Time:</strong> 2026-11-10 10:05:00 UTC</div>
+            <div className="text-slate-600 space-y-1 text-[11px]">
+              <div><strong className="text-slate-700">Type:</strong> {selectedNode.type}</div>
+              <div><strong className="text-slate-700">Vendor:</strong> {selectedNode.vendor}</div>
+              <div><strong className="text-slate-700">Status:</strong> {selectedNode.sub}</div>
+              <div><strong className="text-slate-700">Valid Time:</strong> 2026-11-10 10:05:00 UTC</div>
             </div>
           </div>
         )}
       </div>
 
       {/* Legend Footer */}
-      <div className="mt-3 flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800">
+      <div className="mt-3 flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200">
         <div className="flex items-center gap-4 flex-wrap">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Affected Cells (001-003)</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-500"></span> Affected Cells (001-003)</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Shared Router (CSR_ALPHA)</span>
-          <span className="flex items-center gap-1.5"><span className="w-3.5 h-1 bg-rose-500"></span> Failing Fiber Link (94.2% Drop)</span>
-          <span className="flex items-center gap-1.5"><span className="w-3.5 h-1 border-t border-dashed border-amber-400"></span> Standby Microwave</span>
+          <span className="flex items-center gap-1.5"><span className="w-3.5 h-1 bg-red-500"></span> Failing Fiber Link (94.2% Drop)</span>
+          <span className="flex items-center gap-1.5"><span className="w-3.5 h-1 border-t-2 border-dashed border-amber-500"></span> Standby Microwave</span>
         </div>
-        <span className="text-[11px] text-slate-400">Click node to inspect</span>
+        <span className="text-[11px] text-slate-400 font-medium">Click node to inspect</span>
       </div>
     </div>
   );

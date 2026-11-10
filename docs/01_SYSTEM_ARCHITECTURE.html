@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01. System Architecture & Technology Choices | Telecom Network Intelligence</title>
+<style>
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --faint: #7b8794;
+      --border: #e1e6ec;
+      --surface: #ffffff;
+      --page: #f5f7fa;
+      --accent: #1d4ed8;
+      --accent-soft: #eff4ff;
+      --code-bg: #f6f8fa;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .site-header .inner,
+    .pager,
+    .page {
+      width: min(920px, 100% - 32px);
+      margin: 0 auto;
+    }
+    .site-header .inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 16px;
+      padding: 14px 0;
+    }
+    .site-header .brand {
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .site-header nav {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.85rem;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration-thickness: 2px; }
+    .page {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+      margin-top: 28px;
+      margin-bottom: 28px;
+      padding: 52px 64px 64px;
+    }
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--faint);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .doc-meta a { text-transform: none; letter-spacing: 0; font-weight: 500; }
+    h1, h2, h3, h4 {
+      line-height: 1.25;
+      color: #111827;
+      font-weight: 700;
+      margin: 1.8em 0 0.6em;
+      scroll-margin-top: 20px;
+    }
+    h1 { font-size: 1.95rem; margin-top: 0.3em; letter-spacing: -0.02em; }
+    h2 {
+      font-size: 1.35rem;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.1rem; }
+    h4 { font-size: 1rem; color: var(--muted); }
+    p, ul, ol, table, pre, blockquote { margin: 0 0 1.05em; }
+    ul, ol { padding-left: 1.4em; }
+    li { margin: 0.28em 0; }
+    li > ul, li > ol { margin: 0.28em 0 0.28em; }
+    strong { color: #111827; }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2.4em 0;
+    }
+    blockquote {
+      margin-left: 0;
+      padding: 0.85em 1.1em;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+    }
+    blockquote p:last-child { margin-bottom: 0; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.86em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.1em 0.35em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      line-height: 1.5;
+      font-size: 0.85rem;
+    }
+    pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: inherit;
+      white-space: pre;
+    }
+    .highlight pre { margin: 0; }
+    .table-wrap { overflow-x: auto; margin-bottom: 1.05em; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f1f5f9; font-weight: 600; color: #111827; }
+    tbody tr:nth-child(even) { background: #fafbfc; }
+    .mermaid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px;
+      margin: 0 0 1.2em;
+      overflow-x: auto;
+      text-align: center;
+      font-family: inherit;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+    .mermaid[data-processed="true"] { white-space: normal; }
+    .mermaid svg { max-width: 100%; height: auto; }
+    .toc {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fbfcfe;
+      padding: 14px 20px 16px;
+      margin: 1.6em 0 2em;
+    }
+    .toc-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 6px;
+    }
+    .toc ul { list-style: none; padding-left: 0; margin: 0; }
+    .toc ul ul { padding-left: 1.1em; }
+    .toc li { margin: 0.18em 0; font-size: 0.88rem; }
+    .toc a { text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .pager {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      padding-bottom: 40px;
+      font-size: 0.9rem;
+    }
+    .pager a {
+      display: block;
+      flex: 1 1 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 12px 16px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .pager a:hover { border-color: var(--accent); }
+    .pager .label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 2px;
+    }
+    .pager .next { text-align: right; }
+    .pager .spacer { flex: 1 1 0; }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 1.5em;
+    }
+    .card {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px rgba(29, 78, 216, 0.08);
+    }
+    .card .num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .card h3 { margin: 2px 0 4px; font-size: 1.02rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    @media (max-width: 720px) {
+      .page { padding: 32px 22px 44px; border-radius: 0; border-left: 0; border-right: 0; }
+      .site-header .inner, .pager, .page { width: 100%; }
+      .site-header .inner { padding: 12px 16px; }
+      .pager { padding: 0 16px 32px; }
+      h1 { font-size: 1.55rem; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; font-size: 11.5pt; }
+      .site-header, .pager, .toc, .doc-meta a { display: none !important; }
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      a { color: #000; text-decoration: none; }
+      h1, h2, h3 { page-break-after: avoid; }
+      h2 { border-bottom-color: #ccc; }
+      pre, table, blockquote, .mermaid { page-break-inside: avoid; }
+      pre { background: #f7f7f7; border-color: #ddd; }
+      th { background: #f0f0f0; }
+      .mermaid { border-color: #ddd; }
+    }
+</style>
+<style>pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #ffffcc }
+.highlight { background: #f0f0f0; }
+.highlight .c { color: #60a0b0; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #007020; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+.highlight .cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #007020 } /* Comment.Preproc */
+.highlight .cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+.highlight .c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0044DD } /* Generic.Traceback */
+.highlight .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #007020 } /* Keyword.Pseudo */
+.highlight .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #902000 } /* Keyword.Type */
+.highlight .m { color: #40a070 } /* Literal.Number */
+.highlight .s { color: #4070a0 } /* Literal.String */
+.highlight .na { color: #4070a0 } /* Name.Attribute */
+.highlight .nb { color: #007020 } /* Name.Builtin */
+.highlight .nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.highlight .no { color: #60add5 } /* Name.Constant */
+.highlight .nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.highlight .ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #007020 } /* Name.Exception */
+.highlight .nf { color: #06287e } /* Name.Function */
+.highlight .nl { color: #002070; font-weight: bold } /* Name.Label */
+.highlight .nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #bb60d5 } /* Name.Variable */
+.highlight .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mb { color: #40a070 } /* Literal.Number.Bin */
+.highlight .mf { color: #40a070 } /* Literal.Number.Float */
+.highlight .mh { color: #40a070 } /* Literal.Number.Hex */
+.highlight .mi { color: #40a070 } /* Literal.Number.Integer */
+.highlight .mo { color: #40a070 } /* Literal.Number.Oct */
+.highlight .sa { color: #4070a0 } /* Literal.String.Affix */
+.highlight .sb { color: #4070a0 } /* Literal.String.Backtick */
+.highlight .sc { color: #4070a0 } /* Literal.String.Char */
+.highlight .dl { color: #4070a0 } /* Literal.String.Delimiter */
+.highlight .sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #4070a0 } /* Literal.String.Double */
+.highlight .se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #4070a0 } /* Literal.String.Heredoc */
+.highlight .si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.highlight .sx { color: #c65d09 } /* Literal.String.Other */
+.highlight .sr { color: #235388 } /* Literal.String.Regex */
+.highlight .s1 { color: #4070a0 } /* Literal.String.Single */
+.highlight .ss { color: #517918 } /* Literal.String.Symbol */
+.highlight .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #06287e } /* Name.Function.Magic */
+.highlight .vc { color: #bb60d5 } /* Name.Variable.Class */
+.highlight .vg { color: #bb60d5 } /* Name.Variable.Global */
+.highlight .vi { color: #bb60d5 } /* Name.Variable.Instance */
+.highlight .vm { color: #bb60d5 } /* Name.Variable.Magic */
+.highlight .il { color: #40a070 } /* Literal.Number.Integer.Long */</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">Telecom Network Intelligence &middot; Documentation</a>
+    <nav>
+      <a href="index.html">All documents</a>
+      <a href="01_SYSTEM_ARCHITECTURE.md">Markdown source</a>
+    </nav>
+  </div>
+</header>
+<main class="page">
+  <div class="doc-meta">
+    <span>Technical documentation</span>
+    <span>&middot;</span>
+    <a href="01_SYSTEM_ARCHITECTURE.md">01_SYSTEM_ARCHITECTURE.md</a>
+  </div>
+  <nav class="toc"><div class="toc-title">On this page</div><div class="toc">
+<ul>
+<li><a href="#1-executive-summary-architecture-overview">1. Executive Summary &amp; Architecture Overview</a></li>
+<li><a href="#2-ingestion-storage-processing-flow">2. Ingestion, Storage &amp; Processing Flow</a><ul>
+<li><a href="#a-synchronous-requests-vs-events-vs-batch-processing">A. Synchronous Requests vs. Events vs. Batch Processing</a></li>
+</ul>
+</li>
+<li><a href="#3-google-cloud-compute-runtime-selection">3. Google Cloud Compute &amp; Runtime Selection</a><ul>
+<li><a href="#why-cloud-run-and-cloud-run-jobs-over-gke">Why Cloud Run and Cloud Run Jobs over GKE?</a></li>
+</ul>
+</li>
+<li><a href="#4-tiered-storage-architecture-technology-trade-offs">4. Tiered Storage Architecture &amp; Technology Trade-offs</a></li>
+<li><a href="#5-architectural-evaluation-triggers-for-design-evolution">5. Architectural Evaluation &amp; Triggers for Design Evolution</a></li>
+</ul>
+</div>
+</nav>
+  <h1 id="01-system-architecture-technology-choices">01. System Architecture &amp; Technology Choices</h1>
+<h2 id="1-executive-summary-architecture-overview">1. Executive Summary &amp; Architecture Overview</h2>
+<p>The Telecom Network Intelligence Platform is an enterprise-grade operational backbone designed for <strong>five isolated telecommunication customers</strong>, managing over <strong>25,000 radio nodes</strong>, <strong>250,000 cells</strong>, and <strong>2,000,000 topological relationships</strong>, ingesting <strong>50,000,000 raw performance counter rows daily</strong>.</p>
+<p>The platform powers role-governed autonomous AI agents that investigate real-time incidents (such as cell degradation at 10:05 UTC), correlate shared transport and site dependencies, evaluate evidence integrity, and stage human-authorized remediations.</p>
+<pre class="mermaid">
+flowchart TD
+    subgraph Sources["Vendor Network Sources"]
+        E_OSS["Ericsson ENM (XML/SFTP)"]
+        N_OSS["Nokia NetAct (CSV/REST)"]
+        C_OSS["Cisco EPN-M (Telemetry/gRPC)"]
+        CMDB["Enterprise CMDB / BSS"]
+    end
+
+    subgraph Ingestion["Capability 1: Connection Factory"]
+        PubSub_Raw["Cloud Pub/Sub: raw-telemetry-topic"]
+        GCS_Landing["Cloud Storage: Landing Bucket (Raw Payloads)"]
+        CF_Worker["Ingestion Worker (Cloud Run Job / Cloud Run)"]
+        CF_Normalizer["Multi-Vendor Normalizer &amp; Provenance Tracker"]
+        CF_Dedupe["Deduplication &amp; Conflict Resolver"]
+    end
+
+    subgraph Storage["Tiered Polyglot Storage Layer"]
+        BQ["Google BigQuery (Partitioned &amp; Clustered)&lt;br/&gt;50M Counter Rows/Day + Analytical History"]
+        CloudSQL["Cloud SQL for PostgreSQL / AlloyDB&lt;br/&gt;Bi-Temporal Metadata &amp; Entity Identity"]
+        Redis["Memorystore (Redis) Sub-Graph Cache&lt;br/&gt;SLA &lt; 2.0s p95 for 2-hop Traversals"]
+        Firestore["Google Cloud Firestore&lt;br/&gt;Agent Session State, HITL Proposals &amp; Audit Logs"]
+    end
+
+    subgraph Processing["Capability 2 &amp; 3: Engines"]
+        KPI_Engine["KPI Engine (15-min Sliding Windows)&lt;br/&gt;Watermarking, Late Arrival (2h) &amp; Completeness Scoring"]
+        Topology_Engine["Topology Engine (Bi-Temporal Graph)&lt;br/&gt;Point-in-Time 'As-Of' Reconstruction &amp; Dependency Analysis"]
+    end
+
+    subgraph Governance["Governance &amp; Model Context Protocol"]
+        RBAC["Strict Multi-Tenant Isolation &amp; RBAC Guardrails"]
+        MCP_Server["MCP Server (JSON-RPC) &amp; REST API&lt;br/&gt;Cloud Run (Auto-scaling 0 to 100 concurrent)"]
+    end
+
+    subgraph Agents["Role-Based Autonomous AI Agents"]
+        Agent_Alarm["Alarm Management Agent&lt;br/&gt;(Triage, Correlation, Evidence Verification)"]
+        Agent_Perf["Performance Analysis Agent&lt;br/&gt;(Trend &amp; Degradation Analysis)"]
+        Agent_Change["Change Planning Agent&lt;br/&gt;(Blast Radius Simulation)"]
+        HITL["Human-In-The-Loop (HITL) Gatekeeper&lt;br/&gt;(NOC Tier-2 Lead Approval)"]
+    end
+
+    Sources --&gt; PubSub_Raw
+    Sources --&gt; GCS_Landing
+    PubSub_Raw --&gt; CF_Worker
+    GCS_Landing --&gt; CF_Worker
+    CF_Worker --&gt; CF_Normalizer --&gt; CF_Dedupe
+
+    CF_Dedupe --&gt; CloudSQL
+    CF_Dedupe --&gt; BQ
+
+    CloudSQL --&gt; Topology_Engine
+    Topology_Engine --&gt; Redis
+    BQ --&gt; KPI_Engine
+
+    Redis --&gt; MCP_Server
+    Topology_Engine --&gt; MCP_Server
+    KPI_Engine --&gt; MCP_Server
+    Firestore --&gt; Governance
+
+    MCP_Server --&gt; RBAC
+    RBAC --&gt; Agent_Alarm
+    RBAC --&gt; Agent_Perf
+    RBAC --&gt; Agent_Change
+
+    Agent_Alarm -.-&gt;|Stages Action| HITL
+    Agent_Change -.-&gt;|Stages Proposal| HITL
+    HITL -.-&gt;|Human Sign-off| Firestore
+</pre>
+<hr />
+<h2 id="2-ingestion-storage-processing-flow">2. Ingestion, Storage &amp; Processing Flow</h2>
+<h3 id="a-synchronous-requests-vs-events-vs-batch-processing">A. Synchronous Requests vs. Events vs. Batch Processing</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">Flow Pattern</th>
+<th style="text-align: left;">Mechanism</th>
+<th style="text-align: left;">Technology</th>
+<th style="text-align: left;">Rationale &amp; Workload</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Event-Driven Streaming</strong></td>
+<td style="text-align: left;">Asynchronous Event Streams</td>
+<td style="text-align: left;">Cloud Pub/Sub + Cloud Run</td>
+<td style="text-align: left;">High-priority alarms, interface state changes, and streaming Cisco gRPC counters. Immediate ingestion without buffering delay.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Micro-Batch Ingestion</strong></td>
+<td style="text-align: left;">15-Minute Scheduled Micro-Batches</td>
+<td style="text-align: left;">Cloud Run Services + Eventarc</td>
+<td style="text-align: left;">50M performance counters arrive in bursts at 15-minute boundaries. Micro-batching amortizes database transaction overhead and aligns with 3GPP standards.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Batch Bulk Updates</strong></td>
+<td style="text-align: left;">Hourly Scheduled Batch Jobs</td>
+<td style="text-align: left;">Cloud Run Jobs / Dataproc Serverless</td>
+<td style="text-align: left;">Bulk inventory dumps from vendor OSS/NMS (Ericsson ENM / Nokia NetAct), reconciling passive CMDB records.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Synchronous Queries</strong></td>
+<td style="text-align: left;">Request-Response RPC</td>
+<td style="text-align: left;">Cloud Run (FastAPI + MCP)</td>
+<td style="text-align: left;">Agent investigations requiring &lt; 2s bounded topology lookups and real-time evidence integrity checks.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-google-cloud-compute-runtime-selection">3. Google Cloud Compute &amp; Runtime Selection</h2>
+<p>For a small engineering team, <strong>operational overhead and maintenance burden must be minimized</strong>. </p>
+<h3 id="why-cloud-run-and-cloud-run-jobs-over-gke">Why Cloud Run and Cloud Run Jobs over GKE?</h3>
+<ul>
+<li><strong>Zero Cluster Management</strong>: GKE requires continuous control plane maintenance, node pool scaling, VPC CNI management, and Kubernetes security patch cycles.</li>
+<li><strong>Scale to Zero</strong>: Network incidents and agent investigations are bursty. Cloud Run scales from 0 instances during quiescent periods up to 100+ concurrent agent investigations within 2 seconds.</li>
+<li><strong>Cloud Run Jobs for Batch Ingestion</strong>: Bulk inventory imports and hourly Dataform/dbt runs execute cleanly as serverless Cloud Run Jobs, terminating upon completion and incurring zero idle cost.</li>
+<li><strong>When would we migrate to GKE?</strong> If ingestion exceeds 500,000 events/second sustained, or if custom network kernels/gRPC streaming proxies are required that exceed Cloud Run's 60-minute execution boundary.</li>
+</ul>
+<hr />
+<h2 id="4-tiered-storage-architecture-technology-trade-offs">4. Tiered Storage Architecture &amp; Technology Trade-offs</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">Storage Technology</th>
+<th style="text-align: left;">Platform Role</th>
+<th style="text-align: left;">Query Patterns &amp; SLA</th>
+<th style="text-align: left;">Operational Effort &amp; Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Google BigQuery</strong></td>
+<td style="text-align: left;">Counter Data Lake &amp; Historical Analytical KPIs (50M rows/day)</td>
+<td style="text-align: left;">Analytical aggregations over 15m, 1h, 24h. Partitioned by <code>DATE(timestamp)</code> and <code>customer_id</code>; clustered by <code>entity_id</code>.</td>
+<td style="text-align: left;"><strong>Zero ops</strong>. Extremely cost-effective for analytical burst queries via BigQuery BI Engine.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Cloud SQL for PostgreSQL / AlloyDB</strong></td>
+<td style="text-align: left;">Master Entity Metadata &amp; Bi-temporal Transaction Store</td>
+<td style="text-align: left;">Point-in-time entity lookups and ACID inventory reconciliation.</td>
+<td style="text-align: left;">Managed backups, automatic failover. Low operational burden.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Memorystore (Redis) / In-Memory Graph</strong></td>
+<td style="text-align: left;">2-Hop Topology Adjacency Cache</td>
+<td style="text-align: left;">Bounded BFS graph queries. Guarantees <strong>&lt; 2.0s p95 SLA</strong> for agent topology neighborhood queries.</td>
+<td style="text-align: left;">Fully managed in-memory cache with sub-millisecond read latency.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Google Cloud Firestore</strong></td>
+<td style="text-align: left;">Agent State, Session Context, HITL Proposals &amp; Audit Logs</td>
+<td style="text-align: left;">Document-oriented transactional state for active agent investigations.</td>
+<td style="text-align: left;">Serverless, multi-region replication, native optimistic concurrency.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="5-architectural-evaluation-triggers-for-design-evolution">5. Architectural Evaluation &amp; Triggers for Design Evolution</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">System Area</th>
+<th style="text-align: left;">Initial MVP Choice</th>
+<th style="text-align: left;">Evidence Trigger to Evolve</th>
+<th style="text-align: left;">Evolution Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Graph Traversal</strong></td>
+<td style="text-align: left;">AlloyDB / Cloud SQL with Redis Adjacency Cache</td>
+<td style="text-align: left;">2-hop traversal p95 latency exceeds 1.5 seconds, or graph depth requirements expand beyond 3 hops.</td>
+<td style="text-align: left;"><strong>Google Cloud Spanner Graph</strong> or <strong>Neo4j AuraDB Enterprise</strong>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>KPI Stream Ingestion</strong></td>
+<td style="text-align: left;">Cloud Run Micro-batchers</td>
+<td style="text-align: left;">15-minute counter bursts cause HTTP ingest throttling, or late-arriving data volume exceeds 20% of total payload.</td>
+<td style="text-align: left;"><strong>Managed Apache Beam on Google Cloud Dataflow</strong> with tumbling/sliding event-time watermarking.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Agent Reasoning</strong></td>
+<td style="text-align: left;">Vertex AI (Gemini 1.5 Flash) with deterministic tool scaffolding</td>
+<td style="text-align: left;">Agent hallucination rate on root cause synthesis exceeds 1.0%, or tool selection precision drops below 95%.</td>
+<td style="text-align: left;">Hybrid Fine-Tuned Domain Model + Multi-Agent Consensus Verification.</td>
+</tr>
+</tbody>
+</table></div>
+</main>
+<nav class="pager">
+  <span class="spacer"></span>
+  <a class="next" href="02_TOPOLOGY_DATA_MODEL.html"><span class="label">Next &rarr;</span>02. Inventory & Topology Data Model</a>
+</nav>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  if (document.querySelector(".mermaid")) {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      fontFamily: "inherit",
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+    });
+  }
+</script>
+</body>
+</html>

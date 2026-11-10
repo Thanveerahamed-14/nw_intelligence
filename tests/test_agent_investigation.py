@@ -1,6 +1,6 @@
 """
 Integration Tests for the Autonomous Role-Based Agent Workflows.
-Simulates the exact 10:05 UTC incident scenario from the assignment document.
+Simulates the end-to-end 10:05 UTC incident scenario used across the platform demo.
 """
 
 import unittest

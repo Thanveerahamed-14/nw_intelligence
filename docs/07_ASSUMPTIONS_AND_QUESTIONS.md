@@ -26,7 +26,7 @@
 
 ---
 
-## 2. Unresolved Questions for the Chief Solution Lead & Stakeholders
+## 2. Open Questions & Stakeholder Decisions
 
 1. **Human-In-The-Loop (HITL) Expiration & SLA**:
    - If an agent stages an emergency reroute action in `PENDING_APPROVAL` and the NOC Human Operator does not respond within 15 minutes, should the action expire, escalate to a secondary on-call engineer, or (for pre-certified non-destructive changes) auto-execute under an emergency failover policy?

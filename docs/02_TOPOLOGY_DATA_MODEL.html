@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02. Inventory & Topology Data Model | Telecom Network Intelligence</title>
+<style>
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --faint: #7b8794;
+      --border: #e1e6ec;
+      --surface: #ffffff;
+      --page: #f5f7fa;
+      --accent: #1d4ed8;
+      --accent-soft: #eff4ff;
+      --code-bg: #f6f8fa;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .site-header .inner,
+    .pager,
+    .page {
+      width: min(920px, 100% - 32px);
+      margin: 0 auto;
+    }
+    .site-header .inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 16px;
+      padding: 14px 0;
+    }
+    .site-header .brand {
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .site-header nav {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.85rem;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration-thickness: 2px; }
+    .page {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+      margin-top: 28px;
+      margin-bottom: 28px;
+      padding: 52px 64px 64px;
+    }
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--faint);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .doc-meta a { text-transform: none; letter-spacing: 0; font-weight: 500; }
+    h1, h2, h3, h4 {
+      line-height: 1.25;
+      color: #111827;
+      font-weight: 700;
+      margin: 1.8em 0 0.6em;
+      scroll-margin-top: 20px;
+    }
+    h1 { font-size: 1.95rem; margin-top: 0.3em; letter-spacing: -0.02em; }
+    h2 {
+      font-size: 1.35rem;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.1rem; }
+    h4 { font-size: 1rem; color: var(--muted); }
+    p, ul, ol, table, pre, blockquote { margin: 0 0 1.05em; }
+    ul, ol { padding-left: 1.4em; }
+    li { margin: 0.28em 0; }
+    li > ul, li > ol { margin: 0.28em 0 0.28em; }
+    strong { color: #111827; }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2.4em 0;
+    }
+    blockquote {
+      margin-left: 0;
+      padding: 0.85em 1.1em;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+    }
+    blockquote p:last-child { margin-bottom: 0; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.86em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.1em 0.35em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      line-height: 1.5;
+      font-size: 0.85rem;
+    }
+    pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: inherit;
+      white-space: pre;
+    }
+    .highlight pre { margin: 0; }
+    .table-wrap { overflow-x: auto; margin-bottom: 1.05em; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f1f5f9; font-weight: 600; color: #111827; }
+    tbody tr:nth-child(even) { background: #fafbfc; }
+    .mermaid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px;
+      margin: 0 0 1.2em;
+      overflow-x: auto;
+      text-align: center;
+      font-family: inherit;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+    .mermaid[data-processed="true"] { white-space: normal; }
+    .mermaid svg { max-width: 100%; height: auto; }
+    .toc {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fbfcfe;
+      padding: 14px 20px 16px;
+      margin: 1.6em 0 2em;
+    }
+    .toc-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 6px;
+    }
+    .toc ul { list-style: none; padding-left: 0; margin: 0; }
+    .toc ul ul { padding-left: 1.1em; }
+    .toc li { margin: 0.18em 0; font-size: 0.88rem; }
+    .toc a { text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .pager {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      padding-bottom: 40px;
+      font-size: 0.9rem;
+    }
+    .pager a {
+      display: block;
+      flex: 1 1 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 12px 16px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .pager a:hover { border-color: var(--accent); }
+    .pager .label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 2px;
+    }
+    .pager .next { text-align: right; }
+    .pager .spacer { flex: 1 1 0; }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 1.5em;
+    }
+    .card {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px rgba(29, 78, 216, 0.08);
+    }
+    .card .num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .card h3 { margin: 2px 0 4px; font-size: 1.02rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    @media (max-width: 720px) {
+      .page { padding: 32px 22px 44px; border-radius: 0; border-left: 0; border-right: 0; }
+      .site-header .inner, .pager, .page { width: 100%; }
+      .site-header .inner { padding: 12px 16px; }
+      .pager { padding: 0 16px 32px; }
+      h1 { font-size: 1.55rem; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; font-size: 11.5pt; }
+      .site-header, .pager, .toc, .doc-meta a { display: none !important; }
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      a { color: #000; text-decoration: none; }
+      h1, h2, h3 { page-break-after: avoid; }
+      h2 { border-bottom-color: #ccc; }
+      pre, table, blockquote, .mermaid { page-break-inside: avoid; }
+      pre { background: #f7f7f7; border-color: #ddd; }
+      th { background: #f0f0f0; }
+      .mermaid { border-color: #ddd; }
+    }
+</style>
+<style>pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #ffffcc }
+.highlight { background: #f0f0f0; }
+.highlight .c { color: #60a0b0; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #007020; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+.highlight .cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #007020 } /* Comment.Preproc */
+.highlight .cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+.highlight .c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0044DD } /* Generic.Traceback */
+.highlight .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #007020 } /* Keyword.Pseudo */
+.highlight .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #902000 } /* Keyword.Type */
+.highlight .m { color: #40a070 } /* Literal.Number */
+.highlight .s { color: #4070a0 } /* Literal.String */
+.highlight .na { color: #4070a0 } /* Name.Attribute */
+.highlight .nb { color: #007020 } /* Name.Builtin */
+.highlight .nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.highlight .no { color: #60add5 } /* Name.Constant */
+.highlight .nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.highlight .ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #007020 } /* Name.Exception */
+.highlight .nf { color: #06287e } /* Name.Function */
+.highlight .nl { color: #002070; font-weight: bold } /* Name.Label */
+.highlight .nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #bb60d5 } /* Name.Variable */
+.highlight .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mb { color: #40a070 } /* Literal.Number.Bin */
+.highlight .mf { color: #40a070 } /* Literal.Number.Float */
+.highlight .mh { color: #40a070 } /* Literal.Number.Hex */
+.highlight .mi { color: #40a070 } /* Literal.Number.Integer */
+.highlight .mo { color: #40a070 } /* Literal.Number.Oct */
+.highlight .sa { color: #4070a0 } /* Literal.String.Affix */
+.highlight .sb { color: #4070a0 } /* Literal.String.Backtick */
+.highlight .sc { color: #4070a0 } /* Literal.String.Char */
+.highlight .dl { color: #4070a0 } /* Literal.String.Delimiter */
+.highlight .sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #4070a0 } /* Literal.String.Double */
+.highlight .se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #4070a0 } /* Literal.String.Heredoc */
+.highlight .si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.highlight .sx { color: #c65d09 } /* Literal.String.Other */
+.highlight .sr { color: #235388 } /* Literal.String.Regex */
+.highlight .s1 { color: #4070a0 } /* Literal.String.Single */
+.highlight .ss { color: #517918 } /* Literal.String.Symbol */
+.highlight .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #06287e } /* Name.Function.Magic */
+.highlight .vc { color: #bb60d5 } /* Name.Variable.Class */
+.highlight .vg { color: #bb60d5 } /* Name.Variable.Global */
+.highlight .vi { color: #bb60d5 } /* Name.Variable.Instance */
+.highlight .vm { color: #bb60d5 } /* Name.Variable.Magic */
+.highlight .il { color: #40a070 } /* Literal.Number.Integer.Long */</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">Telecom Network Intelligence &middot; Documentation</a>
+    <nav>
+      <a href="index.html">All documents</a>
+      <a href="02_TOPOLOGY_DATA_MODEL.md">Markdown source</a>
+    </nav>
+  </div>
+</header>
+<main class="page">
+  <div class="doc-meta">
+    <span>Technical documentation</span>
+    <span>&middot;</span>
+    <a href="02_TOPOLOGY_DATA_MODEL.md">02_TOPOLOGY_DATA_MODEL.md</a>
+  </div>
+  <nav class="toc"><div class="toc-title">On this page</div><div class="toc">
+<ul>
+<li><a href="#1-bi-temporal-modeling-framework">1. Bi-Temporal Modeling Framework</a><ul>
+<li><a href="#entity-schema-attributes">Entity Schema Attributes</a></li>
+<li><a href="#point-in-time-temporal-query-semantics">Point-in-Time Temporal Query Semantics</a></li>
+</ul>
+</li>
+<li><a href="#2-inventory-reconciliation-conflict-resolution">2. Inventory Reconciliation &amp; Conflict Resolution</a><ul>
+<li><a href="#source-authority-priority-matrix">Source Authority Priority Matrix</a></li>
+</ul>
+</li>
+<li><a href="#3-entity-to-kpi-linkage-architecture">3. Entity-to-KPI Linkage Architecture</a></li>
+</ul>
+</div>
+</nav>
+  <h1 id="02-inventory-topology-data-model">02. Inventory &amp; Topology Data Model</h1>
+<h2 id="1-bi-temporal-modeling-framework">1. Bi-Temporal Modeling Framework</h2>
+<p>A critical requirement of telecommunications incident root cause analysis is answering:  </p>
+<blockquote>
+<p><strong>"What did the network topology look like at the exact moment this alarm occurred (10:05 UTC)?"</strong></p>
+</blockquote>
+<p>Traditional databases overwrite state on updates, destroying historical visibility. Our platform implements a <strong>Bi-Temporal Data Model</strong> separating <strong>Valid Time</strong> (when a fact was physically true in the real world) from <strong>System Time</strong> (when the platform learned of that fact).</p>
+<pre class="mermaid">
+gantt
+    title Bi-Temporal Event Timeline (10:05 UTC Incident)
+    dateFormat HH:mm
+    axisFormat %H:%M
+
+    section Physical Reality (Valid Time)
+    Cell 001 Active on Primary Link       :09:00, 10:03
+    Backhaul Degradation &amp; Alarm Trigger  :crit, 10:03, 10:15
+    Microwave Standby Reroute Active      :active, 10:15, 11:00
+
+    section Ingestion Pipeline (System Time)
+    Normal Telemetry Processed            :09:45, 10:00
+    Incident Alarms Ingested              :crit, 10:05, 10:06
+    Late Vendor Topology Update Arrives   :done, 10:35, 10:36
+    Historical Re-calculation Triggered   :active, 10:36, 10:37
+</pre>
+<h3 id="entity-schema-attributes">Entity Schema Attributes</h3>
+<p>Every network entity (Cell, Node, Site, Router, Link) and relationship record includes four temporal coordinates:</p>
+<div class="highlight"><pre><span></span><code><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">network_entity_versions</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="n">entity_id</span><span class="w">           </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">tenant_id</span><span class="w">           </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">entity_type</span><span class="w">         </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">vendor</span><span class="w">              </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">properties</span><span class="w">          </span><span class="n">JSONB</span><span class="w">        </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+
+<span class="w">    </span><span class="c1">-- Real-world validity period</span>
+<span class="w">    </span><span class="n">valid_from</span><span class="w">          </span><span class="n">TIMESTAMPTZ</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">valid_to</span><span class="w">            </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span><span class="w">             </span><span class="c1">-- NULL indicates currently valid</span>
+
+<span class="w">    </span><span class="c1">-- Platform transaction / ingestion period</span>
+<span class="w">    </span><span class="n">system_from</span><span class="w">         </span><span class="n">TIMESTAMPTZ</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="p">,</span>
+<span class="w">    </span><span class="n">system_to</span><span class="w">           </span><span class="n">TIMESTAMPTZ</span><span class="p">,</span><span class="w">             </span><span class="c1">-- NULL indicates current knowledge</span>
+
+<span class="w">    </span><span class="n">provenance_hash</span><span class="w">     </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="n">ingestion_batch_id</span><span class="w">  </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w">  </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span>
+<span class="w">    </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="p">(</span><span class="n">entity_id</span><span class="p">,</span><span class="w"> </span><span class="n">valid_from</span><span class="p">,</span><span class="w"> </span><span class="n">system_from</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div>
+
+<h3 id="point-in-time-temporal-query-semantics">Point-in-Time Temporal Query Semantics</h3>
+<p>To reconstruct the exact graph state at <code>10:05:00 UTC</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">network_entity_versions</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">tenant_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;customer_a&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">valid_from</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="s1">&#39;2026-11-10T10:05:00Z&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="p">(</span><span class="n">valid_to</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">valid_to</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="s1">&#39;2026-11-10T10:05:00Z&#39;</span><span class="p">)</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">system_from</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="p">(</span><span class="n">system_to</span><span class="w"> </span><span class="k">IS</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="n">system_to</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="k">CURRENT_TIMESTAMP</span><span class="p">);</span>
+</code></pre></div>
+
+<hr />
+<h2 id="2-inventory-reconciliation-conflict-resolution">2. Inventory Reconciliation &amp; Conflict Resolution</h2>
+<p>Inventory records arrive from disparate vendor systems (Ericsson ENM, Nokia NetAct, Cisco EPN-M) and enterprise CMDBs. The platform applies deterministic reconciliation:</p>
+<pre class="mermaid">
+flowchart TD
+    RawRecord["Incoming Inventory Record"] --&gt; ValCheck{"Valid Schema?"}
+    ValCheck -- No --&gt; Quarantine["Route to Quarantine Queue (DLQ)&lt;br/&gt;Alert Ingestion Pipeline Lead"]
+    ValCheck -- Yes --&gt; HashCheck{"SHA-256 Hash Seen?"}
+    HashCheck -- Yes --&gt; Dedupe["Deduplicate &amp; Ignore (Idempotent)"]
+    HashCheck -- No --&gt; ConflictCheck{"Active Version Conflict?"}
+    ConflictCheck -- No --&gt; Upsert["Insert New Temporal Entity Version"]
+    ConflictCheck -- Yes --&gt; AuthorityEval{"Compare Source Authority Rank"}
+    AuthorityEval -- Higher Rank --&gt; Supersede["Close Prior valid_to &amp; Insert"]
+    AuthorityEval -- Lower Rank --&gt; Yield["Yield: Discard Record &amp; Log Audit Event"]
+    AuthorityEval -- Equal Rank --&gt; TimestampCheck{"Newer Timestamp?"}
+    TimestampCheck -- Yes --&gt; Supersede
+    TimestampCheck -- No --&gt; Yield
+</pre>
+<h3 id="source-authority-priority-matrix">Source Authority Priority Matrix</h3>
+<p>When conflicting records arrive for the same physical entity:
+1. <strong>Vendor Authoritative EMS (Ericsson ENM / Nokia NetAct / Cisco EPN)</strong>: Weight = 100
+2. <strong>Enterprise CMDB / BSS</strong>: Weight = 90
+3. <strong>SNMP Collector / Active Prober</strong>: Weight = 60
+4. <strong>Passive Topology Crawler</strong>: Weight = 40</p>
+<p>Unresolvable conflicts (e.g. identical rank and identical timestamp but conflicting properties) are never discarded silently; they are staged in a <strong>Quarantine Dead Letter Queue</strong> with audit notifications.</p>
+<hr />
+<h2 id="3-entity-to-kpi-linkage-architecture">3. Entity-to-KPI Linkage Architecture</h2>
+<p>Entities in the topology engine link to performance metrics in BigQuery via <strong>Global Canonical URNs (Uniform Resource Names)</strong>:
+- Standard 3GPP Cell Format: <code>urn:3gpp:network:{tenant_id}:cell:{cell_id}</code>
+- Cell Site Router: <code>urn:ietf:network:{tenant_id}:router:{router_id}</code>
+- Transport Link: <code>urn:ietf:network:{tenant_id}:link:{link_id}</code></p>
+<p>In BigQuery, performance tables are partitioned by <code>DATE(timestamp)</code> and clustered by <code>(tenant_id, canonical_urn)</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">SELECT</span><span class="w"> </span>
+<span class="w">    </span><span class="n">k</span><span class="p">.</span><span class="k">timestamp</span><span class="p">,</span>
+<span class="w">    </span><span class="n">k</span><span class="p">.</span><span class="n">kpi_name</span><span class="p">,</span>
+<span class="w">    </span><span class="n">k</span><span class="p">.</span><span class="n">value</span><span class="p">,</span>
+<span class="w">    </span><span class="n">k</span><span class="p">.</span><span class="n">quality_status</span><span class="p">,</span>
+<span class="w">    </span><span class="n">k</span><span class="p">.</span><span class="n">completeness_score</span>
+<span class="k">FROM</span><span class="w"> </span><span class="o">`</span><span class="n">telecom_kpis</span><span class="p">.</span><span class="n">kpi_rollups_15m</span><span class="o">`</span><span class="w"> </span><span class="n">k</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">k</span><span class="p">.</span><span class="n">tenant_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;customer_a&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">k</span><span class="p">.</span><span class="n">entity_urn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;urn:3gpp:network:customer_a:cell:CELL_001&#39;</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">k</span><span class="p">.</span><span class="k">timestamp</span><span class="w"> </span><span class="k">BETWEEN</span><span class="w"> </span><span class="s1">&#39;2026-11-10T09:30:00Z&#39;</span><span class="w"> </span><span class="k">AND</span><span class="w"> </span><span class="s1">&#39;2026-11-10T10:15:00Z&#39;</span><span class="p">;</span>
+</code></pre></div>
+
+<p>This guarantees sub-second BigQuery execution while preserving full provenance back to source vendor payloads.</p>
+</main>
+<nav class="pager">
+  <a class="prev" href="01_SYSTEM_ARCHITECTURE.html"><span class="label">&larr; Previous</span>01. System Architecture & Technology Choices</a>
+  <a class="next" href="03_KPI_ENGINE_DATA_QUALITY.html"><span class="label">Next &rarr;</span>03. KPI Engine & Data Quality Specification</a>
+</nav>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  if (document.querySelector(".mermaid")) {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      fontFamily: "inherit",
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+    });
+  }
+</script>
+</body>
+</html>

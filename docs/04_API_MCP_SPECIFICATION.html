@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04. API & Model Context Protocol (MCP) Specification | Telecom Network Intelligence</title>
+<style>
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --faint: #7b8794;
+      --border: #e1e6ec;
+      --surface: #ffffff;
+      --page: #f5f7fa;
+      --accent: #1d4ed8;
+      --accent-soft: #eff4ff;
+      --code-bg: #f6f8fa;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .site-header .inner,
+    .pager,
+    .page {
+      width: min(920px, 100% - 32px);
+      margin: 0 auto;
+    }
+    .site-header .inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 16px;
+      padding: 14px 0;
+    }
+    .site-header .brand {
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .site-header nav {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.85rem;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration-thickness: 2px; }
+    .page {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+      margin-top: 28px;
+      margin-bottom: 28px;
+      padding: 52px 64px 64px;
+    }
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--faint);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .doc-meta a { text-transform: none; letter-spacing: 0; font-weight: 500; }
+    h1, h2, h3, h4 {
+      line-height: 1.25;
+      color: #111827;
+      font-weight: 700;
+      margin: 1.8em 0 0.6em;
+      scroll-margin-top: 20px;
+    }
+    h1 { font-size: 1.95rem; margin-top: 0.3em; letter-spacing: -0.02em; }
+    h2 {
+      font-size: 1.35rem;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.1rem; }
+    h4 { font-size: 1rem; color: var(--muted); }
+    p, ul, ol, table, pre, blockquote { margin: 0 0 1.05em; }
+    ul, ol { padding-left: 1.4em; }
+    li { margin: 0.28em 0; }
+    li > ul, li > ol { margin: 0.28em 0 0.28em; }
+    strong { color: #111827; }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2.4em 0;
+    }
+    blockquote {
+      margin-left: 0;
+      padding: 0.85em 1.1em;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+    }
+    blockquote p:last-child { margin-bottom: 0; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.86em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.1em 0.35em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      line-height: 1.5;
+      font-size: 0.85rem;
+    }
+    pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: inherit;
+      white-space: pre;
+    }
+    .highlight pre { margin: 0; }
+    .table-wrap { overflow-x: auto; margin-bottom: 1.05em; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f1f5f9; font-weight: 600; color: #111827; }
+    tbody tr:nth-child(even) { background: #fafbfc; }
+    .mermaid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px;
+      margin: 0 0 1.2em;
+      overflow-x: auto;
+      text-align: center;
+      font-family: inherit;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+    .mermaid[data-processed="true"] { white-space: normal; }
+    .mermaid svg { max-width: 100%; height: auto; }
+    .toc {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fbfcfe;
+      padding: 14px 20px 16px;
+      margin: 1.6em 0 2em;
+    }
+    .toc-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 6px;
+    }
+    .toc ul { list-style: none; padding-left: 0; margin: 0; }
+    .toc ul ul { padding-left: 1.1em; }
+    .toc li { margin: 0.18em 0; font-size: 0.88rem; }
+    .toc a { text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .pager {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      padding-bottom: 40px;
+      font-size: 0.9rem;
+    }
+    .pager a {
+      display: block;
+      flex: 1 1 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 12px 16px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .pager a:hover { border-color: var(--accent); }
+    .pager .label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 2px;
+    }
+    .pager .next { text-align: right; }
+    .pager .spacer { flex: 1 1 0; }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 1.5em;
+    }
+    .card {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px rgba(29, 78, 216, 0.08);
+    }
+    .card .num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .card h3 { margin: 2px 0 4px; font-size: 1.02rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    @media (max-width: 720px) {
+      .page { padding: 32px 22px 44px; border-radius: 0; border-left: 0; border-right: 0; }
+      .site-header .inner, .pager, .page { width: 100%; }
+      .site-header .inner { padding: 12px 16px; }
+      .pager { padding: 0 16px 32px; }
+      h1 { font-size: 1.55rem; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; font-size: 11.5pt; }
+      .site-header, .pager, .toc, .doc-meta a { display: none !important; }
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      a { color: #000; text-decoration: none; }
+      h1, h2, h3 { page-break-after: avoid; }
+      h2 { border-bottom-color: #ccc; }
+      pre, table, blockquote, .mermaid { page-break-inside: avoid; }
+      pre { background: #f7f7f7; border-color: #ddd; }
+      th { background: #f0f0f0; }
+      .mermaid { border-color: #ddd; }
+    }
+</style>
+<style>pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #ffffcc }
+.highlight { background: #f0f0f0; }
+.highlight .c { color: #60a0b0; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #007020; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+.highlight .cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #007020 } /* Comment.Preproc */
+.highlight .cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+.highlight .c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0044DD } /* Generic.Traceback */
+.highlight .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #007020 } /* Keyword.Pseudo */
+.highlight .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #902000 } /* Keyword.Type */
+.highlight .m { color: #40a070 } /* Literal.Number */
+.highlight .s { color: #4070a0 } /* Literal.String */
+.highlight .na { color: #4070a0 } /* Name.Attribute */
+.highlight .nb { color: #007020 } /* Name.Builtin */
+.highlight .nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.highlight .no { color: #60add5 } /* Name.Constant */
+.highlight .nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.highlight .ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #007020 } /* Name.Exception */
+.highlight .nf { color: #06287e } /* Name.Function */
+.highlight .nl { color: #002070; font-weight: bold } /* Name.Label */
+.highlight .nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #bb60d5 } /* Name.Variable */
+.highlight .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mb { color: #40a070 } /* Literal.Number.Bin */
+.highlight .mf { color: #40a070 } /* Literal.Number.Float */
+.highlight .mh { color: #40a070 } /* Literal.Number.Hex */
+.highlight .mi { color: #40a070 } /* Literal.Number.Integer */
+.highlight .mo { color: #40a070 } /* Literal.Number.Oct */
+.highlight .sa { color: #4070a0 } /* Literal.String.Affix */
+.highlight .sb { color: #4070a0 } /* Literal.String.Backtick */
+.highlight .sc { color: #4070a0 } /* Literal.String.Char */
+.highlight .dl { color: #4070a0 } /* Literal.String.Delimiter */
+.highlight .sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #4070a0 } /* Literal.String.Double */
+.highlight .se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #4070a0 } /* Literal.String.Heredoc */
+.highlight .si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.highlight .sx { color: #c65d09 } /* Literal.String.Other */
+.highlight .sr { color: #235388 } /* Literal.String.Regex */
+.highlight .s1 { color: #4070a0 } /* Literal.String.Single */
+.highlight .ss { color: #517918 } /* Literal.String.Symbol */
+.highlight .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #06287e } /* Name.Function.Magic */
+.highlight .vc { color: #bb60d5 } /* Name.Variable.Class */
+.highlight .vg { color: #bb60d5 } /* Name.Variable.Global */
+.highlight .vi { color: #bb60d5 } /* Name.Variable.Instance */
+.highlight .vm { color: #bb60d5 } /* Name.Variable.Magic */
+.highlight .il { color: #40a070 } /* Literal.Number.Integer.Long */</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">Telecom Network Intelligence &middot; Documentation</a>
+    <nav>
+      <a href="index.html">All documents</a>
+      <a href="04_API_MCP_SPECIFICATION.md">Markdown source</a>
+    </nav>
+  </div>
+</header>
+<main class="page">
+  <div class="doc-meta">
+    <span>Technical documentation</span>
+    <span>&middot;</span>
+    <a href="04_API_MCP_SPECIFICATION.md">04_API_MCP_SPECIFICATION.md</a>
+  </div>
+  <nav class="toc"><div class="toc-title">On this page</div><div class="toc">
+<ul>
+<li><a href="#1-api-and-mcp-architecture-relationship">1. API and MCP Architecture Relationship</a></li>
+<li><a href="#2-model-context-protocol-tools-specification">2. Model Context Protocol Tools Specification</a></li>
+<li><a href="#3-example-request-response-contract">3. Example Request &amp; Response Contract</a><ul>
+<li><a href="#a-example-mcp-tool-call-find_shared_dependencies">A. Example MCP Tool Call: find_shared_dependencies</a></li>
+</ul>
+</li>
+<li><a href="#4-query-bounds-execution-limits-safety-guards">4. Query Bounds, Execution Limits &amp; Safety Guards</a></li>
+<li><a href="#5-human-in-the-loop-hitl-action-lifecycle">5. Human-In-The-Loop (HITL) Action Lifecycle</a></li>
+</ul>
+</div>
+</nav>
+  <h1 id="04-api-model-context-protocol-mcp-specification">04. API &amp; Model Context Protocol (MCP) Specification</h1>
+<h2 id="1-api-and-mcp-architecture-relationship">1. API and MCP Architecture Relationship</h2>
+<p>The platform exposes dual interfaces with shared underlying governance and security layers:
+1. <strong>REST API (OpenAPI 3.0)</strong>: Used by human dashboards, NOC automation workflows, and microservices for standard CRUD operations and scheduled jobs.
+2. <strong>Model Context Protocol (MCP) JSON-RPC 2.0</strong>: Exposes bounded tools directly to AI Agents (Gemini, Claude, local models). Enforces structured JSON schemas, tool filtering by caller role, and token-bounded payloads.</p>
+<pre class="mermaid">
+flowchart LR
+    subgraph Clients["Consumers"]
+        WebUI["Operations Web Console"]
+        Agent_Alarm["Alarm Management Agent"]
+        Agent_Change["Change Planning Agent"]
+    end
+
+    subgraph Gateway["Cloud Run Gateway"]
+        AuthLayer["Authentication &amp; Tenant Isolation Filter"]
+        RBACFilter["RBAC Permission Gate"]
+        MCP_RPC["MCP JSON-RPC 2.0 Dispatcher"]
+        REST_Router["FastAPI REST Endpoints"]
+    end
+
+    subgraph Engines["Core Engines"]
+        Topo["Topology Engine"]
+        KPI["KPI Engine"]
+        HITL["Human-In-The-Loop Manager"]
+    end
+
+    WebUI --&gt;|REST HTTPS| REST_Router
+    Agent_Alarm --&gt;|MCP tools/call| MCP_RPC
+    Agent_Change --&gt;|MCP tools/call| MCP_RPC
+
+    REST_Router --&gt; AuthLayer
+    MCP_RPC --&gt; AuthLayer
+    AuthLayer --&gt; RBACFilter
+    RBACFilter --&gt; Topo
+    RBACFilter --&gt; KPI
+    RBACFilter --&gt; HITL
+</pre>
+<hr />
+<h2 id="2-model-context-protocol-tools-specification">2. Model Context Protocol Tools Specification</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th style="text-align: left;">Tool Name</th>
+<th style="text-align: left;">Intended Role</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Parameters &amp; Bounds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>get_topology_neighborhood</code></td>
+<td style="text-align: left;">Alarm, Perf, Change</td>
+<td style="text-align: left;">Bounded k-hop neighborhood around entity as of timestamp.</td>
+<td style="text-align: left;"><code>entity_id</code> (str), <code>as_of_time</code> (ISO), <code>max_hops</code> (int, 1-3). SLA &lt; 2s.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>find_shared_dependencies</code></td>
+<td style="text-align: left;">Alarm, Change</td>
+<td style="text-align: left;">Upstream common ancestors (shared CSR, backhaul link, site).</td>
+<td style="text-align: left;"><code>entity_ids</code> (array[str]), <code>as_of_time</code> (ISO). Cutoff 3 hops.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>get_entity_kpis</code></td>
+<td style="text-align: left;">Alarm, Perf, Change</td>
+<td style="text-align: left;">Time-series KPIs with completeness scores &amp; formula version.</td>
+<td style="text-align: left;"><code>entity_id</code> (str), <code>start_time</code> (ISO), <code>end_time</code> (ISO).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>verify_evidence_integrity</code></td>
+<td style="text-align: left;">Alarm, Perf</td>
+<td style="text-align: left;">Verifies whether degradation is genuine outage vs missing data.</td>
+<td style="text-align: left;"><code>entity_ids</code> (array[str]), <code>start_time</code> (ISO), <code>end_time</code> (ISO).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>propose_remediation_action</code></td>
+<td style="text-align: left;">Alarm, Change</td>
+<td style="text-align: left;">Stages proposal in <code>PENDING_APPROVAL</code>. Does NOT execute directly.</td>
+<td style="text-align: left;"><code>target_entity_id</code>, <code>action_type</code>, <code>justification</code>, <code>blast_radius</code>, <code>rollback</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>approve_action</code></td>
+<td style="text-align: left;">Human Operator only</td>
+<td style="text-align: left;">Authorizes and executes staged remediation on production.</td>
+<td style="text-align: left;"><code>action_id</code>, <code>caller_id</code>, <code>comment</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-example-request-response-contract">3. Example Request &amp; Response Contract</h2>
+<h3 id="a-example-mcp-tool-call-find_shared_dependencies">A. Example MCP Tool Call: <code>find_shared_dependencies</code></h3>
+<h4 id="request-payload-json-rpc-20">Request Payload (JSON-RPC 2.0)</h4>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;req-101&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tools/call&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;params&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;find_shared_dependencies&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;arguments&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_ids&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;CELL_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;CELL_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;CELL_003&quot;</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;as_of_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-11-10T10:05:00Z&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="response-payload-with-identity-lineage-sla-metadata">Response Payload (with Identity, Lineage &amp; SLA Metadata)</h4>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;jsonrpc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;req-101&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;isError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;queried_entities&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;CELL_001&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;CELL_002&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;CELL_003&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;as_of&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-11-10T10:05:00Z&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;shared_count&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;shared_dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CSR_ALPHA_01&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cell Site Router Alpha-01&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;router&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;vendor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cisco&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASR-903&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;ip_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.200.1.1&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;IP_RAN_CSR&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;LINK_BACKHAUL_09&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Primary Fiber Backhaul 10G-09&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;entity_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;transport_link&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;vendor&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Cisco&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nt">&quot;medium&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SingleMode_Fiber&quot;</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;capacity_gbps&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">10.0</span><span class="p">,</span>
+<span class="w">          </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ACTIVE_PRIMARY&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;latency_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.85</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;sla_met&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;caller_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alarm-agent-01&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;alarm_management&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tenant_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;customer_a&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;duration_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">1.12</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<hr />
+<h2 id="4-query-bounds-execution-limits-safety-guards">4. Query Bounds, Execution Limits &amp; Safety Guards</h2>
+<p>To prevent unbounded graph traversals, LLM context overflow, and cloud budget exhaustion, the following strict bounds are enforced in code:</p>
+<ol>
+<li><strong>Hop Depth Cutoff</strong>: Hard limit of <strong>3 hops</strong> (default 2). Any request specifying <code>max_hops &gt; 3</code> is clamped to 3.</li>
+<li><strong>Entity Response Limit</strong>: A maximum of <strong>250 entities</strong> per topology neighborhood query. If a subgraph exceeds 250 nodes, the result is truncated and flagged with <code>truncated: true</code>.</li>
+<li><strong>Execution Timeout</strong>: MCP tool dispatchers enforce a <strong>2.0-second timeout</strong> for topology lookups and <strong>5.0-second timeout</strong> for KPI queries.</li>
+<li><strong>Token Budgeting</strong>: JSON-RPC outputs are serialized with strict schemas, stripping extraneous vendor debug fields to keep context size under <strong>2,000 tokens per tool call</strong>.</li>
+</ol>
+<hr />
+<h2 id="5-human-in-the-loop-hitl-action-lifecycle">5. Human-In-The-Loop (HITL) Action Lifecycle</h2>
+<pre class="mermaid">
+stateDiagram-v2
+    [*] --&gt; DRAFT : Agent identifies root cause
+    DRAFT --&gt; PENDING_APPROVAL : propose_remediation_action called
+
+    state PENDING_APPROVAL {
+        [*] --&gt; HumanReview : Staged with blast radius &amp; rollback plan
+        HumanReview --&gt; Reject : Incomplete evidence or high risk
+        HumanReview --&gt; Approve : Validated by NOC Tier-2 Lead
+    }
+
+    Reject --&gt; REJECTED : Audit log updated
+    REJECTED --&gt; [*]
+
+    Approve --&gt; EXECUTING : Secure token passed to network gateway
+    EXECUTING --&gt; EXECUTED : Reroute confirmed &amp; alarms clearing
+    EXECUTED --&gt; [*]
+</pre>
+</main>
+<nav class="pager">
+  <a class="prev" href="03_KPI_ENGINE_DATA_QUALITY.html"><span class="label">&larr; Previous</span>03. KPI Engine & Data Quality Specification</a>
+  <a class="next" href="05_AGENT_DESIGN_EVALUATION.html"><span class="label">Next &rarr;</span>05. Agent Behaviour, Safety & Evaluation Framework</a>
+</nav>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  if (document.querySelector(".mermaid")) {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      fontFamily: "inherit",
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+    });
+  }
+</script>
+</body>
+</html>

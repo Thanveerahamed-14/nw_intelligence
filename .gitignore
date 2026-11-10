@@ -59,5 +59,8 @@ dist/
 data/vector_store/
 *.sqlite3
 
+# Local input material (kept out of version control)
+inputs/
+
 
 

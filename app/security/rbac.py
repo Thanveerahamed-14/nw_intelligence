@@ -1,6 +1,6 @@
 """
 Role-Based Access Control (RBAC) and Governance Framework.
-Implements the exact role boundaries required by the chief solution lead:
+Implements the role boundaries for the platform's operating roles:
 1. Alarm Management
 2. Performance Analysis
 3. Change Planning

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07. Working Assumptions, Challenges & Open Questions | Telecom Network Intelligence</title>
+<style>
+    :root {
+      --ink: #1f2933;
+      --muted: #52606d;
+      --faint: #7b8794;
+      --border: #e1e6ec;
+      --surface: #ffffff;
+      --page: #f5f7fa;
+      --accent: #1d4ed8;
+      --accent-soft: #eff4ff;
+      --code-bg: #f6f8fa;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .site-header .inner,
+    .pager,
+    .page {
+      width: min(920px, 100% - 32px);
+      margin: 0 auto;
+    }
+    .site-header .inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px 16px;
+      padding: 14px 0;
+    }
+    .site-header .brand {
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .site-header nav {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 0.85rem;
+    }
+    a { color: var(--accent); }
+    a:hover { text-decoration-thickness: 2px; }
+    .page {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+      margin-top: 28px;
+      margin-bottom: 28px;
+      padding: 52px 64px 64px;
+    }
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--faint);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .doc-meta a { text-transform: none; letter-spacing: 0; font-weight: 500; }
+    h1, h2, h3, h4 {
+      line-height: 1.25;
+      color: #111827;
+      font-weight: 700;
+      margin: 1.8em 0 0.6em;
+      scroll-margin-top: 20px;
+    }
+    h1 { font-size: 1.95rem; margin-top: 0.3em; letter-spacing: -0.02em; }
+    h2 {
+      font-size: 1.35rem;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.1rem; }
+    h4 { font-size: 1rem; color: var(--muted); }
+    p, ul, ol, table, pre, blockquote { margin: 0 0 1.05em; }
+    ul, ol { padding-left: 1.4em; }
+    li { margin: 0.28em 0; }
+    li > ul, li > ol { margin: 0.28em 0 0.28em; }
+    strong { color: #111827; }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2.4em 0;
+    }
+    blockquote {
+      margin-left: 0;
+      padding: 0.85em 1.1em;
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+    }
+    blockquote p:last-child { margin-bottom: 0; }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.86em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 0.1em 0.35em;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      line-height: 1.5;
+      font-size: 0.85rem;
+    }
+    pre code {
+      background: none;
+      border: 0;
+      padding: 0;
+      font-size: inherit;
+      white-space: pre;
+    }
+    .highlight pre { margin: 0; }
+    .table-wrap { overflow-x: auto; margin-bottom: 1.05em; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f1f5f9; font-weight: 600; color: #111827; }
+    tbody tr:nth-child(even) { background: #fafbfc; }
+    .mermaid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px;
+      margin: 0 0 1.2em;
+      overflow-x: auto;
+      text-align: center;
+      font-family: inherit;
+      font-size: 0.9rem;
+      white-space: pre;
+    }
+    .mermaid[data-processed="true"] { white-space: normal; }
+    .mermaid svg { max-width: 100%; height: auto; }
+    .toc {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fbfcfe;
+      padding: 14px 20px 16px;
+      margin: 1.6em 0 2em;
+    }
+    .toc-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 6px;
+    }
+    .toc ul { list-style: none; padding-left: 0; margin: 0; }
+    .toc ul ul { padding-left: 1.1em; }
+    .toc li { margin: 0.18em 0; font-size: 0.88rem; }
+    .toc a { text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .pager {
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      padding-bottom: 40px;
+      font-size: 0.9rem;
+    }
+    .pager a {
+      display: block;
+      flex: 1 1 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 12px 16px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .pager a:hover { border-color: var(--accent); }
+    .pager .label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 2px;
+    }
+    .pager .next { text-align: right; }
+    .pager .spacer { flex: 1 1 0; }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 1.5em;
+    }
+    .card {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px rgba(29, 78, 216, 0.08);
+    }
+    .card .num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    .card h3 { margin: 2px 0 4px; font-size: 1.02rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+
+    @media (max-width: 720px) {
+      .page { padding: 32px 22px 44px; border-radius: 0; border-left: 0; border-right: 0; }
+      .site-header .inner, .pager, .page { width: 100%; }
+      .site-header .inner { padding: 12px 16px; }
+      .pager { padding: 0 16px 32px; }
+      h1 { font-size: 1.55rem; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; font-size: 11.5pt; }
+      .site-header, .pager, .toc, .doc-meta a { display: none !important; }
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      a { color: #000; text-decoration: none; }
+      h1, h2, h3 { page-break-after: avoid; }
+      h2 { border-bottom-color: #ccc; }
+      pre, table, blockquote, .mermaid { page-break-inside: avoid; }
+      pre { background: #f7f7f7; border-color: #ddd; }
+      th { background: #f0f0f0; }
+      .mermaid { border-color: #ddd; }
+    }
+</style>
+<style>pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #ffffcc }
+.highlight { background: #f0f0f0; }
+.highlight .c { color: #60a0b0; font-style: italic } /* Comment */
+.highlight .err { border: 1px solid #FF0000 } /* Error */
+.highlight .k { color: #007020; font-weight: bold } /* Keyword */
+.highlight .o { color: #666666 } /* Operator */
+.highlight .ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+.highlight .cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.highlight .cp { color: #007020 } /* Comment.Preproc */
+.highlight .cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+.highlight .c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.highlight .cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.highlight .gd { color: #A00000 } /* Generic.Deleted */
+.highlight .ge { font-style: italic } /* Generic.Emph */
+.highlight .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #FF0000 } /* Generic.Error */
+.highlight .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.highlight .gi { color: #00A000 } /* Generic.Inserted */
+.highlight .go { color: #888888 } /* Generic.Output */
+.highlight .gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.highlight .gt { color: #0044DD } /* Generic.Traceback */
+.highlight .kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.highlight .kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.highlight .kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.highlight .kp { color: #007020 } /* Keyword.Pseudo */
+.highlight .kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.highlight .kt { color: #902000 } /* Keyword.Type */
+.highlight .m { color: #40a070 } /* Literal.Number */
+.highlight .s { color: #4070a0 } /* Literal.String */
+.highlight .na { color: #4070a0 } /* Name.Attribute */
+.highlight .nb { color: #007020 } /* Name.Builtin */
+.highlight .nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.highlight .no { color: #60add5 } /* Name.Constant */
+.highlight .nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.highlight .ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.highlight .ne { color: #007020 } /* Name.Exception */
+.highlight .nf { color: #06287e } /* Name.Function */
+.highlight .nl { color: #002070; font-weight: bold } /* Name.Label */
+.highlight .nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.highlight .nt { color: #062873; font-weight: bold } /* Name.Tag */
+.highlight .nv { color: #bb60d5 } /* Name.Variable */
+.highlight .ow { color: #007020; font-weight: bold } /* Operator.Word */
+.highlight .w { color: #bbbbbb } /* Text.Whitespace */
+.highlight .mb { color: #40a070 } /* Literal.Number.Bin */
+.highlight .mf { color: #40a070 } /* Literal.Number.Float */
+.highlight .mh { color: #40a070 } /* Literal.Number.Hex */
+.highlight .mi { color: #40a070 } /* Literal.Number.Integer */
+.highlight .mo { color: #40a070 } /* Literal.Number.Oct */
+.highlight .sa { color: #4070a0 } /* Literal.String.Affix */
+.highlight .sb { color: #4070a0 } /* Literal.String.Backtick */
+.highlight .sc { color: #4070a0 } /* Literal.String.Char */
+.highlight .dl { color: #4070a0 } /* Literal.String.Delimiter */
+.highlight .sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.highlight .s2 { color: #4070a0 } /* Literal.String.Double */
+.highlight .se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.highlight .sh { color: #4070a0 } /* Literal.String.Heredoc */
+.highlight .si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.highlight .sx { color: #c65d09 } /* Literal.String.Other */
+.highlight .sr { color: #235388 } /* Literal.String.Regex */
+.highlight .s1 { color: #4070a0 } /* Literal.String.Single */
+.highlight .ss { color: #517918 } /* Literal.String.Symbol */
+.highlight .bp { color: #007020 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #06287e } /* Name.Function.Magic */
+.highlight .vc { color: #bb60d5 } /* Name.Variable.Class */
+.highlight .vg { color: #bb60d5 } /* Name.Variable.Global */
+.highlight .vi { color: #bb60d5 } /* Name.Variable.Instance */
+.highlight .vm { color: #bb60d5 } /* Name.Variable.Magic */
+.highlight .il { color: #40a070 } /* Literal.Number.Integer.Long */</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="inner">
+    <a class="brand" href="index.html">Telecom Network Intelligence &middot; Documentation</a>
+    <nav>
+      <a href="index.html">All documents</a>
+      <a href="07_ASSUMPTIONS_AND_QUESTIONS.md">Markdown source</a>
+    </nav>
+  </div>
+</header>
+<main class="page">
+  <div class="doc-meta">
+    <span>Technical documentation</span>
+    <span>&middot;</span>
+    <a href="07_ASSUMPTIONS_AND_QUESTIONS.md">07_ASSUMPTIONS_AND_QUESTIONS.md</a>
+  </div>
+  <nav class="toc"><div class="toc-title">On this page</div><div class="toc">
+<ul>
+<li><a href="#1-challenges-to-initial-assumptions">1. Challenges to Initial Assumptions</a><ul>
+<li><a href="#a-strict-data-isolation-vs-shared-infrastructure-mocn-towerco">A. Strict Data Isolation vs. Shared Infrastructure (MOCN / TowerCo)</a></li>
+<li><a href="#b-50-million-counter-rowsday-15-minute-bursts">B. 50 Million Counter Rows/Day &amp; 15-Minute Bursts</a></li>
+<li><a href="#c-2-hour-late-performance-data">C. 2-Hour Late Performance Data</a></li>
+</ul>
+</li>
+<li><a href="#2-open-questions-stakeholder-decisions">2. Open Questions &amp; Stakeholder Decisions</a></li>
+</ul>
+</div>
+</nav>
+  <h1 id="07-working-assumptions-challenges-open-questions">07. Working Assumptions, Challenges &amp; Open Questions</h1>
+<h2 id="1-challenges-to-initial-assumptions">1. Challenges to Initial Assumptions</h2>
+<h3 id="a-strict-data-isolation-vs-shared-infrastructure-mocn-towerco">A. Strict Data Isolation vs. Shared Infrastructure (MOCN / TowerCo)</h3>
+<ul>
+<li><strong>Assumption Stated</strong>: <em>"Five customers with strict data isolation."</em></li>
+<li><strong>Engineering Challenge</strong>: In real-world telecom networks, multiple operators frequently share physical infrastructure through:
+  1. <strong>MOCN (Multi-Operator Core Network)</strong>: Multiple operators sharing the same physical radio nodes and antennas, differentiated only by PLMN ID.
+  2. <strong>Passive Tower Sharing (TowerCos)</strong>: Operators leasing antenna space on the same physical tower (e.g. Crown Castle / American Tower) with shared diesel generators, battery banks, and fiber conduits.</li>
+<li><strong>Platform Architecture Decision</strong>: Our tenant isolation model strictly prevents Customer A from querying Customer B's subscriber or traffic metrics. However, our topology engine supports an underlying <strong>Shared Facility Layer</strong> where anonymized physical events (e.g. "Site Alpha commercial power failure") can correlate across tenants without leaking confidential customer traffic data.</li>
+</ul>
+<h3 id="b-50-million-counter-rowsday-15-minute-bursts">B. 50 Million Counter Rows/Day &amp; 15-Minute Bursts</h3>
+<ul>
+<li><strong>Assumption Stated</strong>: <em>"Approximately 50 million performance-counter rows per day, arriving in bursts around 15-minute reporting intervals."</em></li>
+<li><strong>Engineering Analysis</strong>:</li>
+<li>50 million rows/day equates to an average of <strong>~578 rows/second</strong>.</li>
+<li>However, in telecommunications, counters do not arrive uniformly. They arrive in synchronized bursts during the 3 minutes immediately following the 15-minute window close ($:00, :15, :30, :45$).</li>
+<li>Peak burst volume will surge to <strong>10,000 to 25,000 rows/second</strong>.</li>
+<li><strong>Architecture Decision</strong>: Direct OLTP database insertion (Cloud SQL) during bursts would cause IOPS exhaustion and lock contention. We route all counter bursts through <strong>Cloud Pub/Sub</strong> into <strong>Google BigQuery Storage Write API</strong> with managed streaming buffers, decoupling ingestion from analytical queries.</li>
+</ul>
+<h3 id="c-2-hour-late-performance-data">C. 2-Hour Late Performance Data</h3>
+<ul>
+<li><strong>Assumption Stated</strong>: <em>"Performance data can arrive up to two hours late."</em></li>
+<li><strong>Engineering Decision</strong>:</li>
+<li>We maintain a <strong>Sliding Watermark of 2 hours 15 minutes</strong>.</li>
+<li>Any data arriving within the watermark triggers an <strong>incremental delta recalculation</strong>, updates the completeness score, and increments the record revision.</li>
+<li>Data arriving after 2 hours 15 minutes is routed to an <strong>Historical Backfill Pipeline</strong> executed via nightly BigQuery scheduled queries to prevent destabilizing real-time agent caches.</li>
+</ul>
+<hr />
+<h2 id="2-open-questions-stakeholder-decisions">2. Open Questions &amp; Stakeholder Decisions</h2>
+<ol>
+<li>
+<p><strong>Human-In-The-Loop (HITL) Expiration &amp; SLA</strong>:
+   - If an agent stages an emergency reroute action in <code>PENDING_APPROVAL</code> and the NOC Human Operator does not respond within 15 minutes, should the action expire, escalate to a secondary on-call engineer, or (for pre-certified non-destructive changes) auto-execute under an emergency failover policy?</p>
+</li>
+<li>
+<p><strong>2-Hop Topology Boundary Semantics</strong>:
+   - In 5G networks, does a "2-hop" lookup encompass logical service slices (e.g. Cell $\rightarrow$ gNodeB $\rightarrow$ UPF) or physical transport hops (Cell $\rightarrow$ gNodeB $\rightarrow$ CSR $\rightarrow$ Aggregation Router)? Our engine currently defaults to physical and logical adjacency up to a configurable depth of 3.</p>
+</li>
+<li>
+<p><strong>Vendor Protocol Ingestion Constraints</strong>:
+   - Are legacy vendor EMS instances capable of streaming via modern telemetry (gRPC / Kafka / Pub/Sub), or will the platform require batch SFTP polling workers for legacy 3GPP XML / ASN.1 binary files?</p>
+</li>
+<li>
+<p><strong>Closed-Loop Action Execution Endpoint</strong>:
+   - How does the platform authenticate against the physical network controllers (e.g. Cisco NSO, Nokia NSP, Ericsson ENM CLI/NETCONF) when a human approves an action? We recommend using short-lived signed JWTs passed to a hardened Network Configuration Gateway.</p>
+</li>
+</ol>
+</main>
+<nav class="pager">
+  <a class="prev" href="06_EXECUTIVE_SLIDES.html"><span class="label">&larr; Previous</span>06. Executive Presentation: Platform Overview & Incident Resolution</a>
+  <span class="spacer"></span>
+</nav>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  if (document.querySelector(".mermaid")) {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "neutral",
+      securityLevel: "loose",
+      fontFamily: "inherit",
+      flowchart: { useMaxWidth: true, htmlLabels: true },
+    });
+  }
+</script>
+</body>
+</html>
