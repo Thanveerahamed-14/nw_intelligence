@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from app.security.rbac import SecurityContext, Role, Permission
 from app.mcp.tools import MCPToolRegistry
 from app.config import settings
+from app.ai import get_ai_service
 
 class ChangeImpactAssessment(BaseModel):
     target_entity_id: str
@@ -22,6 +23,11 @@ class ChangeImpactAssessment(BaseModel):
     risk_level: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
     recommendation: str
     requires_human_approval: bool = True
+    risk_analysis: Optional[str] = None
+    suggested_window: Optional[str] = None
+    rollback_strategy: Optional[str] = None
+    pre_flight_checks: List[str] = Field(default_factory=list)
+    ai_engine_used: Optional[str] = None
 
 class ChangePlanningAgent:
     def __init__(self, mcp_registry: MCPToolRegistry):
@@ -66,7 +72,18 @@ class ChangePlanningAgent:
         if len(cells) > 5:
             risk = "CRITICAL"
 
-        recommendation = (
+        # Synthesize deep risk analysis, rollback strategy, and execution window via AI
+        ai_assessment = get_ai_service().generate_change_risk_assessment(
+            target_entity_id=target_entity_id,
+            change_type=change_type,
+            affected_cells=cells,
+            estimated_subscribers=subscriber_estimate,
+            has_redundancy=has_redundancy,
+            topology_nodes=nodes,
+            calculated_risk=risk
+        )
+
+        recommendation = ai_assessment.get("recommendation") or (
             f"Change Impact Analysis for {change_type} on {target_entity_id}: "
             f"Downstream impact reaches {len(cells)} cells (~{subscriber_estimate} subscribers). "
             f"Redundancy path is {'available (risk: LOW)' if has_redundancy else 'NOT available (risk: HIGH)'}. "
@@ -80,7 +97,12 @@ class ChangePlanningAgent:
             affected_cells=cells,
             estimated_impacted_subscribers=subscriber_estimate,
             has_standby_redundancy=has_redundancy,
-            risk_level=risk,
-            recommendation=recommendation
+            risk_level=ai_assessment.get("risk_level", risk),
+            recommendation=recommendation,
+            risk_analysis=ai_assessment.get("risk_analysis"),
+            suggested_window=ai_assessment.get("suggested_window"),
+            rollback_strategy=ai_assessment.get("rollback_strategy"),
+            pre_flight_checks=ai_assessment.get("pre_flight_checks", []),
+            ai_engine_used=ai_assessment.get("engine_used")
         )
 

@@ -418,7 +418,13 @@ class InvestigationGraph:
                     "LLM_SYNTHESIS",
                     "propose_remediation_action" if staged_action else None,
                     {"target": target_id, "incident_kpis": state.get("kpi_summary", {})},
-                    {"root_cause": synthesis["root_cause"], "staged_action": staged_action},
+                    {
+                        "root_cause": synthesis["root_cause"],
+                        "diagnosis": synthesis.get("diagnosis", synthesis["root_cause"]),
+                        "recommendation": synthesis.get("recommendation", ""),
+                        "staged_action": staged_action,
+                        "engine_used": synthesis.get("engine_used", "Google Gemini"),
+                    },
                     started,
                 )
             ],

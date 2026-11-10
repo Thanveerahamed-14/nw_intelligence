@@ -49,12 +49,18 @@ To guarantee safety, predictability, and sub-30-second response times, we strict
 
 | Platform Task | Execution Mode | Justification |
 | :--- | :--- | :--- |
-| **Topology Graph Traversal** | **Deterministic (Python / NetworkX / SQL)** | Graph traversal requires mathematical correctness and exact neighbor discovery. LLMs hallucinate node connections. |
-| **KPI Calculation & Quality Scoring** | **Deterministic (Python / BigQuery)** | Statistical rollups, divisions, and percentage calculations must be bit-exact and audit-compliant. |
-| **RBAC & Multi-Tenant Enforcement** | **Deterministic Guardrail (Python Context)** | Access control must never rely on prompt engineering or LLM goodwill. |
+| **Topology Graph Traversal** | **Deterministic Graph Engine (Property Graph / Cypher / SQL / Index-Backed Traversal)** | Graph traversal requires mathematical correctness, exact neighbor discovery, and bounded sub-2-second latency. LLMs are non-deterministic and hallucinate node connections. |
+| **KPI Calculation & Quality Scoring** | **Deterministic (Analytical SQL / BigQuery)** | Statistical rollups, divisions, and percentage calculations must be bit-exact and audit-compliant. |
+| **RBAC & Multi-Tenant Enforcement** | **Deterministic Guardrail (Security Context)** | Access control must never rely on prompt engineering or LLM goodwill. |
 | **Tool Selection & Sequence Execution** | **Scaffolded State Machine / ReAct** | Deterministic state machine handles the standard 5-step triage sequence; LLM selects exploratory tools when anomalies diverge. |
-| **Multi-Source Evidence Synthesis** | **LLM Reasoning (Gemini 2.0 Flash)** | Synthesizing unstructured syslog messages, vendor-specific alarms, and numerical telemetry into a coherent root cause narrative with sub-second latency. |
+| **Multi-Source Evidence Synthesis** | **LLM Reasoning Layer (Pluggable Foundation Model / SLM)** | Synthesizing unstructured syslog messages, vendor-specific alarms, and numerical telemetry into a coherent root cause narrative with sub-second latency. |
 | **Remediation Plan Formulation** | **LLM Formulation + Deterministic Schema** | Drafting human-readable justification, blast radius explanation, and rollback instructions adhering to strict Pydantic models. |
+
+### Pluggable AI Backends & Air-Gapped Resiliency
+The agent framework deliberately avoids tight coupling to any single proprietary AI model. By mediating all tool interactions through the Model Context Protocol (MCP) and abstracting model calls behind an AI Service Interface, the platform seamlessly interoperates with:
+- **Cloud Foundation Models**: Google Cloud Vertex AI (Gemini), Anthropic Claude, OpenAI GPT.
+- **On-Premise / Edge Deployments**: Open-weights domain models (e.g., Llama 3, Mistral, Qwen) hosted via vLLM or Ollama.
+- **Deterministic Domain Fallback**: If external connectivity is severed or API quotas are exhausted, the agent automatically falls back to an embedded deterministic telecom reasoning engine, ensuring uninterrupted incident triage in air-gapped NOC environments.
 
 ---
 
@@ -63,7 +69,7 @@ To guarantee safety, predictability, and sub-30-second response times, we strict
 We selected a **Role-Based Multi-Agent Architecture** with distinct agent personas:
 1. **Alarm Management Agent**: Optimised for rapid incident triage, correlation, and proposing immediate fixes.
 2. **Performance Analysis Agent**: Optimised for long-term trend analysis, baseline deviation detection, and capacity planning.
-3. **Change Planning Agent**: Optimised for pre-change simulation, blast radius calculation, and risk scoring.
+3. **Change Planning Agent**: Optimised for pre-change simulation, digital twin blast radius calculation, AI-driven risk scoring, maintenance window selection, and rollback strategy formulation.
 
 ### Why not a single monolithic agent?
 - **Principle of Least Privilege**: The Alarm Management Agent needs permission to propose operational reroutes, whereas the Performance Analysis Agent should **never** have write permissions. A monolithic agent risks permission escalation.

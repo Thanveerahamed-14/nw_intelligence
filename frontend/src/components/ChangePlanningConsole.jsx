@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sliders, ShieldAlert, CheckCircle2, AlertTriangle, Play, RefreshCw, Cpu, Layers } from 'lucide-react';
+import { Sliders, ShieldAlert, CheckCircle2, AlertTriangle, Play, RefreshCw, Cpu, Layers, Sparkles, Clock, RotateCcw, ShieldCheck, CheckSquare } from 'lucide-react';
 
 export default function ChangePlanningConsole({ tenant }) {
   const [targetEntity, setTargetEntity] = useState('CSR_ALPHA_01');
@@ -37,33 +37,33 @@ export default function ChangePlanningConsole({ tenant }) {
   return (
     <div className="space-y-5">
       {/* Simulation Setup Card */}
-      <div className="clean-card p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+      <div className="clean-card p-5 bg-slate-900/80 border border-slate-800/80 rounded-xl shadow-2xl">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+            <div className="w-8 h-8 rounded-lg bg-indigo-950/80 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-sm shadow-indigo-950">
               <Sliders className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">Pre-Change Impact Simulation Sandbox</h2>
-              <p className="text-xs text-slate-500">
-                Change Planning Agent calculates blast radius and verifies redundant capacity before proposing changes.
+              <h2 className="text-sm font-bold text-white">Pre-Change Impact Simulation Sandbox</h2>
+              <p className="text-xs text-slate-400">
+                Change Planning Agent calculates blast radius, queries digital twin topology, and synthesizes AI risk advisories.
               </p>
             </div>
           </div>
-          <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
+          <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 font-bold border border-indigo-500/40 font-mono">
             SIMULATE_CHANGE Permission
           </span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <label className="text-[11px] font-semibold text-slate-600 mb-1 block">
+            <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
               Target Network Entity
             </label>
             <select
               value={targetEntity}
               onChange={(e) => setTargetEntity(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-100 font-medium"
+              className="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 outline-none focus:border-indigo-500 font-mono"
             >
               <option value="CSR_ALPHA_01">CSR_ALPHA_01 (Cell Site Router - Cisco ASR-903)</option>
               <option value="LINK_BACKHAUL_09">LINK_BACKHAUL_09 (Primary 10G Fiber Link)</option>
@@ -72,13 +72,13 @@ export default function ChangePlanningConsole({ tenant }) {
           </div>
 
           <div>
-            <label className="text-[11px] font-semibold text-slate-600 mb-1 block">
+            <label className="text-[11px] font-semibold text-slate-400 mb-1 block">
               Proposed Operation
             </label>
             <select
               value={changeType}
               onChange={(e) => setChangeType(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-100 font-medium"
+              className="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 outline-none focus:border-indigo-500 font-mono"
             >
               <option value="REROUTE_STANDBY_MICROWAVE_BACKHAUL">
                 REROUTE_STANDBY_MICROWAVE_BACKHAUL (Divert to Microwave)
@@ -93,17 +93,17 @@ export default function ChangePlanningConsole({ tenant }) {
             <button
               onClick={handleSimulate}
               disabled={isSimulating}
-              className="w-full py-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 disabled:bg-indigo-400"
+              className="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-500 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all active:scale-95 disabled:bg-indigo-900/50"
             >
               <Play className={`w-4 h-4 ${isSimulating ? 'animate-spin' : ''}`} />
-              {isSimulating ? 'Simulating...' : 'Run Impact Simulation'}
+              {isSimulating ? 'Running AI Simulation...' : 'Run Impact Simulation'}
             </button>
           </div>
         </div>
 
         {/* Informational Guidance */}
-        <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
-          <Layers className="w-4 h-4 text-indigo-500 shrink-0" />
+        <div className="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-400 flex items-center gap-2">
+          <Layers className="w-4 h-4 text-indigo-400 shrink-0" />
           <span>
             Simulation executes in a zero-impact digital twin environment. Real network routing remains unchanged until authorized in the Human-in-the-Loop gate.
           </span>
@@ -112,64 +112,130 @@ export default function ChangePlanningConsole({ tenant }) {
 
       {/* Simulation Results */}
       {simulationResult && (
-        <div className="clean-card p-5 bg-white border border-slate-200 rounded-xl shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div className="clean-card p-5 bg-slate-900/80 border border-slate-800/80 rounded-xl shadow-2xl space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <h3 className="text-sm font-bold text-slate-900">Simulation Assessment Report</h3>
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <h3 className="text-sm font-bold text-white">Simulation Assessment Report</h3>
             </div>
-            <span
-              className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
-                simulationResult.risk_level === 'LOW'
-                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                  : 'bg-rose-50 text-rose-800 border border-rose-200'
-              }`}
-            >
-              Risk Level: {simulationResult.risk_level}
-            </span>
+            <div className="flex items-center gap-2">
+              {simulationResult.ai_engine_used && (
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-950/80 text-purple-300 font-semibold border border-purple-500/40 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-purple-400" />
+                  {simulationResult.ai_engine_used}
+                </span>
+              )}
+              <span
+                className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
+                  simulationResult.risk_level === 'LOW'
+                    ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/40'
+                    : 'bg-rose-950/80 text-rose-300 border border-rose-500/40'
+                }`}
+              >
+                Risk Level: {simulationResult.risk_level}
+              </span>
+            </div>
           </div>
 
+          {/* Key Metrics Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="text-[11px] text-slate-500 font-semibold block mb-1">Target Entity</span>
-              <strong className="text-slate-900 font-mono text-sm">{simulationResult.target_entity_id}</strong>
+            <div className="p-3.5 rounded-lg bg-slate-950/80 border border-slate-800">
+              <span className="text-[11px] text-slate-400 font-semibold block mb-1">Target Entity</span>
+              <strong className="text-white font-mono text-sm">{simulationResult.target_entity_id}</strong>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="text-[11px] text-slate-500 font-semibold block mb-1">Affected Downstream Cells</span>
+            <div className="p-3.5 rounded-lg bg-slate-950/80 border border-slate-800">
+              <span className="text-[11px] text-slate-400 font-semibold block mb-1">Affected Downstream Cells</span>
               <div className="flex flex-wrap gap-1 mt-1">
                 {simulationResult.affected_cells?.map(cell => (
-                  <span key={cell} className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-[11px] font-semibold">
+                  <span key={cell} className="px-1.5 py-0.5 rounded bg-blue-950 text-cyan-300 border border-cyan-500/30 font-mono text-[11px] font-semibold">
                     {cell}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="text-[11px] text-slate-500 font-semibold block mb-1">Subscribers Restored</span>
-              <strong className="text-emerald-700 text-sm font-bold">
+            <div className="p-3.5 rounded-lg bg-slate-950/80 border border-slate-800">
+              <span className="text-[11px] text-slate-400 font-semibold block mb-1">Subscribers Restored</span>
+              <strong className="text-emerald-400 text-sm font-bold font-mono">
                 ~{simulationResult.estimated_impacted_subscribers} Subscribers
               </strong>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-              <span className="text-[11px] text-slate-500 font-semibold block mb-1">Standby Redundancy Path</span>
-              <div className="flex items-center gap-1.5 mt-1 font-semibold text-emerald-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <div className="p-3.5 rounded-lg bg-slate-950/80 border border-slate-800">
+              <span className="text-[11px] text-slate-400 font-semibold block mb-1">Standby Redundancy Path</span>
+              <div className="flex items-center gap-1.5 mt-1 font-semibold text-emerald-400">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 <span>Verified Available (10G Microwave)</span>
               </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-indigo-50/60 border border-indigo-200/80 text-xs text-indigo-900 space-y-1">
-            <strong className="font-bold block">Agent Assessment &amp; Justification:</strong>
-            <p className="leading-relaxed">{simulationResult.recommendation}</p>
+          {/* AI Risk Analysis & Blast Radius Synthesis */}
+          {simulationResult.risk_analysis && (
+            <div className="p-4 rounded-xl bg-slate-950/90 border border-indigo-500/40 text-xs text-slate-200 space-y-1.5 shadow-2xl">
+              <div className="flex items-center gap-1.5 font-bold text-indigo-300 text-xs uppercase tracking-wide">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span>AI Risk Analysis &amp; Blast Radius Synthesis</span>
+              </div>
+              <p className="leading-relaxed text-slate-300 font-medium">
+                {simulationResult.risk_analysis}
+              </p>
+            </div>
+          )}
+
+          {/* Execution Window & Rollback Strategy 2-Column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            {/* Suggested Window */}
+            <div className="p-3.5 rounded-lg bg-blue-950/40 border border-blue-500/40 text-blue-200 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-blue-300">
+                <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Suggested Change Window:</span>
+              </div>
+              <p className="leading-relaxed font-medium text-slate-300 font-mono text-[11px]">
+                {simulationResult.suggested_window || 'Immediate Emergency Window (P1 Incident Recovery)'}
+              </p>
+            </div>
+
+            {/* Rollback Strategy */}
+            <div className="p-3.5 rounded-lg bg-rose-950/40 border border-rose-500/40 text-rose-200 space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-rose-300">
+                <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
+                <span>Automated Rollback Strategy:</span>
+              </div>
+              <p className="leading-relaxed font-medium text-slate-300 font-mono text-[11px]">
+                {simulationResult.rollback_strategy || 'Re-enable primary link and flush BGP routes if packet loss > 0.5%.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Pre-Flight Safety Checks */}
+          {simulationResult.pre_flight_checks && simulationResult.pre_flight_checks.length > 0 && (
+            <div className="p-3.5 rounded-lg bg-slate-950/80 border border-slate-800 text-xs space-y-2">
+              <div className="flex items-center gap-1.5 font-bold text-white text-xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Pre-Flight Safety Verification Checklist:</span>
+              </div>
+              <div className="space-y-1.5 pl-1">
+                {simulationResult.pre_flight_checks.map((check, i) => (
+                  <div key={i} className="flex items-start gap-2 text-slate-300">
+                    <CheckSquare className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+                    <span className="leading-relaxed">{check}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Agent Assessment & Justification */}
+          <div className="p-3.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-xs text-indigo-200 space-y-1">
+            <strong className="font-bold block text-indigo-300">Formal Change Advisory Summary:</strong>
+            <p className="leading-relaxed text-slate-300">{simulationResult.recommendation}</p>
           </div>
 
           {simulationResult.requires_human_approval && (
-            <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2 font-medium">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+            <div className="p-3 rounded-lg bg-amber-950/60 border border-amber-500/40 text-xs text-amber-200 flex items-center gap-2 font-medium">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
                 Safety Boundary Enforced: This operation requires Tier-2 NOC Human Lead sign-off before entering production execution.
               </span>

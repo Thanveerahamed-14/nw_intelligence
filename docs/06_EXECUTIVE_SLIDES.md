@@ -46,7 +46,7 @@ flowchart TD
 
     subgraph Platform["Application & AI Gateway"]
         CR_App["Cloud Run: FastAPI + MCP Server<br/>(JSON-RPC 2.0 & OpenAPI)"]
-        Vertex["Google Cloud Vertex AI<br/>(Gemini 2.0 Flash Model)"]
+        AIGateway["Enterprise AI Gateway<br/>(Pluggable LLM / Foundation Models)"]
         HITL_Gate["Human-In-The-Loop Approval Gate"]
     end
 
@@ -59,7 +59,7 @@ flowchart TD
     CR_App --> Redis
     CR_App --> BQ
     CR_App --> FS
-    CR_App <--> Vertex
+    CR_App <--> AIGateway
     CR_App --> HITL_Gate
 ```
 
@@ -93,7 +93,7 @@ The KPI Engine attaches a `completeness_score` and `quality_status` to every cal
 | :--- | :---: | :---: | :---: | :---: | :--- |
 | **Alarm Management** | ✅ | ✅ | ✅ | ❌ | Triage alarms, correlate evidence, stage fixes. |
 | **Performance Analysis**| ✅ | ✅ | ❌ | ❌ | Analyze long-term degradation and baseline trends. |
-| **Change Planning** | ✅ | ✅ | ✅ | ❌ | Simulate blast radius & subscriber impact. |
+| **Change Planning** | ✅ | ✅ | ✅ | ❌ | Simulate blast radius, AI risk scoring & rollback strategy. |
 | **Human Operator** | ✅ | ✅ | ✅ | **✅ (HITL)** | Authorize production changes and oversee AI. |
 
 ### Model Context Protocol (MCP) Standard
@@ -114,6 +114,6 @@ The KPI Engine attaches a `completeness_score` and `quality_status` to every cal
 ### Delivery Plan (4 Iterative Phases)
 - **Phase 1 (MVP - Current)**: Core Connection Factory, Bi-temporal Graph, KPI Engine with Quality Scoring, MCP Server, HITL Gate, and Local Demonstration.
 - **Phase 2 (Cloud Pilot)**: Deploy on Cloud Run + BigQuery + Cloud SQL + Memorystore; integrate Pub/Sub ingestion.
-- **Phase 3 (Enterprise Scale)**: Onboard all 5 customers; automated Golden Evaluation Harness; fine-tuned Gemini model.
+- **Phase 3 (Enterprise Scale)**: Onboard all 5 customers; automated Golden Evaluation Harness; fine-tuned domain-specific SLM/LLM reasoning models.
 - **Phase 4 (Closed-Loop Autonomous Operations)**: Human-supervised automated low-risk change execution.
 

@@ -4,7 +4,7 @@
 
 The platform exposes dual interfaces with shared underlying governance and security layers:
 1. **REST API (OpenAPI 3.0)**: Used by human dashboards, NOC automation workflows, and microservices for standard CRUD operations and scheduled jobs.
-2. **Model Context Protocol (MCP) JSON-RPC 2.0**: Exposes bounded tools directly to AI Agents (Gemini, Claude, local models). Enforces structured JSON schemas, tool filtering by caller role, and token-bounded payloads.
+2. **Model Context Protocol (MCP) JSON-RPC 2.0**: Exposes bounded, schema-validated tools directly to AI Agents across any model family (Google Gemini, Anthropic Claude, OpenAI, open-weights models via vLLM/Ollama, or specialized on-premise telecom models). Enforces structured JSON schemas, role-governed tool filtering, and token-budgeted payloads.
 
 ```mermaid
 flowchart LR

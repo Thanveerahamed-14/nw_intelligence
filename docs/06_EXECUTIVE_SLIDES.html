@@ -435,7 +435,7 @@ flowchart TD
 
     subgraph Platform["Application &amp; AI Gateway"]
         CR_App["Cloud Run: FastAPI + MCP Server&lt;br/&gt;(JSON-RPC 2.0 &amp; OpenAPI)"]
-        Vertex["Google Cloud Vertex AI&lt;br/&gt;(Gemini 2.0 Flash Model)"]
+        AIGateway["Enterprise AI Gateway&lt;br/&gt;(Pluggable LLM / Foundation Models)"]
         HITL_Gate["Human-In-The-Loop Approval Gate"]
     end
 
@@ -448,7 +448,7 @@ flowchart TD
     CR_App --&gt; Redis
     CR_App --&gt; BQ
     CR_App --&gt; FS
-    CR_App &lt;--&gt; Vertex
+    CR_App &lt;--&gt; AIGateway
     CR_App --&gt; HITL_Gate
 </pre>
 <hr />
@@ -529,7 +529,7 @@ flowchart TD
 <td style="text-align: center;">✅</td>
 <td style="text-align: center;">✅</td>
 <td style="text-align: center;">❌</td>
-<td style="text-align: left;">Simulate blast radius &amp; subscriber impact.</td>
+<td style="text-align: left;">Simulate blast radius, AI risk scoring &amp; rollback strategy.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Human Operator</strong></td>
@@ -560,7 +560,7 @@ flowchart TD
 <ul>
 <li><strong>Phase 1 (MVP - Current)</strong>: Core Connection Factory, Bi-temporal Graph, KPI Engine with Quality Scoring, MCP Server, HITL Gate, and Local Demonstration.</li>
 <li><strong>Phase 2 (Cloud Pilot)</strong>: Deploy on Cloud Run + BigQuery + Cloud SQL + Memorystore; integrate Pub/Sub ingestion.</li>
-<li><strong>Phase 3 (Enterprise Scale)</strong>: Onboard all 5 customers; automated Golden Evaluation Harness; fine-tuned Gemini model.</li>
+<li><strong>Phase 3 (Enterprise Scale)</strong>: Onboard all 5 customers; automated Golden Evaluation Harness; fine-tuned domain-specific SLM/LLM reasoning models.</li>
 <li><strong>Phase 4 (Closed-Loop Autonomous Operations)</strong>: Human-supervised automated low-risk change execution.</li>
 </ul>
 </main>

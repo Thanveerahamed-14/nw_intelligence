@@ -384,7 +384,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <h2 id="1-api-and-mcp-architecture-relationship">1. API and MCP Architecture Relationship</h2>
 <p>The platform exposes dual interfaces with shared underlying governance and security layers:
 1. <strong>REST API (OpenAPI 3.0)</strong>: Used by human dashboards, NOC automation workflows, and microservices for standard CRUD operations and scheduled jobs.
-2. <strong>Model Context Protocol (MCP) JSON-RPC 2.0</strong>: Exposes bounded tools directly to AI Agents (Gemini, Claude, local models). Enforces structured JSON schemas, tool filtering by caller role, and token-bounded payloads.</p>
+2. <strong>Model Context Protocol (MCP) JSON-RPC 2.0</strong>: Exposes bounded, schema-validated tools directly to AI Agents across any model family (Google Gemini, Anthropic Claude, OpenAI, open-weights models via vLLM/Ollama, or specialized on-premise telecom models). Enforces structured JSON schemas, role-governed tool filtering, and token-budgeted payloads.</p>
 <pre class="mermaid">
 flowchart LR
     subgraph Clients["Consumers"]

@@ -177,7 +177,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+    <div className="min-h-screen bg-[#070b13] text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white">
       {/* 1. Slim, Modern Sticky Navbar */}
       <Navbar
         tenant={tenant}

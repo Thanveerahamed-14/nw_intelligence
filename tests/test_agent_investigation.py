@@ -75,6 +75,33 @@ class TestAgentInvestigation(unittest.TestCase):
         self.assertIsNone(report.recommended_action)
         self.assertIn("INVESTIGATION HALTED / NO REMEDIATION PROPOSED", report.root_cause_summary)
 
+    def test_change_planning_simulation_with_ai(self):
+        """
+        Verify that Change Planning Agent simulates downstream blast radius and
+        enriches assessment with AI risk analysis, suggested maintenance window,
+        rollback strategy, and pre-flight safety checks.
+        """
+        assessment = self.hub.run_change_simulation(
+            tenant_id="customer_a",
+            target_entity_id="CSR_ALPHA_01",
+            change_type="REROUTE_STANDBY_MICROWAVE_BACKHAUL"
+        )
+
+        self.assertEqual(assessment.target_entity_id, "CSR_ALPHA_01")
+        self.assertEqual(assessment.change_type, "REROUTE_STANDBY_MICROWAVE_BACKHAUL")
+        self.assertTrue(len(assessment.affected_cells) > 0)
+        self.assertTrue(assessment.estimated_impacted_subscribers > 0)
+        self.assertTrue(assessment.has_standby_redundancy)
+        self.assertEqual(assessment.risk_level, "LOW")
+        self.assertTrue(assessment.requires_human_approval)
+
+        # AI-enhanced intelligence verification
+        self.assertIsNotNone(assessment.risk_analysis)
+        self.assertIsNotNone(assessment.suggested_window)
+        self.assertIsNotNone(assessment.rollback_strategy)
+        self.assertTrue(len(assessment.pre_flight_checks) > 0)
+        self.assertIsNotNone(assessment.ai_engine_used)
+
 if __name__ == "__main__":
     unittest.main()
 

@@ -370,7 +370,10 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
   <nav class="toc"><div class="toc-title">On this page</div><div class="toc">
 <ul>
 <li><a href="#1-walkthrough-the-1005-utc-incident-investigation">1. Walkthrough: The 10:05 UTC Incident Investigation</a></li>
-<li><a href="#2-deterministic-logic-vs-llm-reasoning-boundaries">2. Deterministic Logic vs. LLM Reasoning Boundaries</a></li>
+<li><a href="#2-deterministic-logic-vs-llm-reasoning-boundaries">2. Deterministic Logic vs. LLM Reasoning Boundaries</a><ul>
+<li><a href="#pluggable-ai-backends-air-gapped-resiliency">Pluggable AI Backends &amp; Air-Gapped Resiliency</a></li>
+</ul>
+</li>
 <li><a href="#3-single-agent-vs-multi-agent-rationale">3. Single-Agent vs. Multi-Agent Rationale</a><ul>
 <li><a href="#why-not-a-single-monolithic-agent">Why not a single monolithic agent?</a></li>
 </ul>
@@ -433,17 +436,17 @@ sequenceDiagram
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Topology Graph Traversal</strong></td>
-<td style="text-align: left;"><strong>Deterministic (Python / NetworkX / SQL)</strong></td>
-<td style="text-align: left;">Graph traversal requires mathematical correctness and exact neighbor discovery. LLMs hallucinate node connections.</td>
+<td style="text-align: left;"><strong>Deterministic Graph Engine (Property Graph / Cypher / SQL / Index-Backed Traversal)</strong></td>
+<td style="text-align: left;">Graph traversal requires mathematical correctness, exact neighbor discovery, and bounded sub-2-second latency. LLMs are non-deterministic and hallucinate node connections.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>KPI Calculation &amp; Quality Scoring</strong></td>
-<td style="text-align: left;"><strong>Deterministic (Python / BigQuery)</strong></td>
+<td style="text-align: left;"><strong>Deterministic (Analytical SQL / BigQuery)</strong></td>
 <td style="text-align: left;">Statistical rollups, divisions, and percentage calculations must be bit-exact and audit-compliant.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>RBAC &amp; Multi-Tenant Enforcement</strong></td>
-<td style="text-align: left;"><strong>Deterministic Guardrail (Python Context)</strong></td>
+<td style="text-align: left;"><strong>Deterministic Guardrail (Security Context)</strong></td>
 <td style="text-align: left;">Access control must never rely on prompt engineering or LLM goodwill.</td>
 </tr>
 <tr>
@@ -453,7 +456,7 @@ sequenceDiagram
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Multi-Source Evidence Synthesis</strong></td>
-<td style="text-align: left;"><strong>LLM Reasoning (Gemini 2.0 Flash)</strong></td>
+<td style="text-align: left;"><strong>LLM Reasoning Layer (Pluggable Foundation Model / SLM)</strong></td>
 <td style="text-align: left;">Synthesizing unstructured syslog messages, vendor-specific alarms, and numerical telemetry into a coherent root cause narrative with sub-second latency.</td>
 </tr>
 <tr>
@@ -463,12 +466,17 @@ sequenceDiagram
 </tr>
 </tbody>
 </table></div>
+<h3 id="pluggable-ai-backends-air-gapped-resiliency">Pluggable AI Backends &amp; Air-Gapped Resiliency</h3>
+<p>The agent framework deliberately avoids tight coupling to any single proprietary AI model. By mediating all tool interactions through the Model Context Protocol (MCP) and abstracting model calls behind an AI Service Interface, the platform seamlessly interoperates with:
+- <strong>Cloud Foundation Models</strong>: Google Cloud Vertex AI (Gemini), Anthropic Claude, OpenAI GPT.
+- <strong>On-Premise / Edge Deployments</strong>: Open-weights domain models (e.g., Llama 3, Mistral, Qwen) hosted via vLLM or Ollama.
+- <strong>Deterministic Domain Fallback</strong>: If external connectivity is severed or API quotas are exhausted, the agent automatically falls back to an embedded deterministic telecom reasoning engine, ensuring uninterrupted incident triage in air-gapped NOC environments.</p>
 <hr />
 <h2 id="3-single-agent-vs-multi-agent-rationale">3. Single-Agent vs. Multi-Agent Rationale</h2>
 <p>We selected a <strong>Role-Based Multi-Agent Architecture</strong> with distinct agent personas:
 1. <strong>Alarm Management Agent</strong>: Optimised for rapid incident triage, correlation, and proposing immediate fixes.
 2. <strong>Performance Analysis Agent</strong>: Optimised for long-term trend analysis, baseline deviation detection, and capacity planning.
-3. <strong>Change Planning Agent</strong>: Optimised for pre-change simulation, blast radius calculation, and risk scoring.</p>
+3. <strong>Change Planning Agent</strong>: Optimised for pre-change simulation, digital twin blast radius calculation, AI-driven risk scoring, maintenance window selection, and rollback strategy formulation.</p>
 <h3 id="why-not-a-single-monolithic-agent">Why not a single monolithic agent?</h3>
 <ul>
 <li><strong>Principle of Least Privilege</strong>: The Alarm Management Agent needs permission to propose operational reroutes, whereas the Performance Analysis Agent should <strong>never</strong> have write permissions. A monolithic agent risks permission escalation.</li>
