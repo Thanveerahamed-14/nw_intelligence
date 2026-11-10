@@ -8,29 +8,18 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Chakra Petch', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
-        display: ['Orbitron', 'sans-serif'],
       },
       colors: {
-        cyber: {
-          void: '#02040a',
-          panel: '#050a14',
-          card: '#081020',
-          surface: '#0c162b',
-          border: '#0f2444',
-          neonCyan: '#00f0ff',
-          neonCrimson: '#ff0055',
-          neonAmber: '#ffaa00',
-          neonEmerald: '#00ff9d',
-          neonPurple: '#b026ff',
-        },
         slate: {
-          950: '#02040a',
-          900: '#050a14',
-          850: '#081020',
-          800: '#0c162b',
-          700: '#142340',
+          950: '#070b13',
+          900: '#0b0f19',
+          850: '#111827',
+          800: '#162032',
+          750: '#1c283f',
+          700: '#23324f',
+          600: '#334155',
         }
       }
     },

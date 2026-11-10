@@ -1,222 +1,88 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Orbitron:wght@500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: 'Chakra Petch', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-display: 'Orbitron', sans-serif;
-
-  /* Cyber Theme Palette */
-  --bg-cyber-void: #02040a;
-  --bg-cyber-panel: #050a14;
-  --bg-cyber-card: #081020;
-  --bg-cyber-surface: #0c162b;
   
-  --neon-cyan: #00f0ff;
-  --neon-crimson: #ff0055;
-  --neon-amber: #ffaa00;
-  --neon-emerald: #00ff9d;
-  --neon-purple: #b026ff;
+  /* Modern Clean Enterprise Palette */
+  --bg-app: #0b0f19;
+  --bg-card: #111827;
+  --bg-card-subtle: #162032;
+  --border-color: #1f293d;
+  --border-hover: #334155;
   
-  --border-cyber: #0f2444;
-  --border-cyber-bright: #00f0ff40;
+  --primary: #3b82f6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
 }
 
 body {
-  background-color: var(--bg-cyber-void);
-  color: #e2e8f0;
+  background-color: var(--bg-app);
+  color: #f1f5f9;
   font-family: var(--font-sans);
   line-height: 1.5;
   overflow-x: hidden;
-  background-image: 
-    radial-gradient(ellipse at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 50%, rgba(176, 38, 255, 0.04) 0%, transparent 50%),
-    linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+  -webkit-font-smoothing: antialiased;
 }
 
 code, pre, .font-mono {
   font-family: var(--font-mono);
 }
 
-.font-display {
-  font-family: var(--font-display);
+/* Modern Clean Glass Card */
+.clean-card {
+  background-color: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Cyber Tactical Panels */
-.cyber-panel {
-  background: rgba(5, 10, 20, 0.88);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 240, 255, 0.18);
-  border-radius: 6px;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 240, 255, 0.02);
-  transition: all 0.25s ease;
+.clean-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
 }
 
-.cyber-panel:hover {
-  border-color: rgba(0, 240, 255, 0.35);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 240, 255, 0.04);
-}
-
-/* HUD Tactical Corner Notches */
-.hud-corner {
-  position: relative;
-}
-
-.hud-corner::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: -1px;
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid var(--neon-cyan);
-  border-left: 2px solid var(--neon-cyan);
-  pointer-events: none;
-  z-index: 10;
-}
-
-.hud-corner::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 10px;
-  height: 10px;
-  border-bottom: 2px solid var(--neon-cyan);
-  border-right: 2px solid var(--neon-cyan);
-  pointer-events: none;
-  z-index: 10;
-}
-
-.hud-corner-danger::before {
-  border-top-color: var(--neon-crimson);
-  border-left-color: var(--neon-crimson);
-}
-.hud-corner-danger::after {
-  border-bottom-color: var(--neon-crimson);
-  border-right-color: var(--neon-crimson);
-}
-
-.hud-corner-warning::before {
-  border-top-color: var(--neon-amber);
-  border-left-color: var(--neon-amber);
-}
-.hud-corner-warning::after {
-  border-bottom-color: var(--neon-amber);
-  border-right-color: var(--neon-amber);
-}
-
-.hud-corner-success::before {
-  border-top-color: var(--neon-emerald);
-  border-left-color: var(--neon-emerald);
-}
-.hud-corner-success::after {
-  border-bottom-color: var(--neon-emerald);
-  border-right-color: var(--neon-emerald);
-}
-
-/* Neon Text Glows */
-.text-glow-cyan {
-  text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
-}
-.text-glow-crimson {
-  text-shadow: 0 0 10px rgba(255, 0, 85, 0.8);
-}
-.text-glow-amber {
-  text-shadow: 0 0 10px rgba(255, 170, 0, 0.7);
-}
-.text-glow-emerald {
-  text-shadow: 0 0 10px rgba(0, 255, 157, 0.7);
-}
-
-/* Neon Box Glows */
-.glow-cyan {
-  box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
-}
-.glow-crimson {
-  box-shadow: 0 0 15px rgba(255, 0, 85, 0.35);
-}
-
-/* Scanline subtle overlay */
-.scanlines {
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%, 
-    rgba(0, 0, 0, 0.25) 50%
-  );
-  background-size: 100% 4px;
-}
-
-/* High Voltage Laser Failing Link Pulse */
-@keyframes cyber-laser-failing {
-  0% {
-    stroke-opacity: 0.4;
+/* Failing link in topology */
+@keyframes soft-pulse {
+  0%, 100% {
+    stroke-opacity: 0.5;
     stroke-width: 2.5;
-    filter: drop-shadow(0 0 4px #ff0055);
   }
   50% {
     stroke-opacity: 1;
-    stroke-width: 5;
-    filter: drop-shadow(0 0 14px #ff0055) drop-shadow(0 0 24px #ff0055);
-  }
-  100% {
-    stroke-opacity: 0.4;
-    stroke-width: 2.5;
-    filter: drop-shadow(0 0 4px #ff0055);
+    stroke-width: 3.5;
   }
 }
 
 .failing-link {
-  animation: cyber-laser-failing 1.2s infinite ease-in-out;
-  stroke: #ff0055 !important;
+  stroke: #ef4444 !important;
+  animation: soft-pulse 2s infinite ease-in-out;
 }
 
-/* Standby Microwave Link Pulse */
-@keyframes cyber-standby-flow {
-  to {
-    stroke-dashoffset: -30;
-  }
-}
-
+/* Standby link in topology */
 .standby-link {
-  stroke-dasharray: 6, 6;
-  animation: cyber-standby-flow 1.5s linear infinite;
-  stroke: #ffaa00 !important;
-  filter: drop-shadow(0 0 6px rgba(255, 170, 0, 0.6));
+  stroke: #f59e0b !important;
+  stroke-dasharray: 4, 4;
 }
 
-/* Active Carrier Pulse */
-@keyframes active-carrier-flow {
-  to {
-    stroke-dashoffset: -20;
-  }
-}
-
-.active-carrier-link {
-  stroke: #00f0ff !important;
-  stroke-dasharray: 8, 4;
-  animation: active-carrier-flow 2s linear infinite;
-  filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.5));
-}
-
-/* Cyber Custom Scrollbars */
+/* Clean Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #030712;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #0f2444;
-  border-radius: 3px;
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  background: #273549;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #00f0ff60;
+  background: #3b4e6b;
 }
