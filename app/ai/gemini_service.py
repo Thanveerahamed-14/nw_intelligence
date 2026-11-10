@@ -94,3 +94,4 @@ def get_ai_service() -> GeminiAIService:
     if _gemini_instance is None:
         _gemini_instance = GeminiAIService()
     return _gemini_instance
+

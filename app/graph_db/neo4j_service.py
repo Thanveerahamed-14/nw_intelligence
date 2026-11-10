@@ -71,3 +71,4 @@ def get_graph_db() -> GraphDatabaseService:
     if _graph_db_instance is None:
         _graph_db_instance = GraphDatabaseService()
     return _graph_db_instance
+
