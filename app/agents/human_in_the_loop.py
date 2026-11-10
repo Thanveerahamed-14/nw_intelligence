@@ -136,3 +136,4 @@ _hitl_instance = HITLManager()
 
 def get_hitl_manager() -> HITLManager:
     return _hitl_instance
+

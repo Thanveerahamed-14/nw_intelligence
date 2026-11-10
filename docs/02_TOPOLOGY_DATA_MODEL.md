@@ -116,3 +116,4 @@ WHERE k.tenant_id = 'customer_a'
   AND k.timestamp BETWEEN '2026-11-10T09:30:00Z' AND '2026-11-10T10:15:00Z';
 ```
 This guarantees sub-second BigQuery execution while preserving full provenance back to source vendor payloads.
+

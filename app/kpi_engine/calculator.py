@@ -171,3 +171,4 @@ class KPICalculator:
             ))
 
         return results
+

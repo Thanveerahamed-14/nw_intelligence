@@ -65,3 +65,4 @@ class NetworkRelationship(BaseModel):
         if self.valid_to is not None and as_of >= self.valid_to:
             return False
         return True
+

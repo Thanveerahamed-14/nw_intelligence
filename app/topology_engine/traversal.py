@@ -152,3 +152,4 @@ class TopologyTraversalService:
             "latency_ms": round(duration_ms, 2),
             "sla_met": duration_ms <= (settings.TOPOLOGY_QUERY_TIMEOUT_SECONDS * 1000)
         }
+

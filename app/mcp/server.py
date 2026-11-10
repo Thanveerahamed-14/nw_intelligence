@@ -68,3 +68,4 @@ class MCPServer:
                 "error": {"code": 500, "message": f"Tool execution failed: {str(ex)}"},
                 "meta": {"duration_ms": round((time.perf_counter() - start_time) * 1000, 2)}
             }
+

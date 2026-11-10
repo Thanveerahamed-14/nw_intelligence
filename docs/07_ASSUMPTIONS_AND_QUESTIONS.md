@@ -39,3 +39,4 @@
 
 4. **Closed-Loop Action Execution Endpoint**:
    - How does the platform authenticate against the physical network controllers (e.g. Cisco NSO, Nokia NSP, Ericsson ENM CLI/NETCONF) when a human approves an action? We recommend using short-lived signed JWTs passed to a hardened Network Configuration Gateway.
+

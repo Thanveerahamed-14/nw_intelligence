@@ -94,3 +94,4 @@ class SecurityContext(BaseModel):
 def build_security_context(caller_id: str, role: Role, tenant_id: Optional[str] = None) -> SecurityContext:
     tenant = tenant_id or get_current_tenant()
     return SecurityContext(caller_id=caller_id, role=role, tenant_id=tenant)
+

@@ -178,3 +178,4 @@ class MCPToolRegistry:
             }
 
         return {"error": f"Tool '{tool_name}' not implemented", "isError": True}
+

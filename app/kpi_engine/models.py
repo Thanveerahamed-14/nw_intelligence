@@ -46,3 +46,4 @@ class PerformanceCounterRecord(BaseModel):
     counters: Dict[str, float]
     provenance_hash: str
     ingested_at: datetime
+

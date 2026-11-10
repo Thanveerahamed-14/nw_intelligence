@@ -51,3 +51,4 @@ def set_current_tenant(tenant_id: str):
     if clean_tenant not in settings.ALLOWED_TENANTS:
         raise TenantIsolationViolationError(f"Invalid tenant: '{tenant_id}'")
     _current_tenant.set(clean_tenant)
+

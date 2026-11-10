@@ -38,3 +38,4 @@ def create_provenance(
         raw_payload_hash=compute_payload_hash(raw_payload),
         transformation_rules_applied=rules_applied or ["canonical_mapping", "schema_validation"]
     )
+

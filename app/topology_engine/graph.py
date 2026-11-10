@@ -100,3 +100,4 @@ class TemporalTopologyGraph:
         G.graph["tenant_id"] = tenant_id
         G.graph["build_time_ms"] = duration_ms
         return G
+

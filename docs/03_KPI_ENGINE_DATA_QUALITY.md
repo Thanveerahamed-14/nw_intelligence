@@ -87,3 +87,4 @@ flowchart TD
 - **Rule 2 (Distinguishing Case)**: In our 10:05 UTC incident:
   - `CELL_001`, `CELL_002`, `CELL_003` report **100% counter completeness** $\rightarrow$ Confirmed **Genuine Network Problem**.
   - Control cell `CELL_099` reports **33% counter completeness** $\rightarrow$ Confirmed **Telemetry Gap / Uncertainty**. Agent halts and declines network reroute.
+

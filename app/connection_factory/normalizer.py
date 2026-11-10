@@ -99,3 +99,4 @@ class Normalizer:
         )
         
         return canonical_counters, provenance
+

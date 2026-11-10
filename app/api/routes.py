@@ -226,3 +226,4 @@ def handle_mcp_rpc(
             "error": {"code": -32603, "message": str(e)},
             "id": req.id
         }
+

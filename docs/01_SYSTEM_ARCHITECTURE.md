@@ -120,3 +120,4 @@ For a small engineering team, **operational overhead and maintenance burden must
 | **Graph Traversal** | AlloyDB / Cloud SQL with Redis Adjacency Cache | 2-hop traversal p95 latency exceeds 1.5 seconds, or graph depth requirements expand beyond 3 hops. | **Google Cloud Spanner Graph** or **Neo4j AuraDB Enterprise**. |
 | **KPI Stream Ingestion** | Cloud Run Micro-batchers | 15-minute counter bursts cause HTTP ingest throttling, or late-arriving data volume exceeds 20% of total payload. | **Managed Apache Beam on Google Cloud Dataflow** with tumbling/sliding event-time watermarking. |
 | **Agent Reasoning** | Vertex AI (Gemini 1.5 Flash) with deterministic tool scaffolding | Agent hallucination rate on root cause synthesis exceeds 1.0%, or tool selection precision drops below 95%. | Hybrid Fine-Tuned Domain Model + Multi-Agent Consensus Verification. |
+

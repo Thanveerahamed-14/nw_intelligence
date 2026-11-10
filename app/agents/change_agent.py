@@ -80,3 +80,4 @@ class ChangePlanningAgent:
             risk_level=risk,
             recommendation=recommendation
         )
+

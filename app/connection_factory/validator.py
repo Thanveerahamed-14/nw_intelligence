@@ -102,3 +102,4 @@ class IngestionValidator:
             message="Record successfully validated and normalized.",
             record=payload
         )
+

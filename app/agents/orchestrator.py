@@ -41,3 +41,4 @@ class AgentOrchestrationHub:
 
     def get_investigation_report(self, incident_id: str) -> Optional[IncidentInvestigationReport]:
         return self.active_investigations.get(incident_id)
+

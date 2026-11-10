@@ -37,3 +37,4 @@ class MCPRPCRequest(BaseModel):
     method: str
     params: Optional[Dict[str, Any]] = None
     id: Optional[Any] = 1
+

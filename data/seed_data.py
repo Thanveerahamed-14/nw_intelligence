@@ -295,3 +295,4 @@ def populate_sample_environment(
     )
 
     return incident_time, ["CELL_001", "CELL_002", "CELL_003"]
+
