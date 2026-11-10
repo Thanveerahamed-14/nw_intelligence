@@ -7,6 +7,7 @@ import AgentTraceConsole from './components/AgentTraceConsole';
 import KpiTable from './components/KpiTable';
 import HitlApprovalCard from './components/HitlApprovalCard';
 import VectorSearchModal from './components/VectorSearchModal';
+import Neo4jExplorerModal from './components/Neo4jExplorerModal';
 
 export default function App() {
   const [tenant, setTenant] = useState('customer_a');
@@ -18,6 +19,7 @@ export default function App() {
   const [isInvestigating, setIsInvestigating] = useState(false);
   const [systemStatus, setSystemStatus] = useState(null);
   const [isVectorModalOpen, setIsVectorModalOpen] = useState(false);
+  const [isNeo4jModalOpen, setIsNeo4jModalOpen] = useState(false);
 
   // Load data on mount & tenant switch
   useEffect(() => {
@@ -173,7 +175,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-6 max-w-[1600px] mx-auto text-slate-100">
+    <div className="min-h-screen p-3 md:p-6 max-w-[1680px] mx-auto text-slate-100">
       {/* Top Header */}
       <Header
         tenant={tenant}
@@ -188,6 +190,7 @@ export default function App() {
       <DatabaseStatusRow
         systemStatus={systemStatus}
         onOpenVectorSearch={() => setIsVectorModalOpen(true)}
+        onOpenNeo4jModal={() => setIsNeo4jModalOpen(true)}
       />
 
       {/* KPI Metric Summary Row */}
@@ -197,7 +200,7 @@ export default function App() {
       />
 
       {/* Row 1: Topology Map & Agent Investigation Trace */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
         <TopologyMap
           nodes={topologyData.nodes}
           edges={topologyData.edges}
@@ -212,7 +215,7 @@ export default function App() {
       </div>
 
       {/* Row 2: KPI Engine Data Quality Table & HITL Approval Console */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <KpiTable records={kpiRecords} />
         <HitlApprovalCard
           action={stagedAction}
@@ -227,7 +230,13 @@ export default function App() {
         isOpen={isVectorModalOpen}
         onClose={() => setIsVectorModalOpen(false)}
       />
+
+      {/* Neo4j Cypher Explorer & Bi-Temporal Modal */}
+      <Neo4jExplorerModal
+        isOpen={isNeo4jModalOpen}
+        onClose={() => setIsNeo4jModalOpen(false)}
+        systemStatus={systemStatus}
+      />
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Radio, AlertTriangle, ShieldCheck, Zap, UserCheck, Layers } from 'lucide-react';
+import { Radio, AlertTriangle, ShieldCheck, Zap, UserCheck, Layers, Terminal, Crosshair } from 'lucide-react';
 
 export default function Header({
   tenant,
@@ -10,26 +10,35 @@ export default function Header({
   onRunInvestigation
 }) {
   return (
-    <header className="glass-panel p-4 mb-6 flex flex-wrap items-center justify-between gap-4 border border-slate-800">
+    <header className="cyber-panel hud-corner p-4 mb-5 border border-cyan-500/20 bg-cyber-panel/90 flex flex-wrap items-center justify-between gap-4">
       {/* Brand & Incident Status */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
-          <Radio className="w-5 h-5 animate-pulse" />
+        <div className="relative w-11 h-11 rounded bg-black/60 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_12px_rgba(0,240,255,0.25)]">
+          <Radio className="w-6 h-6 animate-pulse text-cyan-400" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500"></span>
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-              Telecom Network Intelligence Platform
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-lg md:text-xl font-bold font-display tracking-wider text-white flex items-center gap-2 uppercase">
+              <span className="text-cyan-400 text-glow-cyan">NOC // DEFENSE</span>
+              <span className="text-slate-200">Intelligence Grid</span>
             </h1>
-            <span className="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" /> Incident @ 10:05 UTC
+            <span className="px-2 py-0.5 text-[11px] font-mono font-bold uppercase tracking-wider rounded bg-rose-950/60 text-rose-400 border border-rose-500/50 flex items-center gap-1 shadow-[0_0_10px_rgba(255,0,85,0.3)]">
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+              CRITICAL INCIDENT @ 10:05 UTC
             </span>
-            <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3" /> SLA &lt; 2s (p95)
+            <span className="px-2 py-0.5 text-[11px] font-mono font-bold uppercase tracking-wider rounded bg-emerald-950/60 text-emerald-400 border border-emerald-500/40 flex items-center gap-1 shadow-[0_0_8px_rgba(0,255,157,0.2)]">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              p95 SLA &lt; 2.0s
             </span>
           </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Role-Based Autonomous AI Agents with Deterministic Safeguards &amp; Model Context Protocol
+          <p className="text-[11px] font-mono text-cyan-400/70 mt-0.5 tracking-wide flex items-center gap-2">
+            <span>SEC_LEVEL: TOP_SECRET</span>
+            <span className="text-slate-600">//</span>
+            <span>AUTONOMOUS AGENTS + MCP BOUNDARY</span>
+            <span className="text-slate-600">//</span>
+            <span>BI-TEMPORAL GRAPH REPLAY</span>
           </p>
         </div>
       </div>
@@ -38,33 +47,35 @@ export default function Header({
       <div className="flex items-center flex-wrap gap-3">
         {/* Tenant Scope */}
         <div className="flex flex-col text-left">
-          <label className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider flex items-center gap-1">
-            <Layers className="w-3 h-3 text-cyan-400" /> Tenant Scope
+          <label className="text-[10px] uppercase font-mono font-bold text-cyan-400 tracking-wider flex items-center gap-1">
+            <Layers className="w-3 h-3 text-cyan-400" /> Tenant Partition
           </label>
-          <select
-            value={tenant}
-            onChange={(e) => setTenant(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-500 cursor-pointer"
-          >
-            <option value="customer_a">Customer A (Strict Isolation)</option>
-            <option value="customer_b">Customer B (Isolated Boundary)</option>
-          </select>
+          <div className="relative">
+            <select
+              value={tenant}
+              onChange={(e) => setTenant(e.target.value)}
+              className="bg-black/80 border border-cyan-500/40 text-cyan-300 font-mono text-xs rounded px-3 py-1.5 outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,240,255,0.4)] cursor-pointer pr-7"
+            >
+              <option value="customer_a">CUSTOMER_A (Primary Slice)</option>
+              <option value="customer_b">CUSTOMER_B (Isolated Airgap)</option>
+            </select>
+          </div>
         </div>
 
         {/* Role Selector */}
         <div className="flex flex-col text-left">
-          <label className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider flex items-center gap-1">
-            <UserCheck className="w-3 h-3 text-purple-400" /> Active Role (RBAC)
+          <label className="text-[10px] uppercase font-mono font-bold text-purple-400 tracking-wider flex items-center gap-1">
+            <UserCheck className="w-3 h-3 text-purple-400" /> Agent RBAC Identity
           </label>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-500 cursor-pointer"
+            className="bg-black/80 border border-purple-500/40 text-purple-300 font-mono text-xs rounded px-3 py-1.5 outline-none focus:border-purple-400 focus:shadow-[0_0_10px_rgba(176,38,255,0.4)] cursor-pointer"
           >
-            <option value="alarm_management">Alarm Management Agent</option>
-            <option value="performance_analysis">Performance Analysis Agent</option>
-            <option value="change_planning">Change Planning Agent</option>
-            <option value="human_operator">Human Operator (Approver)</option>
+            <option value="alarm_management">ALARM_MANAGEMENT_AGENT</option>
+            <option value="performance_analysis">PERFORMANCE_ANALYSIS_AGENT</option>
+            <option value="change_planning">CHANGE_PLANNING_AGENT</option>
+            <option value="human_operator">HUMAN_OPERATOR (HITL APPROVER)</option>
           </select>
         </div>
 
@@ -72,17 +83,16 @@ export default function Header({
         <button
           onClick={onRunInvestigation}
           disabled={isInvestigating}
-          className={`px-4 py-2 rounded-lg font-semibold text-xs flex items-center gap-2 shadow-lg transition-all duration-200 mt-3.5 ${
+          className={`relative px-4 py-2 rounded font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-2 border transition-all duration-300 mt-3.5 ${
             isInvestigating
-              ? 'bg-blue-600/50 text-blue-200 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 hover:shadow-blue-600/40 active:scale-95'
+              ? 'bg-cyan-950/60 border-cyan-500/30 text-cyan-500 cursor-not-allowed animate-pulse'
+              : 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-400/60 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)] active:scale-95'
           }`}
         >
-          <Zap className={`w-4 h-4 ${isInvestigating ? 'animate-spin' : ''}`} />
-          {isInvestigating ? 'Investigating...' : 'Investigate 10:05 UTC Incident'}
+          <Zap className={`w-4 h-4 text-cyan-400 ${isInvestigating ? 'animate-spin' : ''}`} />
+          {isInvestigating ? 'DISPATCHING AGENT...' : 'DISPATCH 10:05 INCIDENT'}
         </button>
       </div>
     </header>
   );
 }
-
