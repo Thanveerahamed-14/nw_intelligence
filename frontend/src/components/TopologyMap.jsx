@@ -166,3 +166,4 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
     </div>
   );
 }
+

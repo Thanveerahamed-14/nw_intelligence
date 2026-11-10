@@ -33,3 +33,4 @@ jobs:
     - name: Verify Incident CLI Demonstration
       run: |
         python scripts/run_demo.py
+

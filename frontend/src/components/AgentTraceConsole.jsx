@@ -109,3 +109,4 @@ export default function AgentTraceConsole({ report, isInvestigating, onTrigger }
     </div>
   );
 }
+

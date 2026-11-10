@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Presentation | Telecom Network Intelligence Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090e1a;
+      --card-bg: #111a2e;
+      --border: #1e2c4a;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --purple: #a855f7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 26, 46, 0.8);
+      backdrop-filter: blur(10px);
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .slide-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: 1180px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s ease;
+    }
+    .slide.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .slide-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--blue);
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    p.lead {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: rgba(9, 14, 26, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .feature-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .feature-card ul {
+      margin-top: 10px;
+      padding-left: 18px;
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.7;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      background: rgba(0,0,0,0.2);
+    }
+    footer {
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      background: rgba(17, 26, 46, 0.8);
+    }
+    .nav-btn {
+      background: #1e293b;
+      color: #fff;
+      border: 1px solid #334155;
+      padding: 8px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { background: var(--blue); border-color: var(--blue); }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="font-size:22px;">📡</span>
+      <div>
+        <div style="font-weight:800; font-size:15px; color:#fff;">Telecom Network Intelligence Platform</div>
+        <div style="font-size:11px; color:var(--text-muted);">Executive Presentation • Chief Solution Lead Review</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <span class="badge" style="background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3);">5 Customers Isolated</span>
+      <span class="badge" style="background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">SLA &lt; 2s (p95)</span>
+      <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--rose); border:1px solid rgba(244,63,94,0.3);">Incident @ 10:05 UTC</span>
+    </div>
+  </header>
+
+  <div class="slide-viewport">
+    <!-- Slide 1: Platform Vision & Capabilities -->
+    <div class="slide active" id="slide-1">
+      <div class="slide-num">Slide 01 of 05 • Platform Vision</div>
+      <h2>Strategic Foundation: Three Core Capabilities</h2>
+      <p class="lead">
+        Transforming multi-vendor telecom operations into an autonomous, role-governed intelligence backbone for 5 tier-1 telecom operators managing 25,000 nodes, 250,000 cells, and 50M daily performance counters.
+      </p>
+      <div class="grid-3">
+        <div class="feature-card" style="border-top:3px solid var(--blue);">
+          <h3><span>🔌</span> Connection Factory</h3>
+          <p>Multi-vendor ingestion, normalization &amp; provenance:</p>
+          <ul>
+            <li>Ericsson ENM, Nokia NetAct, Cisco EPN-M</li>
+            <li>SHA-256 immutable content hashing</li>
+            <li>Deterministic source authority conflict resolution</li>
+            <li>Quarantine DLQ for malformed schemas</li>
+          </ul>
+        </div>
+        <div class="feature-card" style="border-top:3px solid var(--emerald);">
+          <h3><span>📊</span> KPI Engine</h3>
+          <p>Certified performance metrics calculation:</p>
+          <ul>
+            <li>Standard 15-minute 3GPP sliding windows</li>
+            <li>2-hour late data watermark &amp; incremental upserts</li>
+            <li>Completeness &amp; Uncertainty Scoring (0.0 to 1.0)</li>
+            <li>Distinguishes true outages from reporting silence</li>
+          </ul>
+        </div>
+        <div class="feature-card" style="border-top:3px solid var(--purple);">
+          <h3><span>🗺️</span> Topology Engine</h3>
+          <p>Bi-temporal graph &amp; Model Context Protocol:</p>
+          <ul>
+            <li>Point-in-time snapshot: "What was valid at 10:05 UTC?"</li>
+            <li>Bounded 2-hop BFS traversals (&lt; 2.0s p95 SLA)</li>
+            <li>Shared dependency &amp; bottleneck correlation</li>
+            <li>MCP JSON-RPC tools for autonomous agents</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: GCP Architecture -->
+    <div class="slide" id="slide-2">
+      <div class="slide-num">Slide 02 of 05 • Architecture &amp; Technology</div>
+      <h2>Serverless Google Cloud Architecture for Lean Teams</h2>
+      <p class="lead">
+        Designed for minimal operational effort, zero idle cost, and instant scaling from quiescent states to 100+ concurrent agent investigations during network incidents.
+      </p>
+      <div class="grid-2">
+        <div class="feature-card">
+          <h3 style="color:var(--blue);">Compute &amp; Runtime Choices</h3>
+          <ul>
+            <li><strong>Cloud Run (FastAPI + MCP Server)</strong>: Serverless container execution scaling 0 to 100 instances in &lt; 2s. Eliminates GKE control-plane maintenance for a small team.</li>
+            <li><strong>Cloud Run Jobs</strong>: Executes scheduled hourly inventory reconciliations and bulk batch imports without persistent idle infrastructure.</li>
+            <li><strong>Cloud Pub/Sub</strong>: Absorbs 15-minute bursts of 50M performance counters arriving from vendor EMS (~20,000 rows/sec burst).</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <h3 style="color:var(--emerald);">Tiered Polyglot Storage</h3>
+          <ul>
+            <li><strong>Google BigQuery</strong>: 50M counter rows/day partitioned by date/customer, clustered by entity ID. Sub-second analytical queries.</li>
+            <li><strong>Cloud SQL (PostgreSQL) / AlloyDB</strong>: Master entity metadata &amp; bi-temporal valid_from/valid_to transaction intervals.</li>
+            <li><strong>Memorystore Redis</strong>: Adjacency sub-graph cache guaranteeing &lt; 2.0s p95 SLA for 2-hop topology traversals.</li>
+            <li><strong>Firestore</strong>: Active agent session state, HITL proposals, and immutable governance audit trails.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Temporal Modeling & Evidence Quality -->
+    <div class="slide" id="slide-3">
+      <div class="slide-num">Slide 03 of 05 • Data Modeling &amp; Truth</div>
+      <h2>Bi-Temporal Topology &amp; Evidence Quality Certification</h2>
+      <p class="lead">
+        Eliminating the twin perils of autonomous AI operations: historical state corruption and mistaking missing telemetry for physical network degradation.
+      </p>
+      <div class="grid-2">
+        <div class="feature-card">
+          <h3 style="color:var(--cyan);">Bi-Temporal Timeline</h3>
+          <p>Every node and edge record tracks two distinct temporal timelines:</p>
+          <ul>
+            <li><strong>Valid Time</strong>: The physical reality interval in the network.</li>
+            <li><strong>System Time</strong>: The platform transaction ingestion interval.</li>
+            <li>Enables exact historical replay: <em>"What did the topology look like at 10:05 UTC when alarms fired?"</em> even if corrected vendor inventory arrived at 10:45 UTC.</li>
+          </ul>
+        </div>
+        <div class="feature-card">
+          <h3 style="color:var(--amber);">Evidence Integrity Certification</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Completeness</th>
+                <th>Verdict</th>
+                <th>Agent Action Boundary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Cells 001..003</strong></td>
+                <td><span style="color:var(--emerald); font-weight:700;">100% (3/3)</span></td>
+                <td>GENUINE_OUTAGE</td>
+                <td>Permitted to stage reroute</td>
+              </tr>
+              <tr>
+                <td><strong>Control Cell 099</strong></td>
+                <td><span style="color:var(--rose); font-weight:700;">33% (1/3)</span></td>
+                <td>DATA_GAP_UNCERTAINTY</td>
+                <td><strong>Halt &amp; decline remediation</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="margin-top:10px; font-size:12px; color:var(--text-muted);">
+            AI agents are hard-coded to refuse destructive network mutations if evidence completeness is &lt; 80%.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Governance & MCP -->
+    <div class="slide" id="slide-4">
+      <div class="slide-num">Slide 04 of 05 • Security &amp; Protocol</div>
+      <h2>Model Context Protocol &amp; Human-In-The-Loop Governance</h2>
+      <p class="lead">
+        Structured JSON-RPC tool dispatching governed by the Principle of Least Privilege. Agents cannot directly execute mutations on production.
+      </p>
+      <div class="feature-card" style="margin-bottom:20px;">
+        <h3>Role-Based Access Control (RBAC) Matrix</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Agent Role</th>
+              <th>Topo Read</th>
+              <th>KPI Read</th>
+              <th>Propose Action</th>
+              <th>Approve / Execute</th>
+              <th>Safety Boundary</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Alarm Management</strong></td>
+              <td>✅</td><td>✅</td><td>✅</td><td>❌</td>
+              <td>Triage alarms, correlate evidence, stage fixes.</td>
+            </tr>
+            <tr>
+              <td><strong>Performance Analysis</strong></td>
+              <td>✅</td><td>✅</td><td>❌</td><td>❌</td>
+              <td>Read-only trend and degradation pattern analysis.</td>
+            </tr>
+            <tr>
+              <td><strong>Change Planning</strong></td>
+              <td>✅</td><td>✅</td><td>✅</td><td>❌</td>
+              <td>Simulate failover blast radius &amp; impact.</td>
+            </tr>
+            <tr>
+              <td><strong>Human Operator</strong></td>
+              <td>✅</td><td>✅</td><td>✅</td><td><strong style="color:var(--emerald);">✅ (HITL)</strong></td>
+              <td>Human Lead authorization required to execute.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid-3" style="font-size:12px;">
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <strong style="color:var(--blue);">Bounded Graph Lookups</strong><br>
+          Hard cutoff of 2 hops (max 3), max 250 entities, 2s query timeout.
+        </div>
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <strong style="color:var(--purple);">Token Budgeting</strong><br>
+          Lean JSON-RPC payloads (&lt; 2,000 tokens) to prevent context blowup.
+        </div>
+        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
+          <strong style="color:var(--emerald);">Audit Trail</strong><br>
+          Every recommendation and sign-off recorded in immutable audit log.
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: The 10:05 UTC Incident & Delivery Roadmap -->
+    <div class="slide" id="slide-5">
+      <div class="slide-num">Slide 05 of 05 • Incident Walkthrough &amp; Delivery</div>
+      <h2>The 10:05 UTC Incident Resolution &amp; 4-Phase Delivery Plan</h2>
+      <p class="lead">
+        Walkthrough of the autonomous resolution sequence and staged enterprise rollout roadmap.
+      </p>
+      <div class="grid-2">
+        <div class="feature-card">
+          <h3 style="color:var(--rose);">10:05 UTC Incident Walkthrough</h3>
+          <ol style="font-size:12px; color:#cbd5e1; padding-left:18px; line-height:1.7;">
+            <li><strong>Trigger</strong>: Availability alarms fire on CELL_001, 002, 003.</li>
+            <li><strong>Topology Discovery</strong>: Maps cells to NODE_42 &amp; 43 at SITE_ALPHA.</li>
+            <li><strong>Correlation</strong>: Identifies shared CSR_ALPHA_01 &amp; fiber backhaul.</li>
+            <li><strong>KPI Check</strong>: Confirms 94.2% packet loss &amp; 100% completeness.</li>
+            <li><strong>HITL Staging</strong>: Proposes failover to Standby Microwave Link.</li>
+            <li><strong>Human Sign-off</strong>: Tier-2 NOC Lead approves; alarms clear.</li>
+          </ol>
+        </div>
+        <div class="feature-card">
+          <h3 style="color:var(--blue);">Staged Delivery Roadmap</h3>
+          <ul style="font-size:12px; color:#cbd5e1; line-height:1.7;">
+            <li><strong>Phase 1 (MVP - Completed)</strong>: Ingestion Normalizer, Bi-Temporal Graph, KPI Engine with Quality Scoring, MCP Server, React UI, and 19 automated tests.</li>
+            <li><strong>Phase 2 (Cloud Pilot)</strong>: Deploy on Cloud Run, BigQuery, Cloud SQL &amp; Memorystore; Pub/Sub ingestion integration.</li>
+            <li><strong>Phase 3 (Enterprise Scale)</strong>: Onboard all 5 customers; Golden Evaluation Harness for continuous model testing.</li>
+            <li><strong>Phase 4 (Autonomous Closed-Loop)</strong>: Supervised automated low-risk change execution.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous Slide</button>
+    <div style="font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--text-muted);" id="slideIndicator">
+      Slide 1 of 5
+    </div>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next Slide →</button>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 5;
+
+    function changeSlide(direction) {
+      document.getElementById(`slide-${currentSlide}`).classList.remove('active');
+      currentSlide += direction;
+      if (currentSlide < 1) currentSlide = 1;
+      if (currentSlide > totalSlides) currentSlide = totalSlides;
+
+      document.getElementById(`slide-${currentSlide}`).classList.add('active');
+      document.getElementById('slideIndicator').textContent = `Slide ${currentSlide} of ${totalSlides}`;
+      document.getElementById('prevBtn').disabled = (currentSlide === 1);
+      document.getElementById('nextBtn').disabled = (currentSlide === totalSlides);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
+      if (e.key === 'ArrowLeft') changeSlide(-1);
+    });
+
+    changeSlide(0);
+  </script>
+</body>
+</html>

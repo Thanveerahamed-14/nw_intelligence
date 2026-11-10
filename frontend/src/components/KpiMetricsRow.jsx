@@ -72,3 +72,4 @@ export default function KpiMetricsRow({ latencyMs, report }) {
     </div>
   );
 }
+
