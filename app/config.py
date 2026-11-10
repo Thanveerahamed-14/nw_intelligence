@@ -25,6 +25,17 @@ class Settings(BaseSettings):
     ALLOWED_TENANTS: Union[List[str], str] = ["customer_a", "customer_b", "customer_c", "customer_d", "customer_e"]
     DEFAULT_TENANT: str = "customer_a"
 
+    # API Authentication
+    # API_KEYS is a JSON object: {"<api-key>": {"caller_id": "...", "role": "...", "tenant_ids": ["..."]}}
+    # When at least one key is configured, every request must present a valid X-API-Key header.
+    # When no key is configured and DEMO_MODE is true, a fixed, non-escalatable demo principal is used
+    # so the bundled single-origin dashboard still runs out of the box. Never rely on DEMO_MODE in production.
+    API_KEYS: str = ""
+    DEMO_MODE: bool = True
+    DEMO_CALLER_ID: str = "demo-noc-operator"
+    DEMO_ROLE: str = "human_operator"
+    DEMO_TENANTS: Union[List[str], str] = ["customer_a", "customer_b", "customer_c", "customer_d", "customer_e"]
+
     def get_allowed_tenants(self) -> List[str]:
         if isinstance(self.ALLOWED_TENANTS, str):
             clean = self.ALLOWED_TENANTS.strip()
@@ -35,6 +46,17 @@ class Settings(BaseSettings):
                     pass
             return [t.strip() for t in clean.split(",") if t.strip()]
         return list(self.ALLOWED_TENANTS)
+
+    def get_demo_tenants(self) -> List[str]:
+        if isinstance(self.DEMO_TENANTS, str):
+            clean = self.DEMO_TENANTS.strip()
+            if clean.startswith("[") and clean.endswith("]"):
+                try:
+                    return json.loads(clean)
+                except Exception:
+                    pass
+            return [t.strip() for t in clean.split(",") if t.strip()]
+        return list(self.DEMO_TENANTS)
     
     # SLA & Performance Bounds
     TOPOLOGY_MAX_HOPS_DEFAULT: int = 2
@@ -47,6 +69,8 @@ class Settings(BaseSettings):
     KPI_INTERVAL_MINUTES: int = 15
     LATE_DATA_WATERMARK_HOURS: int = 2.0  # Data accepted up to 2 hours late
     DATA_QUALITY_COMPLETENESS_THRESHOLD: float = 0.80  # Below 80% marks record as PARTIAL/INCOMPLETE
+    KPI_CELL_AVAILABILITY_MIN_PCT: float = 90.0  # Below this, a cell is considered degraded
+    KPI_PACKET_LOSS_MAX_PCT: float = 5.0         # Above this, transport is considered degraded
     
     # GCP Infrastructure Mapping (for Production)
     GCP_PROJECT_ID: str = "telecom-nw-intelligence-prod"
@@ -63,6 +87,7 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-2.5-flash"
     VERTEX_AI_MODEL: str = "gemini-1.5-flash"
     USE_MOCK_LLM_IF_NO_KEY: bool = True  # Allows deterministic fallback simulation if offline
+    LLM_REQUEST_TIMEOUT_SECONDS: float = 8.0  # Hard budget for a synchronous LLM call (protects the 30s agent SLA)
 
     # Graph Database Settings (Neo4j & In-Memory Bi-Temporal Graph)
     NEO4J_URI: Optional[str] = None

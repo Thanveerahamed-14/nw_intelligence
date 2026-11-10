@@ -116,6 +116,28 @@ The platform strictly enforces the **Principle of Least Privilege** across four 
 | **Performance Analysis Agent** | ✅ | ✅ | ✅ | ❌ | ❌ | Investigate KPI trends, detect anomalies across slices. |
 | **Change Planning Agent** | ✅ | ✅ | ❌ | ✅ | ❌ | Assess blast radius, simulate failovers, prepare change briefs. |
 | **Human Operator (NOC Lead)** | ✅ | ✅ | ✅ | ✅ | **✅ (HITL)** | Authorize production changes and oversee AI actions. |
+| **System Admin** | ✅ | ✅ | ✅ | ✅ | ✅ | Platform diagnostics and administration. |
+
+### Authentication & Tenant Scope
+
+Every API request is authenticated with an `X-API-Key` header. The key resolves the
+caller's identity, role, and tenant scope **server-side**; request bodies and query
+strings cannot choose their own `caller_id`, `role`, or `tenant_id`.
+
+- **Keyed mode (recommended):** set `API_KEYS` to a JSON map of key → principal.
+  Requests without a valid key receive `401`; cross-tenant requests receive `403`;
+  callers without the required permission (e.g. a non-approver calling the approval
+  endpoint) receive `403`.
+  ```bash
+  export API_KEYS='{"noc-key":{"caller_id":"noc_tier2_lead_sarah","role":"human_operator","tenant_ids":["customer_a"]}}'
+  ```
+- **Demo mode:** when `API_KEYS` is empty and `DEMO_MODE=true`, a single fixed
+  `demo-noc-operator` principal is used so the bundled dashboard runs out of the box.
+  Set `DEMO_MODE=false` before exposing the service to an untrusted network.
+
+Hardening applied to the diagnostic surface: `/api/v1/system/status` only returns
+database connection strings to `system_admin`, and `/api/v1/graph/cypher` rejects
+mutating Cypher (`CREATE`, `MERGE`, `DELETE`, `SET`, …).
 
 ---
 

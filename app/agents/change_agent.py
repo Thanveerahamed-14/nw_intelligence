@@ -5,11 +5,12 @@ and prepares formal change advisory recommendations for Human-In-The-Loop approv
 """
 
 from datetime import datetime, timezone
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from pydantic import BaseModel, Field
 
 from app.security.rbac import SecurityContext, Role, Permission
 from app.mcp.tools import MCPToolRegistry
+from app.config import settings
 
 class ChangeImpactAssessment(BaseModel):
     target_entity_id: str
@@ -31,7 +32,8 @@ class ChangePlanningAgent:
         tenant_id: str,
         target_entity_id: str,
         change_type: str,
-        agent_id: str = "change-planner-01"
+        agent_id: str = "change-planner-01",
+        as_of: Optional[datetime] = None
     ) -> ChangeImpactAssessment:
         context = SecurityContext(
             caller_id=agent_id,
@@ -40,15 +42,16 @@ class ChangePlanningAgent:
         )
         context.require_permission(Permission.SIMULATE_CHANGE)
 
-        now = datetime.now(timezone.utc)
+        now = as_of or datetime.now(timezone.utc)
         
-        # Traverse downstream topology to evaluate impact
+        # Traverse downstream topology to evaluate impact. Three hops are needed
+        # to map cells when the target is a transport link (link -> CSR -> node -> cell).
         topo_res = self.registry.execute_tool(
             "get_topology_neighborhood",
             {
                 "entity_id": target_entity_id,
                 "as_of_time": now.isoformat(),
-                "max_hops": 2
+                "max_hops": settings.TOPOLOGY_MAX_HOPS_ABSOLUTE_LIMIT
             },
             context
         )

@@ -1,8 +1,13 @@
 """
 FastAPI REST Routes and MCP Server Endpoints.
+
+Identity is resolved from the ``X-API-Key`` header (see ``app.security.auth``).
+No endpoint accepts a caller-supplied ``caller_id`` or ``role``; tenant access is
+authorized against the authenticated principal's tenant scope.
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query, Request
+import re
+from fastapi import APIRouter, HTTPException, Depends, Query
 from datetime import datetime, timezone
 from typing import List, Optional
 from dateutil import parser
@@ -14,8 +19,9 @@ from app.api.schemas import (
     ActionRejectionRequest,
     MCPRPCRequest
 )
-from app.security.rbac import Role, Permission, SecurityContext
+from app.security.rbac import Role, Permission
 from app.security.tenancy import TenantContext, TenantIsolationViolationError
+from app.security.auth import Principal, get_principal
 
 router = APIRouter()
 
@@ -28,6 +34,14 @@ mcp_server = None
 orchestration_hub = None
 hitl_manager = None
 
+# Cypher constructs that mutate data or perform side effects. The explorer
+# endpoint is read-only; anything else must go through a governed change flow.
+_CYPHER_WRITE_PATTERN = re.compile(
+    r"\b(CREATE|MERGE|DELETE|DETACH|SET|REMOVE|DROP|FOREACH|LOAD\s+CSV|CALL)\b",
+    re.IGNORECASE,
+)
+
+
 def init_services(g, kpi, trav, reg, srv, hub, hitl):
     global graph, kpi_service, traversal_service, mcp_registry, mcp_server, orchestration_hub, hitl_manager
     graph = g
@@ -37,6 +51,35 @@ def init_services(g, kpi, trav, reg, srv, hub, hitl):
     mcp_server = srv
     orchestration_hub = hub
     hitl_manager = hitl
+
+
+def _raise_http(exc: Exception) -> None:
+    """Maps domain exceptions to HTTP status codes without masking HTTPException."""
+    if isinstance(exc, HTTPException):
+        raise exc
+    if isinstance(exc, TenantIsolationViolationError):
+        raise HTTPException(status_code=403, detail=str(exc))
+    if isinstance(exc, PermissionError):
+        raise HTTPException(status_code=403, detail=str(exc))
+    if isinstance(exc, (KeyError, ValueError)):
+        raise HTTPException(status_code=400, detail=str(exc))
+    raise HTTPException(status_code=500, detail=str(exc))
+
+
+def _require_cypher_read_only(query: str) -> None:
+    if _CYPHER_WRITE_PATTERN.search(query):
+        raise HTTPException(
+            status_code=400,
+            detail="Only read-only Cypher queries are permitted on this endpoint.",
+        )
+
+
+def _tenant_context(principal: Principal, requested: Optional[str], permission: Permission):
+    tenant_id = principal.authorize_tenant(requested)
+    context = principal.to_context(tenant_id)
+    context.require_permission(permission)
+    return tenant_id, context
+
 
 @router.get("/health")
 def health_check():
@@ -54,7 +97,7 @@ def health_check():
     }
 
 @router.get("/system/status")
-def system_status():
+def system_status(principal: Principal = Depends(get_principal)):
     from app.ai import get_ai_service
     from app.vector_store import get_vector_store
     from app.graph_db import get_graph_db
@@ -63,6 +106,14 @@ def system_status():
     ai = get_ai_service()
     vs = get_vector_store()
     gdb = get_graph_db()
+
+    relational_db = {"status": "ONLINE"}
+    graph_status = gdb.get_status()
+    if principal.role == Role.SYSTEM_ADMIN:
+        # Connection strings are only disclosed to platform administrators.
+        relational_db["url"] = settings.DATABASE_URL
+    else:
+        graph_status.pop("uri", None)
 
     return {
         "ai": ai.get_status(),
@@ -73,41 +124,56 @@ def system_status():
             "indexed_runbooks_count": vs.collection.count(),
             "status": "ONLINE"
         },
-        "graph_db": gdb.get_status(),
-        "relational_db": {
-            "url": settings.DATABASE_URL,
-            "status": "ONLINE"
-        },
+        "graph_db": graph_status,
+        "relational_db": relational_db,
         "multi_tenancy": {
             "tenants": settings.get_allowed_tenants(),
             "isolation": "STRICT_PER_CUSTOMER"
+        },
+        "caller": {
+            "caller_id": principal.caller_id,
+            "role": principal.role.value,
+            "tenant_ids": principal.tenant_ids,
         }
     }
 
 @router.get("/vector/search")
 def search_vector_runbooks(
     query: str = Query(default="fiber optical transceiver packet loss drop", description="Semantic query text"),
-    top_k: int = Query(default=3, ge=1, le=10)
+    top_k: int = Query(default=3, ge=1, le=10),
+    principal: Principal = Depends(get_principal)
 ):
-    from app.vector_store import get_vector_store
-    vs = get_vector_store()
-    results = vs.search_runbooks(query=query, top_k=top_k)
-    return {
-        "query": query,
-        "results_count": len(results),
-        "runbooks": results
-    }
+    try:
+        _, context = _tenant_context(principal, None, Permission.TOPOLOGY_READ)
+        from app.vector_store import get_vector_store
+        vs = get_vector_store()
+        results = vs.search_runbooks(query=query, top_k=top_k)
+        return {
+            "query": query,
+            "results_count": len(results),
+            "runbooks": results
+        }
+    except Exception as e:
+        _raise_http(e)
 
 @router.post("/graph/cypher")
-def run_cypher_query(query: str = Query(default="MATCH (n) RETURN n LIMIT 10")):
-    from app.graph_db import get_graph_db
-    gdb = get_graph_db()
-    res = gdb.execute_cypher(query)
-    return {
-        "query": query,
-        "results": res,
-        "engine": gdb.get_status()["engine"]
-    }
+def run_cypher_query(
+    query: str = Query(default="MATCH (n) RETURN n LIMIT 10"),
+    principal: Principal = Depends(get_principal)
+):
+    try:
+        _, context = _tenant_context(principal, None, Permission.TOPOLOGY_READ)
+        _require_cypher_read_only(query)
+        from app.graph_db import get_graph_db
+        gdb = get_graph_db()
+        res = gdb.execute_cypher(query)
+        return {
+            "query": query,
+            "results": res,
+            "engine": gdb.get_status()["engine"]
+        }
+    except Exception as e:
+        _raise_http(e)
 
 # -------------------------------------------------------------
 # TOPOLOGY ENGINE ENDPOINTS
@@ -117,30 +183,33 @@ def get_topology_neighborhood(
     entity_id: str,
     as_of: Optional[str] = None,
     max_hops: int = Query(default=2, le=3),
-    tenant_id: str = "customer_a",
-    caller_role: str = "alarm_management"
+    tenant_id: Optional[str] = None,
+    principal: Principal = Depends(get_principal)
 ):
     try:
+        tenant, context = _tenant_context(principal, tenant_id, Permission.TOPOLOGY_READ)
         as_of_dt = parser.isoparse(as_of) if as_of else datetime(2026, 11, 10, 10, 5, 0, tzinfo=timezone.utc)
-        with TenantContext(tenant_id):
-            res = traversal_service.get_neighborhood(entity_id, as_of_dt, tenant_id, max_hops)
+        with TenantContext(tenant):
+            res = traversal_service.get_neighborhood(entity_id, as_of_dt, tenant, max_hops)
             return res.to_dict()
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        _raise_http(e)
 
 @router.get("/topology/shared-dependencies")
 def get_shared_dependencies(
     entity_ids: List[str] = Query(default=["CELL_001", "CELL_002", "CELL_003"]),
     as_of: Optional[str] = None,
-    tenant_id: str = "customer_a"
+    tenant_id: Optional[str] = None,
+    principal: Principal = Depends(get_principal)
 ):
     try:
+        tenant, context = _tenant_context(principal, tenant_id, Permission.TOPOLOGY_READ)
         as_of_dt = parser.isoparse(as_of) if as_of else datetime(2026, 11, 10, 10, 5, 0, tzinfo=timezone.utc)
-        with TenantContext(tenant_id):
-            res = traversal_service.find_shared_dependencies(entity_ids, as_of_dt, tenant_id)
+        with TenantContext(tenant):
+            res = traversal_service.find_shared_dependencies(entity_ids, as_of_dt, tenant)
             return res
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        _raise_http(e)
 
 # -------------------------------------------------------------
 # KPI ENGINE ENDPOINTS
@@ -150,102 +219,108 @@ def get_entity_kpis(
     entity_id: str,
     start_time: Optional[str] = None,
     end_time: Optional[str] = None,
-    tenant_id: str = "customer_a"
+    tenant_id: Optional[str] = None,
+    principal: Principal = Depends(get_principal)
 ):
     try:
+        tenant, context = _tenant_context(principal, tenant_id, Permission.KPI_READ)
         s_dt = parser.isoparse(start_time) if start_time else datetime(2026, 11, 10, 9, 30, 0, tzinfo=timezone.utc)
         e_dt = parser.isoparse(end_time) if end_time else datetime(2026, 11, 10, 10, 15, 0, tzinfo=timezone.utc)
-        with TenantContext(tenant_id):
-            records = kpi_service.get_entity_kpis(tenant_id, entity_id, s_dt, e_dt)
+        with TenantContext(tenant):
+            records = kpi_service.get_entity_kpis(tenant, entity_id, s_dt, e_dt)
             return {
                 "entity_id": entity_id,
-                "tenant_id": tenant_id,
+                "tenant_id": tenant,
                 "records": [r.dict() for r in records],
                 "count": len(records)
             }
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        _raise_http(e)
 
 @router.get("/kpi/verify-integrity")
 def verify_integrity(
     entity_ids: List[str] = Query(default=["CELL_001", "CELL_002", "CELL_003", "CELL_099"]),
-    tenant_id: str = "customer_a"
+    tenant_id: Optional[str] = None,
+    principal: Principal = Depends(get_principal)
 ):
     try:
+        tenant, context = _tenant_context(principal, tenant_id, Permission.KPI_READ)
         s_dt = datetime(2026, 11, 10, 9, 30, 0, tzinfo=timezone.utc)
         e_dt = datetime(2026, 11, 10, 10, 15, 0, tzinfo=timezone.utc)
-        with TenantContext(tenant_id):
-            assessments = kpi_service.verify_evidence_integrity(tenant_id, entity_ids, s_dt, e_dt)
+        with TenantContext(tenant):
+            assessments = kpi_service.verify_evidence_integrity(tenant, entity_ids, s_dt, e_dt)
             return {eid: a.to_dict() for eid, a in assessments.items()}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        _raise_http(e)
 
 # -------------------------------------------------------------
 # AUTONOMOUS AGENT INVESTIGATION ENDPOINTS
 # -------------------------------------------------------------
 @router.post("/investigation/run")
-def run_investigation(req: InvestigationRequest):
+def run_investigation(req: InvestigationRequest, principal: Principal = Depends(get_principal)):
     try:
-        with TenantContext(req.tenant_id):
+        tenant, context = _tenant_context(principal, req.tenant_id, Permission.ALARM_READ)
+        with TenantContext(tenant):
             t = req.incident_time or datetime(2026, 11, 10, 10, 5, 0, tzinfo=timezone.utc)
             report = orchestration_hub.run_alarm_investigation(
-                tenant_id=req.tenant_id,
+                tenant_id=tenant,
                 affected_cells=req.affected_cells,
                 incident_time=t
             )
             return report.dict()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        _raise_http(e)
 
 @router.post("/change/simulate")
-def simulate_change(req: ChangeSimulationRequest):
+def simulate_change(req: ChangeSimulationRequest, principal: Principal = Depends(get_principal)):
     try:
-        with TenantContext(req.tenant_id):
+        tenant, context = _tenant_context(principal, req.tenant_id, Permission.SIMULATE_CHANGE)
+        with TenantContext(tenant):
             assessment = orchestration_hub.run_change_simulation(
-                tenant_id=req.tenant_id,
+                tenant_id=tenant,
                 target_entity_id=req.target_entity_id,
                 change_type=req.change_type
             )
             return assessment.dict()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        _raise_http(e)
 
 # -------------------------------------------------------------
 # HUMAN-IN-THE-LOOP APPROVAL ENDPOINTS
 # -------------------------------------------------------------
 @router.get("/actions")
-def list_actions(tenant_id: str = "customer_a"):
-    with TenantContext(tenant_id):
-        actions = hitl_manager.list_actions(tenant_id)
-        return [a.dict() for a in actions]
+def list_actions(tenant_id: Optional[str] = None, principal: Principal = Depends(get_principal)):
+    try:
+        tenant, context = _tenant_context(principal, tenant_id, Permission.ALARM_READ)
+        with TenantContext(tenant):
+            actions = hitl_manager.list_actions(tenant)
+            return [a.dict() for a in actions]
+    except Exception as e:
+        _raise_http(e)
 
 @router.post("/actions/{action_id}/approve")
-def approve_action(action_id: str, req: ActionApprovalRequest):
+def approve_action(action_id: str, req: ActionApprovalRequest, principal: Principal = Depends(get_principal)):
     try:
-        with TenantContext(req.tenant_id):
-            sec = SecurityContext(
-                caller_id=req.caller_id,
-                role=Role.HUMAN_OPERATOR,
-                tenant_id=req.tenant_id
-            )
+        tenant = principal.authorize_tenant(req.tenant_id)
+        with TenantContext(tenant):
+            # Identity and role come from the authenticated principal, not the body.
+            sec = principal.to_context(tenant)
             action = hitl_manager.approve_and_execute(action_id, sec, comment=req.comment)
             return action.dict()
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        _raise_http(e)
 
 @router.post("/actions/{action_id}/reject")
-def reject_action(action_id: str, req: ActionRejectionRequest):
+def reject_action(action_id: str, req: ActionRejectionRequest, principal: Principal = Depends(get_principal)):
     try:
-        with TenantContext(req.tenant_id):
-            sec = SecurityContext(
-                caller_id=req.caller_id,
-                role=Role.HUMAN_OPERATOR,
-                tenant_id=req.tenant_id
-            )
+        tenant = principal.authorize_tenant(req.tenant_id)
+        with TenantContext(tenant):
+            # Identity and role come from the authenticated principal, not the body.
+            sec = principal.to_context(tenant)
             action = hitl_manager.reject_action(action_id, sec, reason=req.reason)
             return action.dict()
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        _raise_http(e)
 
 # -------------------------------------------------------------
 # MODEL CONTEXT PROTOCOL (MCP) JSON-RPC 2.0 ENDPOINT
@@ -253,16 +328,12 @@ def reject_action(action_id: str, req: ActionRejectionRequest):
 @router.post("/mcp")
 def handle_mcp_rpc(
     req: MCPRPCRequest,
-    caller_id: str = "agent-mcp-client",
-    role: str = "alarm_management",
-    tenant_id: str = "customer_a"
+    tenant_id: Optional[str] = None,
+    principal: Principal = Depends(get_principal)
 ):
     try:
-        sec = SecurityContext(
-            caller_id=caller_id,
-            role=Role(role),
-            tenant_id=tenant_id
-        )
+        tenant = principal.authorize_tenant(tenant_id)
+        sec = principal.to_context(tenant)
         if req.method == "tools/list":
             return mcp_server.handle_tools_list(sec)
         elif req.method == "tools/call":
@@ -277,9 +348,14 @@ def handle_mcp_rpc(
                 "id": req.id
             }
     except Exception as e:
+        if isinstance(e, HTTPException):
+            return {
+                "jsonrpc": "2.0",
+                "error": {"code": e.status_code, "message": str(e.detail)},
+                "id": req.id
+            }
         return {
             "jsonrpc": "2.0",
             "error": {"code": -32603, "message": str(e)},
             "id": req.id
         }
-

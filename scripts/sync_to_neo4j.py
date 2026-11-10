@@ -37,8 +37,12 @@ def sync_topology_to_neo4j():
     try:
         import neo4j
         console.print("[cyan]Connecting to Neo4j instance...[/cyan]")
+        uri = settings.NEO4J_URI
+        if uri.startswith("neo4j://127.0.0.1") or uri.startswith("neo4j://localhost"):
+            uri = uri.replace("neo4j://", "bolt://")
+
         driver = neo4j.GraphDatabase.driver(
-            settings.NEO4J_URI,
+            uri,
             auth=(settings.NEO4J_USER, settings.NEO4J_PASSWORD)
         )
         driver.verify_connectivity()

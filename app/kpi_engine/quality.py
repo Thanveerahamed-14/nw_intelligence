@@ -11,16 +11,28 @@ from app.kpi_engine.calculator import KPICalculator
 from app.config import settings
 
 class QualityAssessment:
-    def __init__(self, entity_id: str, is_genuine_outage: bool, confidence: float, explanation: str):
+    def __init__(
+        self,
+        entity_id: str,
+        is_genuine_outage: bool,
+        confidence: float,
+        explanation: str,
+        verdict: Optional[str] = None,
+    ):
         self.entity_id = entity_id
         self.is_genuine_outage = is_genuine_outage
         self.confidence = confidence
         self.explanation = explanation
+        # Nominal performance is distinct from missing telemetry. Collapsing the
+        # two caused healthy entities to be reported as "uncertain".
+        self.verdict = verdict or (
+            "GENUINE_NETWORK_PROBLEM" if is_genuine_outage else "DATA_GAP_OR_UNCERTAINTY"
+        )
 
     def to_dict(self) -> Dict:
         return {
             "entity_id": self.entity_id,
-            "verdict": "GENUINE_NETWORK_PROBLEM" if self.is_genuine_outage else "DATA_GAP_OR_UNCERTAINTY",
+            "verdict": self.verdict,
             "confidence_score": round(self.confidence, 2),
             "explanation": self.explanation
         }
@@ -134,7 +146,8 @@ class KPIService:
                     entity_id=eid,
                     is_genuine_outage=False,
                     confidence=0.1,
-                    explanation="NO_DATA: No performance counters received for this entity. Telemetry stream down or reporting gap."
+                    explanation="NO_DATA: No performance counters received for this entity. Telemetry stream down or reporting gap.",
+                    verdict="NO_DATA",
                 )
                 continue
 
@@ -147,28 +160,34 @@ class KPIService:
                     entity_id=eid,
                     is_genuine_outage=False,
                     confidence=avg_completeness,
-                    explanation=f"UNRESOLVED_UNCERTAINTY: Telemetry completeness is only {int(avg_completeness*100)}%. Degradation may be an artifact of missing reporting samples."
+                    explanation=f"UNRESOLVED_UNCERTAINTY: Telemetry completeness is only {int(avg_completeness*100)}%. Degradation may be an artifact of missing reporting samples.",
+                    verdict="DATA_GAP_OR_UNCERTAINTY",
                 )
             else:
                 # Telemetry is solid; inspect degradation
                 avail_kpis = [k for k in kpis if k.kpi_name == "CELL_AVAILABILITY"]
                 loss_kpis = [k for k in kpis if k.kpi_name == "TRANSPORT_PACKET_LOSS"]
                 
-                is_degraded = any(k.value < 90.0 for k in avail_kpis) or any(k.value > 5.0 for k in loss_kpis)
+                is_degraded = (
+                    any(k.value < settings.KPI_CELL_AVAILABILITY_MIN_PCT for k in avail_kpis)
+                    or any(k.value > settings.KPI_PACKET_LOSS_MAX_PCT for k in loss_kpis)
+                )
                 
                 if is_degraded:
                     assessments[eid] = QualityAssessment(
                         entity_id=eid,
                         is_genuine_outage=True,
                         confidence=avg_completeness,
-                        explanation=f"GENUINE_NETWORK_PROBLEM: Telemetry completeness is {int(avg_completeness*100)}% (high confidence). Physical degradation confirmed by received counter values."
+                        explanation=f"GENUINE_NETWORK_PROBLEM: Telemetry completeness is {int(avg_completeness*100)}% (high confidence). Physical degradation confirmed by received counter values.",
+                        verdict="GENUINE_NETWORK_PROBLEM",
                     )
                 else:
                     assessments[eid] = QualityAssessment(
                         entity_id=eid,
                         is_genuine_outage=False,
                         confidence=avg_completeness,
-                        explanation="NOMINAL_PERFORMANCE: Telemetry complete and KPIs within normal operating thresholds."
+                        explanation="NOMINAL_PERFORMANCE: Telemetry complete and KPIs within normal operating thresholds.",
+                        verdict="NOMINAL_PERFORMANCE",
                     )
 
         return assessments

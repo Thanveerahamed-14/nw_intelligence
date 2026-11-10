@@ -7,10 +7,11 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 class InvestigationRequest(BaseModel):
-    tenant_id: str = Field(default="customer_a", description="Customer tenant ID")
+    tenant_id: str = Field(default="customer_a", description="Customer tenant ID (must be authorized for the API key)")
     affected_cells: List[str] = Field(
         default=["CELL_001", "CELL_002", "CELL_003"],
-        description="List of cell identifiers triggering alarms"
+        min_length=1,
+        description="List of cell identifiers triggering alarms (at least one required)"
     )
     incident_time: Optional[datetime] = Field(
         default=None,
@@ -23,13 +24,13 @@ class ChangeSimulationRequest(BaseModel):
     change_type: str = Field(default="REROUTE_STANDBY_MICROWAVE_BACKHAUL")
 
 class ActionApprovalRequest(BaseModel):
-    caller_id: str = Field(default="noc_tier2_lead_sarah")
-    tenant_id: str = Field(default="customer_a")
-    comment: str = Field(default="Verified redundant microwave capacity and alarm correlation. Approved.")
+    # Identity is resolved from the authenticated principal, never from the body.
+    tenant_id: Optional[str] = Field(default=None, description="Optional tenant override; must be authorized for the caller")
+    comment: str = Field(default="Approved after evidence review.")
 
 class ActionRejectionRequest(BaseModel):
-    caller_id: str = Field(default="noc_tier2_lead_sarah")
-    tenant_id: str = Field(default="customer_a")
+    # Identity is resolved from the authenticated principal, never from the body.
+    tenant_id: Optional[str] = Field(default=None, description="Optional tenant override; must be authorized for the caller")
     reason: str = Field(default="Insufficient evidence or high traffic hour.")
 
 class MCPRPCRequest(BaseModel):

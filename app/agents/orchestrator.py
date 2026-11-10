@@ -42,3 +42,18 @@ class AgentOrchestrationHub:
     def get_investigation_report(self, incident_id: str) -> Optional[IncidentInvestigationReport]:
         return self.active_investigations.get(incident_id)
 
+    def get_investigation_graph_mermaid(self) -> str:
+        """Mermaid diagram of the compiled investigation state graph."""
+        return self.alarm_agent.graph.to_mermaid()
+
+    def get_investigation_graph_definition(self) -> Dict[str, Any]:
+        """Nodes and edges of the compiled investigation state graph."""
+        drawn = self.alarm_agent.graph.graph.get_graph()
+        return {
+            "nodes": sorted(drawn.nodes),
+            "edges": sorted(
+                {"source": edge.source, "target": edge.target} for edge in drawn.edges
+            ),
+            "mermaid": self.get_investigation_graph_mermaid(),
+        }
+

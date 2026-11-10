@@ -5,7 +5,34 @@ to generate incident diagnoses and remediation justifications.
 """
 
 from typing import Dict, Any, Optional
+from queue import Empty, Queue
+from threading import Thread
+
 from app.config import settings
+
+
+def _call_with_budget(fn, timeout_seconds: float):
+    """Runs fn() on a daemon thread and returns None if it exceeds the budget.
+
+    A synchronous LLM round-trip must never consume the whole agent SLA, so a
+    timed-out call falls back to the deterministic engine.
+    """
+    results: "Queue" = Queue(maxsize=1)
+
+    def worker():
+        try:
+            results.put((True, fn()))
+        except Exception as exc:  # surfaced to the caller below
+            results.put((False, exc))
+
+    Thread(target=worker, daemon=True).start()
+    try:
+        ok, value = results.get(timeout=timeout_seconds)
+    except Empty:
+        return None
+    if not ok:
+        raise value
+    return value
 
 class GeminiAIService:
     def __init__(self):
@@ -57,27 +84,33 @@ class GeminiAIService:
 
         if self.is_ai_connected() and self.client:
             try:
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=prompt
+                response = _call_with_budget(
+                    lambda: self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt
+                    ),
+                    settings.LLM_REQUEST_TIMEOUT_SECONDS,
                 )
                 if response and response.text:
                     return {
                         "root_cause": response.text.strip(),
                         "engine_used": f"Google Gemini ({self.model_name})"
                     }
-            except Exception as e:
+            except Exception:
                 pass  # Fall back to deterministic synthesis
 
         # Deterministic Domain-Specific AI Synthesis
         shared_target = shared_dependencies[0]["name"] if shared_dependencies else "Transport Router"
         shared_id = shared_dependencies[0]["id"] if shared_dependencies else "CSR_ALPHA_01"
         runbook_ref = matched_runbooks[0]["id"] if matched_runbooks else "RCA-OPTICAL-001"
+        availability = kpi_summary.get("cell_availability", "n/a")
+        packet_loss = kpi_summary.get("csr_packet_loss", "n/a")
 
         diagnosis = (
-            f"CORRELATED ROOT CAUSE CONFIRMED: High packet discards (>90%) detected on shared transport infrastructure "
-            f"'{shared_target}' (ID: {shared_id}). This upstream fiber interface degradation caused catastrophic "
-            f"availability collapse across cells {affected_cells} at Site Alpha. Counter completeness is 100% (high evidence integrity). "
+            f"CORRELATED ROOT CAUSE CONFIRMED: Transport packet loss of {packet_loss} measured on shared "
+            f"transport infrastructure '{shared_target}' (ID: {shared_id}) coincides with cell availability "
+            f"of {availability} across cells {affected_cells}. This is consistent with upstream backhaul "
+            f"degradation on the shared path affecting all dependent cells. "
             f"Referenced Vector Runbook: {runbook_ref}."
         )
 
