@@ -99,3 +99,4 @@ export default function AgentWorkspaceBanner({ role, tenant }) {
     </div>
   );
 }
+
