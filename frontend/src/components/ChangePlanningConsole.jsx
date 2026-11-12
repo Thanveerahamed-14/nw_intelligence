@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Sliders, ShieldAlert, CheckCircle2, AlertTriangle, Play, RefreshCw, Cpu, Layers, Sparkles, Clock, RotateCcw, ShieldCheck, CheckSquare } from 'lucide-react';
+import AiEngineBadge from './AiEngineBadge';
+import MarkdownText, { InlineMarkdown } from './MarkdownText';
 
 export default function ChangePlanningConsole({ tenant }) {
   const [targetEntity, setTargetEntity] = useState('CSR_ALPHA_01');
@@ -119,12 +121,13 @@ export default function ChangePlanningConsole({ tenant }) {
               <h3 className="text-sm font-bold text-white">Simulation Assessment Report</h3>
             </div>
             <div className="flex items-center gap-2">
-              {simulationResult.ai_engine_used && (
-                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-purple-950/80 text-purple-300 font-semibold border border-purple-500/40 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-purple-400" />
-                  {simulationResult.ai_engine_used}
-                </span>
-              )}
+              <AiEngineBadge
+                status={simulationResult.ai_status}
+                model={simulationResult.ai_model}
+                attempts={simulationResult.ai_attempts}
+                fallbackReason={simulationResult.ai_fallback_reason}
+                engineUsed={simulationResult.ai_engine_used}
+              />
               <span
                 className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
                   simulationResult.risk_level === 'LOW'
@@ -164,9 +167,17 @@ export default function ChangePlanningConsole({ tenant }) {
 
             <div className="p-3.5 rounded-lg bg-slate-950/80 border border-slate-800">
               <span className="text-[11px] text-slate-400 font-semibold block mb-1">Standby Redundancy Path</span>
-              <div className="flex items-center gap-1.5 mt-1 font-semibold text-emerald-400">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Verified Available (10G Microwave)</span>
+              <div className={`flex items-center gap-1.5 mt-1 font-semibold ${
+                simulationResult.has_standby_redundancy ? 'text-emerald-400' : 'text-rose-400'
+              }`}>
+                {simulationResult.has_standby_redundancy
+                  ? <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  : <AlertTriangle className="w-4 h-4 text-rose-400" />}
+                <span>
+                  {simulationResult.has_standby_redundancy
+                    ? 'Verified Available (Standby Path)'
+                    : 'Not Available (Simplex Path)'}
+                </span>
               </div>
             </div>
           </div>
@@ -178,9 +189,10 @@ export default function ChangePlanningConsole({ tenant }) {
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
                 <span>AI Risk Analysis &amp; Blast Radius Synthesis</span>
               </div>
-              <p className="leading-relaxed text-slate-300 font-medium">
-                {simulationResult.risk_analysis}
-              </p>
+              <MarkdownText
+                text={simulationResult.risk_analysis}
+                className="text-slate-300 font-medium"
+              />
             </div>
           )}
 
@@ -192,9 +204,10 @@ export default function ChangePlanningConsole({ tenant }) {
                 <Clock className="w-3.5 h-3.5 text-cyan-400" />
                 <span>Suggested Change Window:</span>
               </div>
-              <p className="leading-relaxed font-medium text-slate-300 font-mono text-[11px]">
-                {simulationResult.suggested_window || 'Immediate Emergency Window (P1 Incident Recovery)'}
-              </p>
+              <MarkdownText
+                text={simulationResult.suggested_window || 'Immediate Emergency Window (P1 Incident Recovery)'}
+                className="text-slate-300 font-medium"
+              />
             </div>
 
             {/* Rollback Strategy */}
@@ -203,9 +216,10 @@ export default function ChangePlanningConsole({ tenant }) {
                 <RotateCcw className="w-3.5 h-3.5 text-rose-400" />
                 <span>Automated Rollback Strategy:</span>
               </div>
-              <p className="leading-relaxed font-medium text-slate-300 font-mono text-[11px]">
-                {simulationResult.rollback_strategy || 'Re-enable primary link and flush BGP routes if packet loss > 0.5%.'}
-              </p>
+              <MarkdownText
+                text={simulationResult.rollback_strategy || 'Re-enable primary link and flush BGP routes if packet loss > 0.5%.'}
+                className="text-slate-300 font-medium"
+              />
             </div>
           </div>
 
@@ -220,7 +234,7 @@ export default function ChangePlanningConsole({ tenant }) {
                 {simulationResult.pre_flight_checks.map((check, i) => (
                   <div key={i} className="flex items-start gap-2 text-slate-300">
                     <CheckSquare className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                    <span className="leading-relaxed">{check}</span>
+                    <InlineMarkdown text={check} className="leading-relaxed" />
                   </div>
                 ))}
               </div>
@@ -230,7 +244,7 @@ export default function ChangePlanningConsole({ tenant }) {
           {/* Agent Assessment & Justification */}
           <div className="p-3.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-xs text-indigo-200 space-y-1">
             <strong className="font-bold block text-indigo-300">Formal Change Advisory Summary:</strong>
-            <p className="leading-relaxed text-slate-300">{simulationResult.recommendation}</p>
+            <MarkdownText text={simulationResult.recommendation} className="text-slate-300" />
           </div>
 
           {simulationResult.requires_human_approval && (

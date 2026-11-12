@@ -84,10 +84,34 @@ class Settings(BaseSettings):
     
     # LLM Settings (Google Gemini & Vertex AI)
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-2.0-flash"
-    VERTEX_AI_MODEL: str = "gemini-2.0-flash"
-    USE_MOCK_LLM_IF_NO_KEY: bool = True  # Allows deterministic fallback simulation if offline
-    LLM_REQUEST_TIMEOUT_SECONDS: float = 8.0  # Hard budget for a synchronous LLM call (protects the 30s agent SLA)
+    GEMINI_MODEL: str = "gemini-3.5-flash"
+    VERTEX_AI_MODEL: str = "gemini-3.5-flash"
+    # Free-tier models tried in order when the primary model is retired,
+    # rate-limited, or temporarily unavailable. Models that a key cannot access
+    # simply fail over to the next entry.
+    GEMINI_FALLBACK_MODELS: Union[List[str], str] = [
+        "gemini-2.5-flash",
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-flash-latest",
+        "gemini-flash-lite-latest",
+    ]
+    USE_MOCK_LLM_IF_NO_KEY: bool = False  # Fallback is explicit and reported, never simulated silently
+    LLM_REQUEST_TIMEOUT_SECONDS: float = 15.0  # Per-model budget; a timeout fails over to the next model
+    LLM_TOTAL_BUDGET_SECONDS: float = 25.0  # Total cascade budget, keeps the 30s agent SLA
+
+    def get_gemini_fallback_models(self) -> List[str]:
+        value = self.GEMINI_FALLBACK_MODELS
+        if isinstance(value, str):
+            clean = value.strip()
+            if clean.startswith("[") and clean.endswith("]"):
+                try:
+                    return [str(m).strip() for m in json.loads(clean) if str(m).strip()]
+                except Exception:
+                    pass
+            return [m.strip() for m in clean.split(",") if m.strip()]
+        return [str(m).strip() for m in value if str(m).strip()]
 
     # Graph Database Settings (Neo4j & In-Memory Bi-Temporal Graph)
     NEO4J_URI: Optional[str] = None

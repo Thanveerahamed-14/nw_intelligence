@@ -97,7 +97,8 @@ class MCPToolRegistry:
                     "action_type": {"type": "string", "description": "E.g. REROUTE_STANDBY_BACKHAUL, REBOOT_OPTICAL_MODULE, TICKET_ESCALATION"},
                     "justification": {"type": "string", "description": "Detailed evidence and reasoning supporting the recommendation"},
                     "blast_radius_summary": {"type": "string", "description": "Estimated impact on surrounding entities and subscribers"},
-                    "rollback_procedure": {"type": "string", "description": "Deterministic procedure to undo change if regression occurs"}
+                    "rollback_procedure": {"type": "string", "description": "Deterministic procedure to undo change if regression occurs"},
+                    "bypass_path": {"type": "object", "description": "Deterministic topology resolution for the standby bypass (primary/standby, checks, capacity). Supplied by the resolver, never invented by the model."}
                 },
                 "required": ["target_entity_id", "action_type", "justification", "blast_radius_summary", "rollback_procedure"]
             },
@@ -141,7 +142,7 @@ class MCPToolRegistry:
             return {
                 "content": {
                     "entity_id": entity_id,
-                    "kpis": [r.dict() for r in records],
+                    "kpis": [r.model_dump() for r in records],
                     "record_count": len(records)
                 },
                 "isError": False
@@ -167,12 +168,13 @@ class MCPToolRegistry:
                 action_type=arguments["action_type"],
                 justification=arguments["justification"],
                 blast_radius=arguments["blast_radius_summary"],
-                rollback=arguments["rollback_procedure"]
+                rollback=arguments["rollback_procedure"],
+                bypass_path=arguments.get("bypass_path")
             )
             return {
                 "content": {
                     "message": "Action staged successfully in PENDING_APPROVAL state. Human authorization required before execution.",
-                    "staged_action": action.dict()
+                    "staged_action": action.model_dump()
                 },
                 "isError": False
             }

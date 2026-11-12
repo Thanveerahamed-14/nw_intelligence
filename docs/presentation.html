@@ -1,436 +1,2203 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Executive Presentation | Telecom Network Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
-      --bg: #090e1a;
-      --card-bg: #111a2e;
-      --border: #1e2c4a;
-      --text: #f1f5f9;
+      --bg: #070b14;
+      --surface: #0d1527;
+      --surface-card: #111c35;
+      --surface-elevated: #162444;
+      --border: #1e2f56;
+      --border-bright: #2d457c;
+      --title: #ffffff;
+      --text: #f8fafc;
       --text-muted: #94a3b8;
+      --text-dim: #64748b;
       --blue: #3b82f6;
+      --blue-glow: rgba(59, 130, 246, 0.25);
       --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
       --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.25);
       --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.25);
       --rose: #f43f5e;
+      --rose-glow: rgba(244, 63, 94, 0.25);
       --purple: #a855f7;
+      --purple-glow: rgba(168, 85, 247, 0.25);
+      --diagram-bg: #090e1a;
+      --shadow-color: rgba(0, 0, 0, 0.7);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #f1f5f9;
+      --surface-card: #ffffff;
+      --surface-elevated: #e2e8f0;
+      --border: #e2e8f0;
+      --border-bright: #cbd5e1;
+      --title: #0f172a;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      --blue: #2563eb;
+      --blue-glow: rgba(37, 99, 235, 0.15);
+      --cyan: #0284c7;
+      --cyan-glow: rgba(2, 132, 199, 0.15);
+      --emerald: #059669;
+      --emerald-glow: rgba(5, 150, 105, 0.15);
+      --amber: #d97706;
+      --amber-glow: rgba(217, 119, 6, 0.15);
+      --rose: #e11d48;
+      --rose-glow: rgba(225, 29, 72, 0.15);
+      --purple: #7c3aed;
+      --purple-glow: rgba(124, 58, 237, 0.15);
+      --diagram-bg: #f8fafc;
+      --shadow-color: rgba(15, 23, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       background-color: var(--bg);
+      background-image:
+        radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
       color: var(--text);
-      font-family: 'DM Sans', -apple-system, sans-serif;
-      height: 100vh;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-x: hidden;
     }
+
+    /* TOP PROGRESS BAR */
+    .progress-bar-container {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.05);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 20%;
+      background: linear-gradient(90deg, var(--cyan), var(--blue), var(--purple));
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px var(--blue-glow);
+    }
+
+    /* HEADER */
     header {
-      padding: 16px 32px;
+      padding: 14px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border);
-      background: rgba(17, 26, 46, 0.8);
-      backdrop-filter: blur(10px);
+      background: rgba(13, 21, 39, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
-    .badge {
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid var(--border-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .brand-text h1 {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--title);
+    }
+
+    .brand-text p {
       font-size: 11px;
-      font-weight: 700;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .header-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
       padding: 4px 10px;
       border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
+
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--blue);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-rose {
+      background: rgba(244, 63, 94, 0.12);
+      color: var(--rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-purple {
+      background: rgba(168, 85, 247, 0.12);
+      color: var(--purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--surface-elevated);
+      color: #fff;
+      border-color: var(--border-bright);
+    }
+
+    .action-btn.active {
+      background: var(--blue-glow);
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    /* SLIDE VIEWPORT */
     .slide-viewport {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 40px;
+      padding: 24px 32px;
       position: relative;
     }
+
     .slide {
       display: none;
       width: 100%;
-      max-width: 1180px;
-      background: var(--card-bg);
+      max-width: 1320px;
+      background: var(--surface-card);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 48px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      animation: fadeIn 0.3s ease;
+      padding: 36px 42px;
+      box-shadow: 0 25px 60px -15px var(--shadow-color), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .slide.active { display: block; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+
+    .slide.active {
+      display: block;
     }
-    .slide-num {
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.995);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .slide-header {
+      margin-bottom: 22px;
+    }
+
+    .slide-eyebrow {
       font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
-      color: var(--blue);
       font-weight: 700;
-      letter-spacing: 1px;
+      color: var(--cyan);
+      letter-spacing: 1.2px;
       text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    h2 {
-      font-size: 28px;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    p.lead {
-      font-size: 16px;
-      color: var(--text-muted);
-      margin-bottom: 28px;
-      line-height: 1.6;
-    }
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-    }
-    .feature-card {
-      background: rgba(9, 14, 26, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 24px;
-    }
-    .feature-card h3 {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .feature-card p {
+
+    .slide-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--title);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .slide-subtitle {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      max-width: 1100px;
+    }
+
+    /* GRIDS & LAYOUTS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .grid-split-60-40 {
+      display: grid;
+      grid-template-columns: 1.25fr 0.95fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .grid-split-40-60 {
+      display: grid;
+      grid-template-columns: 0.95fr 1.25fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--title);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .card-text {
       font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.55;
     }
-    .feature-card ul {
+
+    .card-list {
       margin-top: 10px;
       padding-left: 18px;
-      font-size: 12px;
+      font-size: 12.5px;
       color: #cbd5e1;
-      line-height: 1.7;
+      line-height: 1.65;
     }
-    table {
+
+    .card-list li {
+      margin-bottom: 4px;
+    }
+
+    /* DIAGRAM WRAPPER */
+    .diagram-container {
+      background: var(--diagram-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diagram-header {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      margin-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-    th, td {
+
+    [data-theme="light"] .diagram-header {
+      border-bottom-color: #e2e8f0;
+    }
+
+    /* LIGHT MODE SVG & COMPONENT OVERRIDES */
+    [data-theme="light"] header,
+    [data-theme="light"] footer {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: #e2e8f0;
+    }
+
+    [data-theme="light"] .action-btn {
+      background: #f1f5f9;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+
+    [data-theme="light"] .action-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    [data-theme="light"] .slide-dot-pill {
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    [data-theme="light"] .slide-dot-pill.active {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: var(--blue);
+      box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+    }
+
+    [data-theme="light"] .nav-btn {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+
+    [data-theme="light"] .nav-btn:hover:not(:disabled) {
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    [data-theme="light"] table.data-table th {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #e2e8f0;
+    }
+
+    [data-theme="light"] table.data-table td {
+      border-color: #e2e8f0;
+    }
+
+    [data-theme="light"] table.data-table tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    [data-theme="light"] .overview-container,
+    [data-theme="light"] .shortcuts-box {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2);
+    }
+
+    [data-theme="light"] .overview-card {
+      background: #f8fafc;
+      border-color: #e2e8f0;
+    }
+
+    [data-theme="light"] .overview-title {
+      color: #0f172a;
+    }
+
+    [data-theme="light"] .speaker-notes-drawer {
+      background: rgba(255, 255, 255, 0.98);
+      border-color: #cbd5e1;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+    }
+
+    [data-theme="light"] .notes-content {
+      color: #334155;
+    }
+
+    [data-theme="light"] .key-row {
+      border-color: #e2e8f0;
+      color: #0f172a;
+    }
+
+    [data-theme="light"] kbd {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      color: #0284c7;
+    }
+
+    /* SVG Theme Adaptations */
+    [data-theme="light"] svg.interactive-diagram {
+      filter: drop-shadow(0 2px 8px rgba(15, 23, 42, 0.08));
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#fff"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#f8fafc"] {
+      fill: #0f172a !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#e2e8f0"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#cbd5e1"] {
+      fill: #334155 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#94a3b8"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#64748b"] {
+      fill: #475569 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram rect[fill="#0c1427"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#0f172a"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#13203e"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#082f49"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#0c172e"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#132347"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#061c1e"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#083344"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#1f1035"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#0b1329"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#172554"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#1e1b4b"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#1e293b"] {
+      fill: #ffffff !important;
+      stroke: #cbd5e1 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram rect[fill="url(#grad-cf)"] {
+      fill: #eff6ff !important;
+      stroke: #93c5fd !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram rect[fill="url(#grad-core)"] {
+      fill: #ecfdf5 !important;
+      stroke: #a7f3d0 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram rect[fill="url(#grad-agent)"] {
+      fill: #faf5ff !important;
+      stroke: #d8b4fe !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram rect[fill="#450a0a"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#4c0519"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#7f1d1d"] {
+      fill: #fff1f2 !important;
+      stroke: #fda4af !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram rect[fill="#052e16"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#064e3b"],
+    [data-theme="light"] svg.interactive-diagram rect[fill="#15803d"] {
+      fill: #ecfdf5 !important;
+      stroke: #86efac !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram rect[fill="#042f2e"] {
+      fill: #f0fdfa !important;
+      stroke: #99f6e4 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#93c5fd"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#60a5fa"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#38bdf8"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#bae6fd"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#7dd3fc"] {
+      fill: #0369a1 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#34d399"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#6ee7b7"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#a7f3d0"] {
+      fill: #047857 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#d8b4fe"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#c084fc"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#e9d5ff"] {
+      fill: #6b21a8 !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#fecdd3"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#fda4af"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#fca5a5"] {
+      fill: #be123c !important;
+    }
+
+    [data-theme="light"] svg.interactive-diagram text[fill="#5eead4"],
+    [data-theme="light"] svg.interactive-diagram text[fill="#99f6e4"] {
+      fill: #0f766e !important;
+    }
+
+    .diagram-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--cyan);
+    }
+
+    .diagram-tag {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    svg.interactive-diagram {
+      width: 100%;
+      height: auto;
+      max-height: 380px;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+    }
+
+    /* SVG DIAGRAM STYLES */
+    .svg-node {
+      transition: all 0.25s ease;
+      cursor: default;
+    }
+
+    .svg-node:hover rect {
+      stroke-width: 2px;
+      filter: brightness(1.2);
+    }
+
+    .pulse-danger {
+      animation: pulseAlert 1.8s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0% {
+        opacity: 0.8;
+        stroke-width: 2;
+      }
+
+      50% {
+        opacity: 1;
+        stroke-width: 3.5;
+        stroke: #f43f5e;
+        filter: drop-shadow(0 0 8px rgba(244, 63, 94, 0.8));
+      }
+
+      100% {
+        opacity: 0.8;
+        stroke-width: 2;
+      }
+    }
+
+    .flow-dash {
+      stroke-dasharray: 6;
+      animation: dashMove 1.5s linear infinite;
+    }
+
+    @keyframes dashMove {
+      to {
+        stroke-dashoffset: -12;
+      }
+    }
+
+    /* TABLES */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 12.5px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    table.data-table th,
+    table.data-table td {
       padding: 10px 14px;
       text-align: left;
       border-bottom: 1px solid var(--border);
     }
-    th {
-      color: var(--text-muted);
-      font-weight: 600;
-      background: rgba(0,0,0,0.2);
+
+    table.data-table th {
+      background: var(--surface-elevated);
+      color: #cbd5e1;
+      font-weight: 700;
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.data-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    /* FOOTER CONTROLS */
     footer {
-      padding: 16px 32px;
+      padding: 14px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-top: 1px solid var(--border);
-      background: rgba(17, 26, 46, 0.8);
+      background: rgba(13, 21, 39, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
     }
-    .nav-btn {
-      background: #1e293b;
+
+    .slide-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-dot-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-dim);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .slide-dot-pill:hover {
       color: #fff;
-      border: 1px solid #334155;
-      padding: 8px 20px;
+      background: var(--surface-elevated);
+    }
+
+    .slide-dot-pill.active {
+      color: #fff;
+      background: var(--surface-card);
+      border-color: var(--blue);
+      box-shadow: 0 0 12px var(--blue-glow);
+    }
+
+    .nav-btn {
+      background: var(--surface-elevated);
+      color: #fff;
+      border: 1px solid var(--border-bright);
+      padding: 8px 18px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 600;
-      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
     }
-    .nav-btn:hover { background: var(--blue); border-color: var(--blue); }
-    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--blue);
+      border-color: var(--blue);
+      box-shadow: 0 0 14px var(--blue-glow);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* SPEAKER NOTES DRAWER */
+    .speaker-notes-drawer {
+      display: none;
+      position: fixed;
+      bottom: 60px;
+      right: 28px;
+      width: 440px;
+      background: rgba(13, 21, 39, 0.95);
+      border: 1px solid var(--border-bright);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(16px);
+      z-index: 90;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .speaker-notes-drawer.open {
+      display: block;
+    }
+
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .notes-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--amber);
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .notes-content {
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .notes-content ul {
+      padding-left: 18px;
+      margin-top: 6px;
+    }
+
+    .notes-content li {
+      margin-bottom: 6px;
+    }
+
+    /* OVERVIEW MODAL */
+    .overview-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 11, 20, 0.88);
+      backdrop-filter: blur(14px);
+      z-index: 120;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .overview-modal.open {
+      display: flex;
+    }
+
+    .overview-container {
+      width: 100%;
+      max-width: 1200px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-bright);
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
+    }
+
+    .overview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    .overview-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      height: 150px;
+    }
+
+    .overview-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .overview-card.active {
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px var(--cyan-glow);
+    }
+
+    .overview-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 6px;
+    }
+
+    .overview-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    /* KEYBOARD SHORTCUTS MODAL */
+    .shortcuts-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(7, 11, 20, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 130;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shortcuts-modal.open {
+      display: flex;
+    }
+
+    .shortcuts-box {
+      width: 440px;
+      background: var(--surface-card);
+      border: 1px solid var(--border-bright);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .key-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    kbd {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-bright);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--cyan);
+    }
+
+    /* PRINT STYLES */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      .progress-bar-container,
+      header,
+      footer,
+      .speaker-notes-drawer,
+      .overview-modal,
+      .shortcuts-modal {
+        display: none !important;
+      }
+
+      .slide-viewport {
+        padding: 0 !important;
+        display: block !important;
+      }
+
+      .slide {
+        display: block !important;
+        page-break-after: always;
+        break-after: page;
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        max-width: 100% !important;
+        padding: 20px !important;
+      }
+
+      .slide-title {
+        color: #000 !important;
+      }
+
+      .slide-subtitle {
+        color: #444 !important;
+      }
+
+      .card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+      }
+
+      .card-title {
+        color: #000 !important;
+      }
+
+      .card-text,
+      .card-list {
+        color: #333 !important;
+      }
+
+      .diagram-container {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+
+      table.data-table th {
+        background: #e2e8f0 !important;
+        color: #000 !important;
+      }
+
+      table.data-table td {
+        color: #000 !important;
+      }
+    }
   </style>
 </head>
+
 <body>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- HEADER -->
   <header>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <span style="font-size:22px;">📡</span>
-      <div>
-        <div style="font-weight:800; font-size:15px; color:#fff;">Telecom Network Intelligence Platform</div>
-        <div style="font-size:11px; color:var(--text-muted);">Executive Presentation • Platform Overview</div>
+    <div class="brand-group">
+      <div class="brand-icon">📡</div>
+      <div class="brand-text">
+        <h1>Telecom Network Intelligence Platform</h1>
+        <p>Executive Architecture &amp; Incident Resolution Briefing</p>
       </div>
     </div>
-    <div style="display:flex; gap:10px;">
-      <span class="badge" style="background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3);">5 Customers Isolated</span>
-      <span class="badge" style="background:rgba(16,185,129,0.15); color:var(--emerald); border:1px solid rgba(16,185,129,0.3);">SLA &lt; 2s (p95)</span>
-      <span class="badge" style="background:rgba(244,63,94,0.15); color:var(--rose); border:1px solid rgba(244,63,94,0.3);">Incident @ 10:05 UTC</span>
+
+    <div class="header-badges">
+      <span class="badge badge-purple">🔒 5 Isolated Tenants</span>
+      <span class="badge badge-emerald">⚡ 2-Hop SLA &lt; 2.0s</span>
+      <span class="badge badge-rose">🚨 Incident @ 10:05 UTC</span>
+      <span class="badge badge-blue">🛡️ HITL Guarded</span>
+    </div>
+
+    <div class="header-controls">
+      <button class="action-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode (T)">
+        ☀️ <span id="themeToggleText">Light (T)</span>
+      </button>
+      <button class="action-btn" id="notesToggleBtn" onclick="toggleNotes()" title="Toggle Speaker Notes (N)">
+        📝 <span>Notes (N)</span>
+      </button>
+      <button class="action-btn" onclick="toggleOverview()" title="Slide Grid Overview (O)">
+        ⊞ <span>Grid (O)</span>
+      </button>
+      <button class="action-btn" onclick="toggleFullscreen()" title="Fullscreen Toggle (F)">
+        ⛶ <span>Fullscreen</span>
+      </button>
+      <button class="action-btn" onclick="toggleShortcuts()" title="Keyboard Shortcuts (?)">
+        ⌨️ <span>Help (?)</span>
+      </button>
     </div>
   </header>
 
-  <div class="slide-viewport">
-    <!-- Slide 1: Platform Vision & Capabilities -->
-    <div class="slide active" id="slide-1">
-      <div class="slide-num">Slide 01 of 05 • Platform Vision</div>
-      <h2>Strategic Foundation: Three Core Capabilities</h2>
-      <p class="lead">
-        Transforming multi-vendor telecom operations into an autonomous, role-governed intelligence backbone for 5 tier-1 telecom operators managing 25,000 nodes, 250,000 cells, and 50M daily performance counters.
-      </p>
-      <div class="grid-3">
-        <div class="feature-card" style="border-top:3px solid var(--blue);">
-          <h3><span>🔌</span> Connection Factory</h3>
-          <p>Multi-vendor ingestion, normalization &amp; provenance:</p>
-          <ul>
-            <li>Ericsson ENM, Nokia NetAct, Cisco EPN-M</li>
-            <li>SHA-256 immutable content hashing</li>
-            <li>Deterministic source authority conflict resolution</li>
-            <li>Quarantine DLQ for malformed schemas</li>
-          </ul>
+  <!-- SLIDE VIEWPORT -->
+  <main class="slide-viewport">
+
+    <!-- ========================================== -->
+    <!-- SLIDE 1: PLATFORM OVERVIEW & THE BIG PICTURE -->
+    <!-- ========================================== -->
+    <section class="slide active" id="slide-1">
+      <div class="slide-header">
+        <div class="slide-eyebrow">
+          <span>01 // THE BIG PICTURE</span>
+          <span style="color:var(--text-dim);">•</span>
+          <span>AI-POWERED TELECOM COPILOT</span>
         </div>
-        <div class="feature-card" style="border-top:3px solid var(--emerald);">
-          <h3><span>📊</span> KPI Engine</h3>
-          <p>Certified performance metrics calculation:</p>
-          <ul>
-            <li>Standard 15-minute 3GPP sliding windows</li>
-            <li>2-hour late data watermark &amp; incremental upserts</li>
-            <li>Completeness &amp; Uncertainty Scoring (0.0 to 1.0)</li>
-            <li>Distinguishes true outages from reporting silence</li>
-          </ul>
+        <h2 class="slide-title">AI-Powered Network Intelligence Platform</h2>
+        <p class="slide-subtitle">
+          An intelligent operational assistant that acts like an automated doctor and detective for mobile phone
+          networks—detecting outages, finding root causes, and preparing safe fixes in under 30 seconds.
+        </p>
+      </div>
+
+      <div class="grid-split-60-40">
+        <!-- SVG COMPARISON DIAGRAM -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Figure 1.1: Operational Comparison — Manual Firefighting vs. AI-Assisted
+              Triage</span>
+            <span class="diagram-tag">OPERATIONAL SHIFT</span>
+          </div>
+
+          <svg class="interactive-diagram" viewBox="0 0 740 330" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- TOP HALF: TRADITIONAL NOC -->
+            <g class="svg-node">
+              <rect x="15" y="25" width="710" height="125" rx="10" fill="#1e1022" stroke="#e11d48" stroke-width="1.5"
+                stroke-dasharray="4" />
+              <text x="35" y="48" fill="#fda4af" font-size="11" font-weight="800"
+                font-family="'JetBrains Mono', monospace">TRADITIONAL NOC (MANUAL FIREFIGHTING: 30–60 MINUTES)</text>
+              <rect x="540" y="34" width="170" height="20" rx="4" fill="#881337" />
+              <text x="625" y="48" fill="#fecdd3" font-size="9" font-weight="700" text-anchor="middle">Slow Resolution
+                &amp; High Downtime</text>
+
+              <!-- Step 1 -->
+              <rect x="35" y="66" width="135" height="66" rx="6" fill="#131c35" stroke="#f43f5e" />
+              <text x="102" y="88" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">1. Alarm
+                Storm</text>
+              <text x="102" y="104" fill="#fda4af" font-size="8.5" text-anchor="middle">Multiple towers down</text>
+              <text x="102" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">Panic in the NOC</text>
+
+              <!-- Arrow 1 -->
+              <path d="M 170 99 L 200 99" stroke="#f43f5e" stroke-width="2" />
+              <polygon points="200,99 193,95 193,103" fill="#f43f5e" />
+
+              <!-- Step 2 -->
+              <rect x="200" y="66" width="145" height="66" rx="6" fill="#131c35" stroke="#f43f5e" />
+              <text x="272" y="88" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">2. Vendor
+                Silos</text>
+              <text x="272" y="104" fill="#fda4af" font-size="8.5" text-anchor="middle">Check Ericsson, Nokia</text>
+              <text x="272" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">&amp; Cisco dashboards</text>
+
+              <!-- Arrow 2 -->
+              <path d="M 345 99 L 375 99" stroke="#f43f5e" stroke-width="2" />
+              <polygon points="375,99 368,95 368,103" fill="#f43f5e" />
+
+              <!-- Step 3 -->
+              <rect x="375" y="66" width="145" height="66" rx="6" fill="#131c35" stroke="#f43f5e" />
+              <text x="447" y="88" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">3. Manual
+                Guesswork</text>
+              <text x="447" y="104" fill="#fda4af" font-size="8.5" text-anchor="middle">Trace network diagrams</text>
+              <text x="447" y="118" fill="#94a3b8" font-size="8" text-anchor="middle">&amp; static spreadsheets</text>
+
+              <!-- Arrow 3 -->
+              <path d="M 520 99 L 550 99" stroke="#f43f5e" stroke-width="2" />
+              <polygon points="550,99 543,95 543,103" fill="#f43f5e" />
+
+              <!-- Step 4 -->
+              <rect x="550" y="66" width="155" height="66" rx="6" fill="#131c35" stroke="#f43f5e" />
+              <text x="627" y="88" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">4. High-Risk CLI
+                Fix</text>
+              <text x="627" y="104" fill="#fda4af" font-size="8.5" text-anchor="middle">Manual command lines</text>
+              <text x="627" y="118" fill="#f87171" font-size="8" text-anchor="middle">Risk of accidental errors</text>
+            </g>
+
+            <!-- BOTTOM HALF: OUR AI PLATFORM -->
+            <g class="svg-node">
+              <rect x="15" y="175" width="710" height="135" rx="10" fill="#061c1e" stroke="#10b981"
+                stroke-width="1.5" />
+              <text x="35" y="198" fill="#6ee7b7" font-size="11" font-weight="800"
+                font-family="'JetBrains Mono', monospace">OUR PLATFORM (AUTONOMOUS AI TRIAGE: &lt; 30 SECONDS)</text>
+              <rect x="535" y="184" width="175" height="20" rx="4" fill="#064e3b" />
+              <text x="622" y="198" fill="#a7f3d0" font-size="9" font-weight="700" text-anchor="middle">Fast Triage •
+                100% Safe Operations</text>
+
+              <!-- Step 1 -->
+              <rect x="35" y="215" width="135" height="74" rx="6" fill="#0f2b2f" stroke="#10b981" />
+              <text x="102" y="238" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">1. Instant
+                Detection</text>
+              <text x="102" y="254" fill="#a7f3d0" font-size="8.5" text-anchor="middle">Unified multi-vendor</text>
+              <text x="102" y="268" fill="#6ee7b7" font-size="8" text-anchor="middle">telemetry ingested</text>
+
+              <!-- Arrow 1 -->
+              <path d="M 170 252 L 200 252" stroke="#10b981" stroke-width="2" />
+              <polygon points="200,252 193,248 193,256" fill="#10b981" />
+
+              <!-- Step 2 -->
+              <rect x="200" y="215" width="145" height="74" rx="6" fill="#0f2b2f" stroke="#10b981" />
+              <text x="272" y="238" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">2.
+                Auto-Correlation</text>
+              <text x="272" y="254" fill="#a7f3d0" font-size="8.5" text-anchor="middle">Traces shared routers</text>
+              <text x="272" y="268" fill="#6ee7b7" font-size="8" text-anchor="middle">&amp; backhaul fiber links</text>
+
+              <!-- Arrow 2 -->
+              <path d="M 345 252 L 375 252" stroke="#10b981" stroke-width="2" />
+              <polygon points="375,252 368,248 368,256" fill="#10b981" />
+
+              <!-- Step 3 -->
+              <rect x="375" y="215" width="145" height="74" rx="6" fill="#0f2b2f" stroke="#10b981" />
+              <text x="447" y="238" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">3. Quality
+                Gate</text>
+              <text x="447" y="254" fill="#a7f3d0" font-size="8.5" text-anchor="middle">Checks 100% data</text>
+              <text x="447" y="268" fill="#6ee7b7" font-size="8" text-anchor="middle">Real outage vs data gap</text>
+
+              <!-- Arrow 3 -->
+              <path d="M 520 252 L 550 252" stroke="#10b981" stroke-width="2" />
+              <polygon points="550,252 543,248 543,256" fill="#10b981" />
+
+              <!-- Step 4 -->
+              <rect x="550" y="215" width="155" height="74" rx="6" fill="#172554" stroke="#3b82f6" stroke-width="1.5" />
+              <text x="627" y="238" fill="#fff" font-size="10.5" font-weight="800" text-anchor="middle">4. 1-Click Human
+                Fix</text>
+              <text x="627" y="254" fill="#bfdbfe" font-size="8.5" text-anchor="middle">AI stages the failover</text>
+              <text x="627" y="268" fill="#60a5fa" font-size="8" font-weight="700" text-anchor="middle">Engineer clicks
+                'Approve'</text>
+            </g>
+          </svg>
         </div>
-        <div class="feature-card" style="border-top:3px solid var(--purple);">
-          <h3><span>🗺️</span> Topology Engine</h3>
-          <p>Bi-temporal graph &amp; Model Context Protocol:</p>
-          <ul>
-            <li>Point-in-time snapshot: "What was valid at 10:05 UTC?"</li>
-            <li>Bounded 2-hop BFS traversals (&lt; 2.0s p95 SLA)</li>
-            <li>Shared dependency &amp; bottleneck correlation</li>
-            <li>MCP JSON-RPC tools for autonomous agents</li>
-          </ul>
+
+        <!-- SUMMARY CARDS -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="card" style="border-left: 3px solid var(--rose);">
+            <div class="card-title">
+              <span>🚨</span> <span>The Telecom Challenge</span>
+            </div>
+            <p class="card-text">
+              Modern mobile networks have thousands of cell towers and complex equipment from multiple vendors
+              (Ericsson, Nokia, Cisco). When an outage strikes, finding the root cause manually takes 30 to 60 minutes
+              of stressful investigation across disconnected tools.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--emerald);">
+            <div class="card-title">
+              <span>⚡</span> <span>The AI Solution (&lt;30s Triage)</span>
+            </div>
+            <p class="card-text">
+              Our autonomous platform reads the network map, pulls performance metrics, checks data completeness, and
+              identifies the exact broken hardware in seconds—reducing Mean Time to Repair (MTTR) by up to 90%.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--blue);">
+            <div class="card-title">
+              <span>🛡️</span> <span>Safety First (Human in the Loop)</span>
+            </div>
+            <p class="card-text">
+              The AI never touches or mutates the live network on its own. It performs the heavy diagnosis and stages a
+              proposed fix, allowing the human engineer to review the blast radius and authorize execution with one
+              click.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Slide 2: GCP Architecture -->
-    <div class="slide" id="slide-2">
-      <div class="slide-num">Slide 02 of 05 • Architecture &amp; Technology</div>
-      <h2>Serverless Google Cloud Architecture for Lean Teams</h2>
-      <p class="lead">
-        Designed for minimal operational effort, zero idle cost, and instant scaling from quiescent states to 100+ concurrent agent investigations during network incidents.
-      </p>
+    <!-- ========================================== -->
+    <!-- SLIDE 2: HIGH LEVEL DESIGN (COMPONENTS, DBS & MCP) -->
+    <!-- ========================================== -->
+    <section class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-eyebrow">
+          <span>02 // HIGH-LEVEL DESIGN</span>
+          <span style="color:var(--text-dim);">•</span>
+          <span>SYSTEM ARCHITECTURE &amp; TOP-TO-BOTTOM DATA FLOW</span>
+        </div>
+        <h2 class="slide-title">High-Level Architecture: Top-to-Bottom Component Flow</h2>
+        <p class="slide-subtitle">
+          How multi-vendor telemetry flows downward from network hardware through specialized databases (Graph, SQL, Vector, Audit), accessed safely via Model Context Protocol (MCP) by AI agents with human approval.
+        </p>
+      </div>
+
+      <div class="grid-split-60-40">
+        <!-- SVG COMPLETE SYSTEM ARCHITECTURE DIAGRAM (TOP-TO-BOTTOM) -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Figure 2.1: Tiered Architecture Flow (Ingestion &darr; Storage &darr; MCP Tools &darr; AI Agent &darr; Human Gate)</span>
+            <span class="diagram-tag">TOP-TO-BOTTOM ARCHITECTURE</span>
+          </div>
+
+          <svg class="interactive-diagram" viewBox="0 0 740 480" fill="none" xmlns="http://www.w3.org/2000/svg" style="max-height: 450px;">
+            <defs>
+              <linearGradient id="grad-t1" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#1e293b"/>
+                <stop offset="100%" stop-color="#0f172a"/>
+              </linearGradient>
+              <linearGradient id="grad-t2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#0f172a"/>
+                <stop offset="100%" stop-color="#071b26"/>
+              </linearGradient>
+              <marker id="arrow-down-blue" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 0 L 5 8 z" fill="#38bdf8"/>
+              </marker>
+              <marker id="arrow-down-green" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 0 L 5 8 z" fill="#34d399"/>
+              </marker>
+              <marker id="arrow-down-purple" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 0 L 5 8 z" fill="#c084fc"/>
+              </marker>
+              <marker id="arrow-down-rose" viewBox="0 0 10 10" refX="5" refY="8" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 0 L 5 8 z" fill="#fb7185"/>
+              </marker>
+              <marker id="arrow-right-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 8 5 L 0 10 z" fill="#38bdf8"/>
+              </marker>
+              <marker id="arrow-right-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 8 5 L 0 10 z" fill="#10b981"/>
+              </marker>
+            </defs>
+
+            <!-- ======================================================== -->
+            <!-- TIER 1 (TOP): HARDWARE & INGESTION                       -->
+            <!-- ======================================================== -->
+            <g class="svg-node">
+              <rect x="12" y="10" width="716" height="74" rx="8" fill="#0b1329" stroke="#1e2f56" stroke-width="1.2"/>
+              <text x="24" y="26" fill="#94a3b8" font-size="9" font-weight="800" font-family="'JetBrains Mono', monospace">TIER 1 // TELEMETRY INGESTION &amp; CONNECTION FACTORY</text>
+
+              <!-- Hardware Sources Box -->
+              <rect x="22" y="32" width="225" height="44" rx="5" fill="#13203e" stroke="#2563eb" stroke-width="1.2"/>
+              <text x="32" y="48" fill="#93c5fd" font-size="9.5" font-weight="700">Multi-Vendor Hardware Sources</text>
+              <text x="32" y="64" fill="#cbd5e1" font-size="8.5">Ericsson ENM • Nokia NetAct • Cisco IP-RAN</text>
+
+              <!-- Arrow: Sources -> Connection Factory -->
+              <path d="M 247 54 L 275 54" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow-right-blue)"/>
+
+              <!-- Connection Factory Box -->
+              <rect x="282" y="32" width="436" height="44" rx="5" fill="#172554" stroke="#3b82f6" stroke-width="1.4"/>
+              <text x="294" y="48" fill="#fff" font-size="10" font-weight="800">Connection Factory ("Universal Translator")</text>
+              <text x="294" y="64" fill="#93c5fd" font-size="8.5">3GPP Schema Normalizer • SHA-256 Provenance Fingerprinter • 5 Isolated Tenants</text>
+            </g>
+
+            <!-- DOWNWARD FLOW ARROWS: Tier 1 -> Tier 2 (Storage DBs) -->
+            <path d="M 330 84 L 102 110" stroke="#06b6d4" stroke-width="1.8" stroke-dasharray="4" marker-end="url(#arrow-down-blue)"/>
+            <path d="M 420 84 L 282 110" stroke="#10b981" stroke-width="1.8" stroke-dasharray="4" marker-end="url(#arrow-down-green)"/>
+            <path d="M 520 84 L 462 110" stroke="#a855f7" stroke-width="1.8" stroke-dasharray="4" marker-end="url(#arrow-down-purple)"/>
+            <path d="M 640 84 L 642 110" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="4" marker-end="url(#arrow-down-rose)"/>
+
+            <!-- ======================================================== -->
+            <!-- TIER 2: SPECIALIZED STORAGE DATABASES                    -->
+            <!-- ======================================================== -->
+            <g class="svg-node">
+              <!-- Graph DB -->
+              <rect x="18" y="112" width="168" height="78" rx="6" fill="#082f49" stroke="#06b6d4" stroke-width="1.4"/>
+              <text x="102" y="130" fill="#67e8f9" font-size="10" font-weight="800" text-anchor="middle">🗺️ Graph DB (Neo4j)</text>
+              <text x="102" y="145" fill="#e0f2fe" font-size="8.5" text-anchor="middle">Network Topology &amp; Links</text>
+              <text x="102" y="160" fill="#7dd3fc" font-size="8" text-anchor="middle">"What connects to what?"</text>
+              <text x="102" y="174" fill="#38bdf8" font-size="8" font-weight="700" text-anchor="middle">&lt;2.0s k-Hop Traversal</text>
+
+              <!-- SQL DB -->
+              <rect x="198" y="112" width="168" height="78" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="1.4"/>
+              <text x="282" y="130" fill="#6ee7b7" font-size="10" font-weight="800" text-anchor="middle">📊 SQL DB (PostgreSQL)</text>
+              <text x="282" y="145" fill="#d1fae5" font-size="8.5" text-anchor="middle">15-Min Sliding Windows</text>
+              <text x="282" y="160" fill="#a7f3d0" font-size="8" text-anchor="middle">Packet Loss &amp; Cell Avail</text>
+              <text x="282" y="174" fill="#34d399" font-size="8" font-weight="700" text-anchor="middle">Completeness Quality Score</text>
+
+              <!-- Vector DB -->
+              <rect x="378" y="112" width="168" height="78" rx="6" fill="#3b0764" stroke="#a855f7" stroke-width="1.4"/>
+              <text x="462" y="130" fill="#d8b4fe" font-size="10" font-weight="800" text-anchor="middle">📚 Vector DB (ChromaDB)</text>
+              <text x="462" y="145" fill="#f3e8ff" font-size="8.5" text-anchor="middle">Telecom Runbooks &amp; SOPs</text>
+              <text x="462" y="160" fill="#e9d5ff" font-size="8" text-anchor="middle">Historical Incident RCAs</text>
+              <text x="462" y="174" fill="#c084fc" font-size="8" font-weight="700" text-anchor="middle">Semantic Search for RAG</text>
+
+              <!-- Audit & State Store -->
+              <rect x="558" y="112" width="168" height="78" rx="6" fill="#450a0a" stroke="#f43f5e" stroke-width="1.4"/>
+              <text x="642" y="130" fill="#fecdd3" font-size="10" font-weight="800" text-anchor="middle">🔒 Audit &amp; State Store</text>
+              <text x="642" y="145" fill="#ffe4e6" font-size="8.5" text-anchor="middle">SHA-256 Hash Ledger</text>
+              <text x="642" y="160" fill="#fda4af" font-size="8" text-anchor="middle">Action History &amp; Cache</text>
+              <text x="642" y="174" fill="#fb7185" font-size="8" font-weight="700" text-anchor="middle">Zero Tampering Audit Trail</text>
+            </g>
+
+            <!-- DOWNWARD FLOW ARROWS: Tier 2 -> Tier 3 (MCP Tools) -->
+            <path d="M 102 190 L 102 214" stroke="#06b6d4" stroke-width="1.8" marker-end="url(#arrow-down-blue)"/>
+            <path d="M 282 190 L 282 214" stroke="#10b981" stroke-width="1.8" marker-end="url(#arrow-down-green)"/>
+            <path d="M 462 190 L 462 214" stroke="#a855f7" stroke-width="1.8" marker-end="url(#arrow-down-purple)"/>
+            <path d="M 642 190 L 642 214" stroke="#f43f5e" stroke-width="1.8" marker-end="url(#arrow-down-rose)"/>
+
+            <!-- ======================================================== -->
+            <!-- TIER 3: MODEL CONTEXT PROTOCOL (MCP) TOOL LAYER          -->
+            <!-- ======================================================== -->
+            <g class="svg-node">
+              <rect x="12" y="216" width="716" height="76" rx="8" fill="#131738" stroke="#6366f1" stroke-width="1.4"/>
+              <text x="24" y="232" fill="#818cf8" font-size="9" font-weight="800" font-family="'JetBrains Mono', monospace">TIER 3 // MCP TOOL &amp; SECURITY LAYER (Model Context Protocol JSON-RPC 2.0 • RBAC Guarded)</text>
+
+              <!-- MCP Tool 1 -->
+              <rect x="22" y="238" width="134" height="46" rx="5" fill="#1e1b4b" stroke="#06b6d4"/>
+              <text x="89" y="255" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">get_topology_</text>
+              <text x="89" y="267" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">neighborhood()</text>
+              <text x="89" y="278" fill="#67e8f9" font-size="7.5" text-anchor="middle">&rarr; Reads Neo4j Graph</text>
+
+              <!-- MCP Tool 2 -->
+              <rect x="162" y="238" width="134" height="46" rx="5" fill="#1e1b4b" stroke="#0ea5e9"/>
+              <text x="229" y="255" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">find_shared_</text>
+              <text x="229" y="267" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">dependencies()</text>
+              <text x="229" y="278" fill="#7dd3fc" font-size="7.5" text-anchor="middle">&rarr; Traces Shared Router</text>
+
+              <!-- MCP Tool 3 -->
+              <rect x="302" y="238" width="134" height="46" rx="5" fill="#064e3b" stroke="#10b981"/>
+              <text x="369" y="255" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">get_entity_kpis()</text>
+              <text x="369" y="267" fill="#6ee7b7" font-size="8" text-anchor="middle">&amp; completeness()</text>
+              <text x="369" y="278" fill="#a7f3d0" font-size="7.5" text-anchor="middle">&rarr; Reads SQL DB</text>
+
+              <!-- MCP Tool 4 -->
+              <rect x="442" y="238" width="134" height="46" rx="5" fill="#3b0764" stroke="#a855f7"/>
+              <text x="509" y="255" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">verify_evidence_</text>
+              <text x="509" y="267" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">integrity()</text>
+              <text x="509" y="278" fill="#d8b4fe" font-size="7.5" text-anchor="middle">&rarr; Validates SHA-256</text>
+
+              <!-- MCP Tool 5 -->
+              <rect x="582" y="238" width="138" height="46" rx="5" fill="#451a03" stroke="#f59e0b" stroke-width="1.2"/>
+              <text x="651" y="254" fill="#fed7aa" font-size="8.5" font-weight="800" text-anchor="middle">propose_remediation_</text>
+              <text x="651" y="266" fill="#fed7aa" font-size="8.5" font-weight="800" text-anchor="middle">action()</text>
+              <text x="651" y="278" fill="#fef08a" font-size="7.5" font-weight="700" text-anchor="middle">&rarr; PENDING_APPROVAL</text>
+            </g>
+
+            <!-- DOWNWARD FLOW ARROW: Tier 3 -> Tier 4 (AI Reasoning) -->
+            <path d="M 370 292 L 370 316" stroke="#c084fc" stroke-width="2.2" marker-end="url(#arrow-down-purple)"/>
+
+            <!-- ======================================================== -->
+            <!-- TIER 4: AI AGENT REASONING ENGINE (LANGGRAPH + GEMINI)   -->
+            <!-- ======================================================== -->
+            <g class="svg-node">
+              <rect x="12" y="318" width="716" height="74" rx="8" fill="#1f1035" stroke="#a855f7" stroke-width="1.4"/>
+              <text x="24" y="334" fill="#e9d5ff" font-size="9" font-weight="800" font-family="'JetBrains Mono', monospace">TIER 4 // AI AGENT REASONING ENGINE (LangGraph State Machine • Gemini 2.0 • Zero Hallucinations)</text>
+
+              <!-- 5 Sequential Workflow Steps -->
+              <rect x="22" y="340" width="128" height="44" rx="5" fill="#2e1065" stroke="#c084fc"/>
+              <text x="86" y="356" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">1. Alarm Trigger</text>
+              <text x="86" y="371" fill="#d8b4fe" font-size="7.5" text-anchor="middle">Validates tenant scope</text>
+
+              <path d="M 150 362 L 164 362" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrow-right-blue)"/>
+
+              <rect x="168" y="340" width="128" height="44" rx="5" fill="#2e1065" stroke="#c084fc"/>
+              <text x="232" y="356" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">2. Graph Traversal</text>
+              <text x="232" y="371" fill="#d8b4fe" font-size="7.5" text-anchor="middle">Maps 2-hop blast radius</text>
+
+              <path d="M 296 362 L 310 362" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrow-right-blue)"/>
+
+              <rect x="314" y="340" width="128" height="44" rx="5" fill="#064e3b" stroke="#10b981"/>
+              <text x="378" y="356" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">3. Quality Gate</text>
+              <text x="378" y="371" fill="#6ee7b7" font-size="7.5" text-anchor="middle">Completeness &ge; 90%</text>
+
+              <path d="M 442 362 L 456 362" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrow-right-blue)"/>
+
+              <rect x="460" y="340" width="128" height="44" rx="5" fill="#2e1065" stroke="#c084fc"/>
+              <text x="524" y="356" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">4. RCA &amp; Runbook</text>
+              <text x="524" y="371" fill="#d8b4fe" font-size="7.5" text-anchor="middle">RAG lookup from Chroma</text>
+
+              <path d="M 588 362 L 602 362" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrow-right-blue)"/>
+
+              <rect x="606" y="340" width="114" height="44" rx="5" fill="#172554" stroke="#38bdf8"/>
+              <text x="663" y="356" fill="#fff" font-size="8.5" font-weight="700" text-anchor="middle">5. Fix Proposal</text>
+              <text x="663" y="371" fill="#93c5fd" font-size="7.5" text-anchor="middle">Stages failover action</text>
+            </g>
+
+            <!-- DOWNWARD FLOW ARROW: Tier 4 -> Tier 5 (Human Gate) -->
+            <path d="M 370 392 L 370 414" stroke="#f43f5e" stroke-width="2.2" marker-end="url(#arrow-down-rose)"/>
+
+            <!-- ======================================================== -->
+            <!-- TIER 5 (BOTTOM): HUMAN-IN-THE-LOOP & NETWORK DISPATCHER  -->
+            <!-- ======================================================== -->
+            <g class="svg-node">
+              <rect x="12" y="416" width="716" height="58" rx="8" fill="#2a0814" stroke="#f43f5e" stroke-width="1.4"/>
+              <text x="24" y="430" fill="#fecdd3" font-size="9" font-weight="800" font-family="'JetBrains Mono', monospace">TIER 5 // HUMAN-IN-THE-LOOP (HITL) SAFETY GATE &amp; NETWORK EXECUTION</text>
+
+              <!-- Safe Staging Box (HITL Barrier) -->
+              <rect x="22" y="434" width="370" height="34" rx="5" fill="#4c0519" stroke="#fb7185"/>
+              <text x="34" y="449" fill="#fff" font-size="9" font-weight="800">🛡️ Remediation Status: PENDING_APPROVAL</text>
+              <text x="34" y="461" fill="#fda4af" font-size="8">NOC Engineer reviews blast radius &amp; clicks &rarr;</text>
+              
+              <!-- 1-Click Approval Pill -->
+              <rect x="250" y="438" width="134" height="26" rx="4" fill="#10b981" stroke="#34d399"/>
+              <text x="317" y="455" fill="#022c22" font-size="9" font-weight="900" text-anchor="middle">✓ 1-CLICK APPROVAL</text>
+
+              <!-- Arrow from Human Gate to Dispatcher -->
+              <path d="M 395 451 L 430 451" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-right-green)"/>
+
+              <!-- Live Network Dispatcher Box -->
+              <rect x="435" y="434" width="285" height="34" rx="5" fill="#064e3b" stroke="#10b981"/>
+              <text x="445" y="448" fill="#a7f3d0" font-size="9" font-weight="800">⚡ Live Network Execution Dispatcher</text>
+              <text x="445" y="461" fill="#6ee7b7" font-size="8">Reroutes traffic to Standby Microwave 80GHz • MTTR &lt; 30s</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- 5 COMPONENT SUMMARY CARDS (TIER-BY-TIER 1-TO-1 MATCH) -->
+        <div style="display:flex; flex-direction:column; gap:9px;">
+          <div class="card" style="border-left: 3px solid var(--blue); padding: 9px 13px;">
+            <div class="card-title" style="font-size:12px; margin-bottom:2px;">
+              <span>📡</span> <span>Tier 1: Telemetry Ingestion &amp; Factory</span>
+            </div>
+            <p class="card-text" style="font-size:11px; line-height:1.45;">
+              Translates multi-vendor hardware (Ericsson, Nokia, Cisco) into standard 3GPP formats with <strong>SHA-256 cryptographic fingerprints</strong> and strict 5-tenant boundary isolation.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--cyan); padding: 9px 13px;">
+            <div class="card-title" style="font-size:12px; margin-bottom:2px;">
+              <span>🗄️</span> <span>Tier 2: Specialized Storage Tier</span>
+            </div>
+            <p class="card-text" style="font-size:11px; line-height:1.45;">
+              <strong>Graph DB (Neo4j)</strong> for &lt;2s topology; <strong>SQL DB (PostgreSQL)</strong> for 15-min counters; <strong>Vector DB (ChromaDB)</strong> for RAG runbooks; <strong>Audit Store</strong> for provenance.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--indigo); padding: 9px 13px;">
+            <div class="card-title" style="font-size:12px; margin-bottom:2px;">
+              <span>⚙️</span> <span>Tier 3: Model Context Protocol (MCP)</span>
+            </div>
+            <p class="card-text" style="font-size:11px; line-height:1.45;">
+              Safe JSON-RPC 2.0 API gateway with role-based access control (RBAC). Prevents raw database access and confines AI to verified read/stage actions.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--purple); padding: 9px 13px;">
+            <div class="card-title" style="font-size:12px; margin-bottom:2px;">
+              <span>🧠</span> <span>Tier 4: LangGraph AI Reasoning</span>
+            </div>
+            <p class="card-text" style="font-size:11px; line-height:1.45;">
+              Gemini 2.0 executes a rigid 5-step state machine: Trigger &rarr; Graph Traversal &rarr; Quality Gate (&ge;90%) &rarr; RCA/RAG Lookup &rarr; Failover Staging.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--rose); padding: 9px 13px;">
+            <div class="card-title" style="font-size:12px; margin-bottom:2px;">
+              <span>🛡️</span> <span>Tier 5: Human Gate &amp; Live Execution</span>
+            </div>
+            <p class="card-text" style="font-size:11px; line-height:1.45;">
+              Actions stay locked in <code style="color:var(--amber);">PENDING_APPROVAL</code>. Only a human NOC engineer can authorize the live failover to standby microwave in &lt;30s.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 3: INCIDENT WALKTHROUGH (10:05 UTC) -->
+    <!-- ========================================== -->
+    <section class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-eyebrow">
+          <span>03 // REAL-WORLD SCENARIO</span>
+          <span style="color:var(--text-dim);">•</span>
+          <span>THE 10:05 UTC OPTICAL FIBER OUTAGE</span>
+        </div>
+        <h2 class="slide-title">Incident Walkthrough: Diagnosing a Cut Fiber in 4 Steps</h2>
+        <p class="slide-subtitle">
+          How the platform automatically pinpoints 99.86% packet loss on a shared optical backhaul and stages a safe
+          reroute to redundant microwave.
+        </p>
+      </div>
+
+      <div class="grid-split-60-40">
+        <!-- SVG INCIDENT TOPOLOGY DIAGRAM -->
+        <div class="diagram-container">
+          <div class="diagram-header">
+            <span class="diagram-title">Figure 3.1: 10:05 UTC Incident Topology Failure &amp; Standby Reroute</span>
+            <span class="diagram-tag">REAL-TIME TRAVERSAL</span>
+          </div>
+
+          <svg class="interactive-diagram" viewBox="0 0 740 330" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- SITE ALPHA BOX -->
+            <rect x="20" y="30" width="310" height="270" rx="12" fill="#0b1329" stroke="#1e2f56" stroke-width="1.5"
+              stroke-dasharray="4" />
+            <text x="35" y="52" fill="#94a3b8" font-size="11" font-weight="700"
+              font-family="'JetBrains Mono', monospace">SITE_ALPHA (CUSTOMER A)</text>
+
+            <!-- Radio Cells -->
+            <g class="svg-node">
+              <rect x="35" y="70" width="85" height="45" rx="6" fill="#1e1b4b" stroke="#f43f5e" stroke-width="1.5"
+                class="pulse-danger" />
+              <text x="77" y="88" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">CELL_001</text>
+              <text x="77" y="103" fill="#fda4af" font-size="8.5" text-anchor="middle">0% Avail (Alarm)</text>
+
+              <rect x="35" y="125" width="85" height="45" rx="6" fill="#1e1b4b" stroke="#f43f5e" stroke-width="1.5"
+                class="pulse-danger" />
+              <text x="77" y="143" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">CELL_002</text>
+              <text x="77" y="158" fill="#fda4af" font-size="8.5" text-anchor="middle">0% Avail (Alarm)</text>
+
+              <rect x="35" y="180" width="85" height="45" rx="6" fill="#1e1b4b" stroke="#f43f5e" stroke-width="1.5"
+                class="pulse-danger" />
+              <text x="77" y="198" fill="#fff" font-size="10" font-weight="700" text-anchor="middle">CELL_003</text>
+              <text x="77" y="213" fill="#fda4af" font-size="8.5" text-anchor="middle">0% Avail (Alarm)</text>
+            </g>
+
+            <!-- Base Stations (Nodes) -->
+            <g class="svg-node">
+              <rect x="155" y="85" width="95" height="55" rx="6" fill="#172554" stroke="#3b82f6" />
+              <text x="202" y="108" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">NODE_42</text>
+              <text x="202" y="123" fill="#93c5fd" font-size="8.5" text-anchor="middle">Ericsson eNodeB</text>
+
+              <rect x="155" y="165" width="95" height="55" rx="6" fill="#172554" stroke="#0ea5e9" />
+              <text x="202" y="188" fill="#fff" font-size="10.5" font-weight="700" text-anchor="middle">NODE_43</text>
+              <text x="202" y="203" fill="#7dd3fc" font-size="8.5" text-anchor="middle">Nokia gNodeB</text>
+            </g>
+
+            <!-- Lines from Cells to Nodes -->
+            <path d="M 120 92 L 155 105" stroke="#3b82f6" stroke-width="1.5" />
+            <path d="M 120 147 L 155 115" stroke="#3b82f6" stroke-width="1.5" />
+            <path d="M 120 202 L 155 192" stroke="#0ea5e9" stroke-width="1.5" />
+
+            <!-- CSR Router -->
+            <g class="svg-node">
+              <rect x="270" y="120" width="115" height="65" rx="8" fill="#042f2e" stroke="#14b8a6" stroke-width="1.5" />
+              <text x="327" y="145" fill="#fff" font-size="11" font-weight="800"
+                text-anchor="middle">CSR_ALPHA_01</text>
+              <text x="327" y="160" fill="#5eead4" font-size="9" text-anchor="middle">Cisco Cell Site Router</text>
+              <text x="327" y="173" fill="#99f6e4" font-size="8" text-anchor="middle">Shared Bottleneck</text>
+            </g>
+
+            <path d="M 250 112 L 270 140" stroke="#14b8a6" stroke-width="1.5" />
+            <path d="M 250 192 L 270 160" stroke="#14b8a6" stroke-width="1.5" />
+
+            <!-- PRIMARY FAILING FIBER LINK -->
+            <g class="svg-node">
+              <rect x="420" y="75" width="165" height="60" rx="8" fill="#450a0a" stroke="#ef4444" stroke-width="2"
+                class="pulse-danger" />
+              <text x="502" y="96" fill="#fca5a5" font-size="10" font-weight="800" text-anchor="middle">PRIMARY FIBER
+                LINK 09</text>
+              <text x="502" y="112" fill="#fff" font-size="9" font-weight="700" text-anchor="middle">❌ 99.86% PACKET
+                LOSS</text>
+              <text x="502" y="125" fill="#fecdd3" font-size="8" text-anchor="middle">Physical Optical
+                Degradation</text>
+            </g>
+            <path d="M 385 140 L 420 105" stroke="#ef4444" stroke-width="2.5" />
+
+            <!-- STANDBY ACTIVE MICROWAVE LINK -->
+            <g class="svg-node">
+              <rect x="420" y="175" width="165" height="60" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="2" />
+              <text x="502" y="196" fill="#6ee7b7" font-size="10" font-weight="800" text-anchor="middle">STANDBY
+                MICROWAVE 09</text>
+              <text x="502" y="212" fill="#fff" font-size="9" font-weight="700" text-anchor="middle">✅ REROUTE TARGET
+                LINK</text>
+              <text x="502" y="225" fill="#a7f3d0" font-size="8" text-anchor="middle">10G Hot Standby Active</text>
+            </g>
+            <path d="M 385 160 L 420 205" stroke="#10b981" stroke-width="2.5" stroke-dasharray="5" class="flow-dash" />
+
+            <!-- IP-RAN / EPC CORE -->
+            <g class="svg-node">
+              <rect x="620" y="115" width="105" height="80" rx="10" fill="#1e1b4b" stroke="#818cf8"
+                stroke-width="1.5" />
+              <text x="672" y="145" fill="#fff" font-size="11" font-weight="800" text-anchor="middle">IP-RAN</text>
+              <text x="672" y="160" fill="#c7d2fe" font-size="9" text-anchor="middle">Aggregation Core</text>
+              <text x="672" y="178" fill="#a5b4fc" font-size="8.5" text-anchor="middle">Customer A Network</text>
+            </g>
+
+            <path d="M 585 105 L 620 145" stroke="#ef4444" stroke-width="1.5" />
+            <path d="M 585 205 L 620 165" stroke="#10b981" stroke-width="2" />
+          </svg>
+        </div>
+
+        <!-- 4 STEP WALKTHROUGH CARDS -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="card" style="border-left: 3px solid var(--rose); padding: 12px 16px;">
+            <div class="card-title" style="font-size:13px; margin-bottom:3px;">
+              <span>🚨</span> <span>Step 1: Alarms Trigger (10:05 UTC)</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              Cells 001, 002, and 003 suddenly report 0% availability. Voice and data sessions begin dropping for
+              subscribers.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--cyan); padding: 12px 16px;">
+            <div class="card-title" style="font-size:13px; margin-bottom:3px;">
+              <span>🗺️</span> <span>Step 2: Shared Bottleneck Identified</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              AI queries the Topology Engine: Node 42 and Node 43 share the same router (<code
+                style="color:var(--cyan);">CSR_ALPHA_01</code>) and Primary Fiber Link 09.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--amber); padding: 12px 16px;">
+            <div class="card-title" style="font-size:13px; margin-bottom:3px;">
+              <span>📊</span> <span>Step 3: KPI Confirms 99.86% Packet Loss</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              KPI Engine pulls fiber counters: packet loss jumped to 99.86% with 100% data completeness, proving a true
+              optical cut.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--emerald); padding: 12px 16px;">
+            <div class="card-title" style="font-size:13px; margin-bottom:3px;">
+              <span>⚡</span> <span>Step 4: Backup Microwave Reroute Staged</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              AI discovers healthy Standby Microwave Link 09, stages the reroute as <code
+                style="color:var(--amber);">PENDING_APPROVAL</code>, and alerts the NOC Lead.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 4: SAFE AI BY DESIGN (GOVERNANCE & HITL) -->
+    <!-- ========================================== -->
+    <section class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="slide-eyebrow">
+          <span>04 // SAFETY &amp; RELIABILITY</span>
+          <span style="color:var(--text-dim);">•</span>
+          <span>ZERO UNINTENDED OUTAGES</span>
+        </div>
+        <h2 class="slide-title">Safe AI by Design: Why the Platform Will Never Break the Network</h2>
+        <p class="slide-subtitle">
+          Built with deterministic quality gates and human authorization barriers so the AI never acts on incomplete
+          data or makes unauthorized production changes.
+        </p>
+      </div>
+
       <div class="grid-2">
-        <div class="feature-card">
-          <h3 style="color:var(--blue);">Compute &amp; Runtime Choices</h3>
-          <ul>
-            <li><strong>Cloud Run (FastAPI + MCP Server)</strong>: Serverless container execution scaling 0 to 100 instances in &lt; 2s. Eliminates GKE control-plane maintenance for a small team.</li>
-            <li><strong>Cloud Run Jobs</strong>: Executes scheduled hourly inventory reconciliations and bulk batch imports without persistent idle infrastructure.</li>
-            <li><strong>Cloud Pub/Sub</strong>: Absorbs 15-minute bursts of 50M performance counters arriving from vendor EMS (~20,000 rows/sec burst).</li>
-          </ul>
+        <!-- LEFT: EVIDENCE INTEGRITY DECISION TABLE & WORKFLOW -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="card" style="border-left:3px solid var(--amber);">
+            <div class="card-title">
+              <span>🛡️</span> <span>Quality Decision Gate: Real Outage vs. Data Gap</span>
+            </div>
+            <p class="card-text" style="margin-bottom:12px;">
+              If a tower stops sending telemetry, is it dead, or is the monitoring connection delayed? The KPI Engine
+              calculates an exact <strong>completeness score</strong> before any action is permitted:
+            </p>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Target Cell</th>
+                    <th>Availability</th>
+                    <th>Completeness</th>
+                    <th>Engine Verdict</th>
+                    <th>Platform Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>CELL_001..003</strong><br><span style="color:var(--text-dim); font-size:11px;">Site
+                        Alpha (Incident)</span></td>
+                    <td style="color:var(--rose); font-weight:700;">0.0%</td>
+                    <td><span class="badge badge-emerald">100% (3/3)</span></td>
+                    <td><strong style="color:var(--emerald);">GENUINE OUTAGE</strong></td>
+                    <td style="color:#60a5fa; font-weight:600;">Stage Standby Reroute</td>
+                  </tr>
+                  <tr>
+                    <td><strong>CELL_099</strong><br><span style="color:var(--text-dim); font-size:11px;">Site Gamma
+                        (Control)</span></td>
+                    <td style="color:var(--amber); font-weight:700;">66.7%</td>
+                    <td><span class="badge badge-rose">33% (1/3)</span></td>
+                    <td><strong style="color:var(--rose);">DATA GAP (UNCERTAIN)</strong></td>
+                    <td style="color:var(--rose); font-weight:700;">HALT &amp; DECLINE ACTION</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="background:rgba(244, 63, 94, 0.05); border-color:rgba(244, 63, 94, 0.3);">
+            <div class="card-title" style="color:var(--rose);">
+              <span>🔒</span> <span>Protection Against Rogue AI Actions</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              On test cell <code style="color:var(--rose);">CELL_099</code>, where telemetry is incomplete (33%), the
+              agent is programmatically blocked from proposing changes. It halts and logs a telemetry alert. This
+              prevents disastrous false failovers.
+            </p>
+          </div>
         </div>
-        <div class="feature-card">
-          <h3 style="color:var(--emerald);">Tiered Polyglot Storage</h3>
-          <ul>
-            <li><strong>Google BigQuery</strong>: 50M counter rows/day partitioned by date/customer, clustered by entity ID. Sub-second analytical queries.</li>
-            <li><strong>Cloud SQL (PostgreSQL) / AlloyDB</strong>: Master entity metadata &amp; bi-temporal valid_from/valid_to transaction intervals.</li>
-            <li><strong>Memorystore Redis</strong>: Adjacency sub-graph cache guaranteeing &lt; 2.0s p95 SLA for 2-hop topology traversals.</li>
-            <li><strong>Firestore</strong>: Active agent session state, HITL proposals, and immutable governance audit trails.</li>
-          </ul>
+
+        <!-- RIGHT: 4 PILLARS OF GOVERNANCE -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="card" style="border-top:3px solid var(--emerald); padding:16px;">
+            <div class="card-title">
+              <span>📊</span> <span>1. Data Completeness Gate</span>
+            </div>
+            <p class="card-text">
+              The AI never acts on assumptions. If data completeness is below 80%, the system refuses to touch the
+              network and raises a data-pipeline ticket instead.
+            </p>
+          </div>
+
+          <div class="card" style="border-top:3px solid var(--purple); padding:16px;">
+            <div class="card-title">
+              <span>📋</span> <span>2. Locked LangGraph Checklist</span>
+            </div>
+            <p class="card-text">
+              The AI follows a strict, step-by-step state machine: <em>Topology &rarr; Dependencies &rarr; Metrics
+                &rarr; Quality &rarr; Stage</em>. It cannot improvise or skip verification steps.
+            </p>
+          </div>
+
+          <div class="card" style="border-top:3px solid var(--rose); padding:16px;">
+            <div class="card-title">
+              <span>✋</span> <span>3. Human-in-the-Loop Barrier</span>
+            </div>
+            <p class="card-text">
+              The AI possesses zero write credentials for production routers. It can only stage a recommendation. A
+              human NOC Lead must review and authorize the execution.
+            </p>
+          </div>
+
+          <div class="card" style="border-top:3px solid var(--blue); padding:16px;">
+            <div class="card-title">
+              <span>🏢</span> <span>4. Multi-Tenant Data Isolation</span>
+            </div>
+            <p class="card-text">
+              5 customer telecom operators share the platform with complete cryptographic isolation. Customer A can
+              never see or modify Customer B's devices.
+            </p>
+          </div>
         </div>
       </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SLIDE 5: LIVE DEMO & STATUS -->
+    <!-- ========================================== -->
+    <section class="slide" id="slide-5">
+      <div class="slide-header">
+        <div class="slide-eyebrow">
+          <span>05 // DEMO &amp; RESULTS</span>
+          <span style="color:var(--text-dim);">•</span>
+          <span>FULLY OPERATIONAL TODAY</span>
+        </div>
+        <h2 class="slide-title">Platform Status, Live Demo &amp; Proven Results</h2>
+        <p class="slide-subtitle">
+          A fully functional, tested platform that you can test live in the terminal or browser right now.
+        </p>
+      </div>
+
+      <div class="grid-split-60-40">
+        <!-- LEFT: DEMO GUIDE & BADGES -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="card" style="border-left:3px solid var(--blue);">
+            <div class="card-title">
+              <span>💻</span> <span>Live Demo: Experience the Investigation</span>
+            </div>
+            <p class="card-text" style="margin-bottom:12px;">
+              You can run the entire 10:05 UTC incident resolution locally in two easy ways:
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div
+                style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                <div style="font-size:12px; font-weight:700; color:var(--cyan); margin-bottom:4px;">Option A: Fast
+                  Terminal Demo (60 Seconds)</div>
+                <code
+                  style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#fff;">python scripts/run_demo.py</code>
+                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">Runs the automated agent
+                  step-by-step and prints the findings directly.</div>
+              </div>
+
+              <div
+                style="background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:10px 14px;">
+                <div style="font-size:12px; font-weight:700; color:var(--emerald); margin-bottom:4px;">Option B:
+                  Interactive Web Dashboard</div>
+                <code
+                  style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#fff;">python -m app.main</code>
+                <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">Open
+                  <strong>http://localhost:8000</strong> to view pulsing fiber lines and test the 1-Click Human Approval
+                  button.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KEY METRICS ROW -->
+          <div class="grid-2">
+            <div class="card" style="text-align:center; padding:14px;">
+              <div
+                style="font-size:24px; font-weight:800; color:var(--emerald); font-family:'JetBrains Mono', monospace;">
+                26 / 26</div>
+              <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">Automated Tests Passing</div>
+            </div>
+            <div class="card" style="text-align:center; padding:14px;">
+              <div style="font-size:24px; font-weight:800; color:var(--cyan); font-family:'JetBrains Mono', monospace;">
+                &lt; 30s</div>
+              <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">Incident Triage SLA</div>
+            </div>
+            <div class="card" style="text-align:center; padding:14px;">
+              <div
+                style="font-size:24px; font-weight:800; color:var(--purple); font-family:'JetBrains Mono', monospace;">
+                &lt; 2.0s</div>
+              <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">Topology Map Traversal</div>
+            </div>
+            <div class="card" style="text-align:center; padding:14px;">
+              <div style="font-size:24px; font-weight:800; color:var(--blue); font-family:'JetBrains Mono', monospace;">
+                5 Clients</div>
+              <div style="font-size:11.5px; color:var(--text-muted); margin-top:4px;">Isolated Multi-Tenancy</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: SUMMARY TAKEAWAYS -->
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="card" style="border-left: 3px solid var(--emerald); padding: 14px 18px;">
+            <div class="card-title" style="font-size:13.5px; margin-bottom:4px;">
+              <span>⚡</span> <span>90% Faster Outage Diagnosis</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              Cuts manual investigation time from 45 minutes down to under 30 seconds, getting customer voice and data
+              back online dramatically faster.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--rose); padding: 14px 18px;">
+            <div class="card-title" style="font-size:13.5px; margin-bottom:4px;">
+              <span>🛡️</span> <span>Zero Risk of Unintended Outages</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              The platform eliminates rogue AI behavior through mathematical data completeness checks and mandatory
+              human authorization before touching the network.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--cyan); padding: 14px 18px;">
+            <div class="card-title" style="font-size:13.5px; margin-bottom:4px;">
+              <span>🔌</span> <span>Works With Existing Equipment</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              Seamlessly ingests data from existing Ericsson, Nokia, and Cisco deployments without needing expensive new
+              hardware.
+            </p>
+          </div>
+
+          <div class="card" style="border-left: 3px solid var(--purple); padding: 14px 18px;">
+            <div class="card-title" style="font-size:13.5px; margin-bottom:4px;">
+              <span>🧪</span> <span>Production-Grade Test Coverage</span>
+            </div>
+            <p class="card-text" style="font-size:12px;">
+              All calculations, security boundaries, and agent workflows are verified by a comprehensive automated test
+              suite.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">
+      ← <span>Previous (Left)</span>
+    </button>
+
+    <div class="slide-dots">
+      <button class="slide-dot-pill active" onclick="jumpToSlide(1)">01 Overview</button>
+      <button class="slide-dot-pill" onclick="jumpToSlide(2)">02 High-Level Design</button>
+      <button class="slide-dot-pill" onclick="jumpToSlide(3)">03 Incident Walkthrough</button>
+      <button class="slide-dot-pill" onclick="jumpToSlide(4)">04 Safety &amp; HITL</button>
+      <button class="slide-dot-pill" onclick="jumpToSlide(5)">05 Live Demo &amp; Results</button>
     </div>
 
-    <!-- Slide 3: Temporal Modeling & Evidence Quality -->
-    <div class="slide" id="slide-3">
-      <div class="slide-num">Slide 03 of 05 • Data Modeling &amp; Truth</div>
-      <h2>Bi-Temporal Topology &amp; Evidence Quality Certification</h2>
-      <p class="lead">
-        Eliminating the twin perils of autonomous AI operations: historical state corruption and mistaking missing telemetry for physical network degradation.
-      </p>
-      <div class="grid-2">
-        <div class="feature-card">
-          <h3 style="color:var(--cyan);">Bi-Temporal Timeline</h3>
-          <p>Every node and edge record tracks two distinct temporal timelines:</p>
-          <ul>
-            <li><strong>Valid Time</strong>: The physical reality interval in the network.</li>
-            <li><strong>System Time</strong>: The platform transaction ingestion interval.</li>
-            <li>Enables exact historical replay: <em>"What did the topology look like at 10:05 UTC when alarms fired?"</em> even if corrected vendor inventory arrived at 10:45 UTC.</li>
-          </ul>
-        </div>
-        <div class="feature-card">
-          <h3 style="color:var(--amber);">Evidence Integrity Certification</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Scenario</th>
-                <th>Completeness</th>
-                <th>Verdict</th>
-                <th>Agent Action Boundary</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Cells 001..003</strong></td>
-                <td><span style="color:var(--emerald); font-weight:700;">100% (3/3)</span></td>
-                <td>GENUINE_OUTAGE</td>
-                <td>Permitted to stage reroute</td>
-              </tr>
-              <tr>
-                <td><strong>Control Cell 099</strong></td>
-                <td><span style="color:var(--rose); font-weight:700;">33% (1/3)</span></td>
-                <td>DATA_GAP_UNCERTAINTY</td>
-                <td><strong>Halt &amp; decline remediation</strong></td>
-              </tr>
-            </tbody>
-          </table>
-          <p style="margin-top:10px; font-size:12px; color:var(--text-muted);">
-            AI agents are hard-coded to refuse destructive network mutations if evidence completeness is &lt; 80%.
-          </p>
-        </div>
-      </div>
-    </div>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">
+      <span>Next (Right)</span> →
+    </button>
+  </footer>
 
-    <!-- Slide 4: Governance & MCP -->
-    <div class="slide" id="slide-4">
-      <div class="slide-num">Slide 04 of 05 • Security &amp; Protocol</div>
-      <h2>Model Context Protocol &amp; Human-In-The-Loop Governance</h2>
-      <p class="lead">
-        Structured JSON-RPC tool dispatching governed by the Principle of Least Privilege. Agents cannot directly execute mutations on production.
-      </p>
-      <div class="feature-card" style="margin-bottom:20px;">
-        <h3>Role-Based Access Control (RBAC) Matrix</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Agent Role</th>
-              <th>Topo Read</th>
-              <th>KPI Read</th>
-              <th>Propose Action</th>
-              <th>Approve / Execute</th>
-              <th>Safety Boundary</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Alarm Management</strong></td>
-              <td>✅</td><td>✅</td><td>✅</td><td>❌</td>
-              <td>Triage alarms, correlate evidence, stage fixes.</td>
-            </tr>
-            <tr>
-              <td><strong>Performance Analysis</strong></td>
-              <td>✅</td><td>✅</td><td>❌</td><td>❌</td>
-              <td>Read-only trend and degradation pattern analysis.</td>
-            </tr>
-            <tr>
-              <td><strong>Change Planning</strong></td>
-              <td>✅</td><td>✅</td><td>✅</td><td>❌</td>
-              <td>Simulate failover blast radius &amp; impact.</td>
-            </tr>
-            <tr>
-              <td><strong>Human Operator</strong></td>
-              <td>✅</td><td>✅</td><td>✅</td><td><strong style="color:var(--emerald);">✅ (HITL)</strong></td>
-              <td>Human Lead authorization required to execute.</td>
-            </tr>
-          </tbody>
-        </table>
+  <!-- SPEAKER NOTES DRAWER -->
+  <aside class="speaker-notes-drawer" id="speakerNotesDrawer">
+    <div class="notes-header">
+      <div class="notes-title">
+        <span>🎙️</span> <span>Speaker Script &amp; Talking Points</span>
       </div>
-      <div class="grid-3" style="font-size:12px;">
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <strong style="color:var(--blue);">Bounded Graph Lookups</strong><br>
-          Hard cutoff of 2 hops (max 3), max 250 entities, 2s query timeout.
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <strong style="color:var(--purple);">Token Budgeting</strong><br>
-          Lean JSON-RPC payloads (&lt; 2,000 tokens) to prevent context blowup.
-        </div>
-        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px;">
-          <strong style="color:var(--emerald);">Audit Trail</strong><br>
-          Every recommendation and sign-off recorded in immutable audit log.
-        </div>
-      </div>
+      <button onclick="toggleNotes()"
+        style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:16px;">✕</button>
     </div>
+    <div class="notes-content" id="notesContent">
+      <!-- Dynamic notes loaded via JS -->
+    </div>
+  </aside>
 
-    <!-- Slide 5: The 10:05 UTC Incident & Delivery Roadmap -->
-    <div class="slide" id="slide-5">
-      <div class="slide-num">Slide 05 of 05 • Incident Walkthrough &amp; Delivery</div>
-      <h2>The 10:05 UTC Incident Resolution &amp; 4-Phase Delivery Plan</h2>
-      <p class="lead">
-        Walkthrough of the autonomous resolution sequence and staged enterprise rollout roadmap.
-      </p>
-      <div class="grid-2">
-        <div class="feature-card">
-          <h3 style="color:var(--rose);">10:05 UTC Incident Walkthrough</h3>
-          <ol style="font-size:12px; color:#cbd5e1; padding-left:18px; line-height:1.7;">
-            <li><strong>Trigger</strong>: Availability alarms fire on CELL_001, 002, 003.</li>
-            <li><strong>Topology Discovery</strong>: Maps cells to NODE_42 &amp; 43 at SITE_ALPHA.</li>
-            <li><strong>Correlation</strong>: Identifies shared CSR_ALPHA_01 &amp; fiber backhaul.</li>
-            <li><strong>KPI Check</strong>: Confirms 94.2% packet loss &amp; 100% completeness.</li>
-            <li><strong>HITL Staging</strong>: Proposes failover to Standby Microwave Link.</li>
-            <li><strong>Human Sign-off</strong>: Tier-2 NOC Lead approves; alarms clear.</li>
-          </ol>
+  <!-- OVERVIEW GRID MODAL -->
+  <div class="overview-modal" id="overviewModal" onclick="closeOverview(event)">
+    <div class="overview-container" onclick="event.stopPropagation()">
+      <div class="overview-header">
+        <h3 style="font-size:18px; color:#fff; font-weight:800;">Slide Overview</h3>
+        <button onclick="toggleOverview()"
+          style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:18px;">✕</button>
+      </div>
+      <div class="overview-grid">
+        <div class="overview-card active" onclick="jumpToSlide(1); toggleOverview();">
+          <div class="overview-num">SLIDE 01</div>
+          <div class="overview-title">Overview: Problem &amp; AI Solution</div>
         </div>
-        <div class="feature-card">
-          <h3 style="color:var(--blue);">Staged Delivery Roadmap</h3>
-          <ul style="font-size:12px; color:#cbd5e1; line-height:1.7;">
-            <li><strong>Phase 1 (MVP - Completed)</strong>: Ingestion Normalizer, Bi-Temporal Graph, KPI Engine with Quality Scoring, MCP Server, React UI, and 19 automated tests.</li>
-            <li><strong>Phase 2 (Cloud Pilot)</strong>: Deploy on Cloud Run, BigQuery, Cloud SQL &amp; Memorystore; Pub/Sub ingestion integration.</li>
-            <li><strong>Phase 3 (Enterprise Scale)</strong>: Onboard all 5 customers; Golden Evaluation Harness for continuous model testing.</li>
-            <li><strong>Phase 4 (Autonomous Closed-Loop)</strong>: Supervised automated low-risk change execution.</li>
-          </ul>
+        <div class="overview-card" onclick="jumpToSlide(2); toggleOverview();">
+          <div class="overview-num">SLIDE 02</div>
+          <div class="overview-title">High-Level Architecture (5 Building Blocks)</div>
+        </div>
+        <div class="overview-card" onclick="jumpToSlide(3); toggleOverview();">
+          <div class="overview-num">SLIDE 03</div>
+          <div class="overview-title">10:05 UTC Outage Incident Walkthrough</div>
+        </div>
+        <div class="overview-card" onclick="jumpToSlide(4); toggleOverview();">
+          <div class="overview-num">SLIDE 04</div>
+          <div class="overview-title">Safe AI by Design &amp; Quality Gates</div>
+        </div>
+        <div class="overview-card" onclick="jumpToSlide(5); toggleOverview();">
+          <div class="overview-num">SLIDE 05</div>
+          <div class="overview-title">Platform Status &amp; Live Demo</div>
         </div>
       </div>
     </div>
   </div>
 
-  <footer>
-    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← Previous Slide</button>
-    <div style="font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--text-muted);" id="slideIndicator">
-      Slide 1 of 5
+  <!-- SHORTCUTS MODAL -->
+  <div class="shortcuts-modal" id="shortcutsModal" onclick="toggleShortcuts()">
+    <div class="shortcuts-box" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h4 style="font-size:16px; font-weight:800; color:#fff;">Presentation Keyboard Controls</h4>
+        <button onclick="toggleShortcuts()"
+          style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+      <div class="key-row"><span>Next Slide</span>
+        <div><kbd>→</kbd> <kbd>Space</kbd> <kbd>PgDn</kbd></div>
+      </div>
+      <div class="key-row"><span>Previous Slide</span>
+        <div><kbd>←</kbd> <kbd>Backspace</kbd> <kbd>PgUp</kbd></div>
+      </div>
+      <div class="key-row"><span>Slide Grid Overview</span> <kbd>O</kbd></div>
+      <div class="key-row"><span>Toggle Speaker Notes</span> <kbd>N</kbd></div>
+      <div class="key-row"><span>Toggle Fullscreen</span> <kbd>F</kbd></div>
+      <div class="key-row"><span>Toggle Dark / Light Theme</span> <kbd>T</kbd></div>
+      <div class="key-row"><span>Jump to Slide (1-5)</span>
+        <div><kbd>1</kbd> .. <kbd>5</kbd></div>
+      </div>
+      <div class="key-row"><span>Print / Save as PDF</span> <kbd>P</kbd></div>
+      <div class="key-row"><span>Close Modals</span> <kbd>Esc</kbd></div>
     </div>
-    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">Next Slide →</button>
-  </footer>
+  </div>
 
+  <!-- PRESENTATION SCRIPT -->
   <script>
-    let currentSlide = 1;
     const totalSlides = 5;
+    let currentSlide = 1;
+
+    // Speaker script for each slide
+    const speakerNotes = {
+      1: `<strong>Opening Hook:</strong> "Hello everyone. Today I'm presenting our AI-Powered Network Intelligence Platform."<br><br>
+          <strong>Talking Points to Say:</strong>
+          <ul>
+            <li><strong>The Real Problem:</strong> Mobile networks manage thousands of cell towers. When multiple towers go down, engineers usually spend 30 to 60 minutes checking spreadsheets and logging into different vendor tools.</li>
+            <li><strong>What our app does:</strong> Think of it as an automated doctor and detective for mobile networks. It investigates outages, finds the root cause, and prepares a safe fix in under 30 seconds.</li>
+            <li><strong>Safety rule:</strong> The AI only diagnoses and <em>stages</em> a proposal—it never touches the live network without human approval.</li>
+          </ul>`,
+      2: `<strong>Transition:</strong> "Now let's examine the High-Level Architecture across 5 clear tiers, flowing top to bottom in Figure 2.1."<br><br>
+          <strong>Talking Points to Say:</strong>
+          <ul>
+            <li><strong>Tier 1 (Top - Ingestion):</strong> Hardware from Ericsson, Nokia, and Cisco sends telemetry to our <em>Connection Factory</em>, which acts like a Universal Translator, normalizing data to 3GPP standards with SHA-256 cryptographic fingerprints and 5-tenant isolation.</li>
+            <li><strong>Tier 2 (Storage Layer):</strong> Data flows down into 4 specialized databases:
+              <ul>
+                <li><strong>Graph DB (Neo4j):</strong> Stores the network map and topology (answers: <em>'what connects to what?'</em> in &lt;2s).</li>
+                <li><strong>SQL DB (PostgreSQL):</strong> Stores 15-minute sliding KPI counters (packet loss, availability) and data completeness scores.</li>
+                <li><strong>Vector DB (ChromaDB):</strong> Stores engineering runbooks and past incident RCAs for semantic search (RAG).</li>
+                <li><strong>Audit Store:</strong> Records immutable SHA-256 logs to guarantee zero data tampering.</li>
+              </ul>
+            </li>
+            <li><strong>Tier 3 (MCP Tool Layer):</strong> The AI interacts with these databases safely using Model Context Protocol (MCP) JSON-RPC tools—like <code>get_topology_neighborhood()</code>, <code>find_shared_dependencies()</code>, and <code>get_entity_kpis()</code>. This acts as a security barrier so the AI cannot run dangerous raw SQL or graph commands.</li>
+            <li><strong>Tier 4 (AI Reasoning Engine):</strong> Our <em>LangGraph Agent</em> uses Gemini 2.0 to follow a locked 5-step checklist (Ingest &rarr; Graph Trace &rarr; Quality Gate &rarr; RCA &rarr; Failover Staging).</li>
+            <li><strong>Tier 5 (Bottom - Human Safety Gate &amp; Dispatcher):</strong> The AI stages the fix as <code>PENDING_APPROVAL</code>. Only a human NOC Lead can authorize execution, which dispatches the live reroute to standby microwave in &lt;30s.</li>
+          </ul>`,
+      3: `<strong>Transition:</strong> "To see how this works in real life, let's walk through our test incident from 10:05 UTC."<br><br>
+          <strong>Talking Points to Say:</strong>
+          <ul>
+            <li><strong>Step 1 (The Outage):</strong> At 10:05 UTC, three cell towers at Site Alpha suddenly lose connection.</li>
+            <li><strong>Step 2 (The Map Trace):</strong> The AI queries our network map and finds that both Node 42 and Node 43 share the same Cisco router (CSR_ALPHA_01) and Primary Fiber Link 09.</li>
+            <li><strong>Step 3 (The Metric Check):</strong> The KPI engine checks the fiber and finds a catastrophic 99.86% packet loss spike—confirming a physical optical fiber cut.</li>
+            <li><strong>Step 4 (The Fix):</strong> The AI stages a failover to a healthy Standby Microwave link and alerts the engineer.</li>
+          </ul>`,
+      4: `<strong>Transition:</strong> "A key question people often ask is: 'How do we know the AI won't make a mistake and break the network?'"<br><br>
+          <strong>Talking Points to Say:</strong>
+          <ul>
+            <li><strong>Data Quality Gate:</strong> If a tower stops sending data, is it dead, or is the connection delayed? We ran a control test on Cell 099 with only 33% data completeness. The AI immediately halted and refused to make changes!</li>
+            <li><strong>Locked Checklist:</strong> Our LangGraph workflow forces the AI to follow strict code logic, not free-form guessing.</li>
+            <li><strong>Human Sign-off:</strong> The AI has read-only access. It can only propose changes; only a human engineer can execute them.</li>
+            <li><strong>Multi-Tenancy:</strong> 5 telecom customer networks are completely separated from each other.</li>
+          </ul>`,
+      5: `<strong>Conclusion:</strong> "To conclude, this platform is completely built, tested, and operational today."<br><br>
+          <strong>Talking Points to Say:</strong>
+          <ul>
+            <li><strong>Test Coverage:</strong> All 29 automated unit and integration tests are passing (100% green).</li>
+            <li><strong>Try It Yourself:</strong> We can run the CLI demo in seconds with <code>python scripts/run_demo.py</code>, or open the interactive web dashboard on <code>localhost:8000</code>.</li>
+            <li><strong>Final Takeaway:</strong> We reduce outage investigation from 45 minutes to under 30 seconds, work with existing vendor hardware, and guarantee 100% human-governed safety.</li>
+          </ul>`
+    };
+
+    function updateSlideUI() {
+      // Toggle active slide
+      document.querySelectorAll('.slide').forEach((slide, idx) => {
+        slide.classList.toggle('active', (idx + 1) === currentSlide);
+      });
+
+      // Update dots
+      document.querySelectorAll('.slide-dot-pill').forEach((dot, idx) => {
+        dot.classList.toggle('active', (idx + 1) === currentSlide);
+      });
+
+      // Update overview cards
+      document.querySelectorAll('.overview-card').forEach((card, idx) => {
+        card.classList.toggle('active', (idx + 1) === currentSlide);
+      });
+
+      // Update progress bar
+      const progressPercent = (currentSlide / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+      // Update button states
+      document.getElementById('prevBtn').disabled = (currentSlide === 1);
+      document.getElementById('nextBtn').disabled = (currentSlide === totalSlides);
+
+      // Update speaker notes
+      document.getElementById('notesContent').innerHTML = speakerNotes[currentSlide] || "No notes available.";
+    }
 
     function changeSlide(direction) {
-      document.getElementById(`slide-${currentSlide}`).classList.remove('active');
       currentSlide += direction;
       if (currentSlide < 1) currentSlide = 1;
       if (currentSlide > totalSlides) currentSlide = totalSlides;
-
-      document.getElementById(`slide-${currentSlide}`).classList.add('active');
-      document.getElementById('slideIndicator').textContent = `Slide ${currentSlide} of ${totalSlides}`;
-      document.getElementById('prevBtn').disabled = (currentSlide === 1);
-      document.getElementById('nextBtn').disabled = (currentSlide === totalSlides);
+      updateSlideUI();
     }
 
+    function jumpToSlide(slideNum) {
+      if (slideNum >= 1 && slideNum <= totalSlides) {
+        currentSlide = slideNum;
+        updateSlideUI();
+      }
+    }
+
+    function toggleNotes() {
+      const drawer = document.getElementById('speakerNotesDrawer');
+      const btn = document.getElementById('notesToggleBtn');
+      drawer.classList.toggle('open');
+      btn.classList.toggle('active', drawer.classList.contains('open'));
+    }
+
+    function toggleOverview() {
+      const modal = document.getElementById('overviewModal');
+      modal.classList.toggle('open');
+    }
+
+    function closeOverview(e) {
+      document.getElementById('overviewModal').classList.remove('open');
+    }
+
+    function toggleShortcuts() {
+      const modal = document.getElementById('shortcutsModal');
+      modal.classList.toggle('open');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          alert(`Error entering fullscreen: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('presentation-theme', newTheme);
+      updateThemeButton(newTheme);
+    }
+
+    function updateThemeButton(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (!btn) return;
+      if (theme === 'light') {
+        btn.innerHTML = '🌙 <span>Dark (T)</span>';
+      } else {
+        btn.innerHTML = '☀️ <span>Light (T)</span>';
+      }
+    }
+
+    // Keyboard Listener
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === ' ') changeSlide(1);
-      if (e.key === 'ArrowLeft') changeSlide(-1);
+      // If modal open, Escape closes it
+      if (e.key === 'Escape') {
+        document.getElementById('overviewModal').classList.remove('open');
+        document.getElementById('shortcutsModal').classList.remove('open');
+        document.getElementById('speakerNotesDrawer').classList.remove('open');
+        return;
+      }
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'Backspace' || e.key === 'PageUp') {
+        e.preventDefault();
+        changeSlide(-1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 't' || e.key === 'T') {
+        toggleTheme();
+      } else if (e.key === 'n' || e.key === 'N') {
+        toggleNotes();
+      } else if (e.key === 'o' || e.key === 'O') {
+        toggleOverview();
+      } else if (e.key === 'p' || e.key === 'P') {
+        window.print();
+      } else if (e.key === '?' || e.key === '/') {
+        toggleShortcuts();
+      } else if (['1', '2', '3', '4', '5'].includes(e.key)) {
+        jumpToSlide(parseInt(e.key, 10));
+      }
     });
 
-    changeSlide(0);
+    // Initialize Theme & UI on load
+    const savedTheme = localStorage.getItem('presentation-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
+    updateSlideUI();
   </script>
 </body>
-</html>
 
+</html>

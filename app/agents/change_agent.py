@@ -28,6 +28,10 @@ class ChangeImpactAssessment(BaseModel):
     rollback_strategy: Optional[str] = None
     pre_flight_checks: List[str] = Field(default_factory=list)
     ai_engine_used: Optional[str] = None
+    ai_status: Optional[str] = None
+    ai_model: Optional[str] = None
+    ai_attempts: List[Dict[str, Any]] = Field(default_factory=list)
+    ai_fallback_reason: Optional[str] = None
 
 class ChangePlanningAgent:
     def __init__(self, mcp_registry: MCPToolRegistry):
@@ -39,7 +43,8 @@ class ChangePlanningAgent:
         target_entity_id: str,
         change_type: str,
         agent_id: str = "change-planner-01",
-        as_of: Optional[datetime] = None
+        as_of: Optional[datetime] = None,
+        with_ai: bool = True,
     ) -> ChangeImpactAssessment:
         context = SecurityContext(
             caller_id=agent_id,
@@ -72,16 +77,22 @@ class ChangePlanningAgent:
         if len(cells) > 5:
             risk = "CRITICAL"
 
-        # Synthesize deep risk analysis, rollback strategy, and execution window via AI
-        ai_assessment = get_ai_service().generate_change_risk_assessment(
-            target_entity_id=target_entity_id,
-            change_type=change_type,
-            affected_cells=cells,
-            estimated_subscribers=subscriber_estimate,
-            has_redundancy=has_redundancy,
-            topology_nodes=nodes,
-            calculated_risk=risk
-        )
+        # Synthesize deep risk analysis, rollback strategy, and execution window via AI.
+        # ``with_ai=False`` is used by the incident workflow, which already spent its
+        # LLM budget on the root-cause synthesis and only needs the deterministic
+        # topology blast radius (avoids a second live model call and SLA overrun).
+        if with_ai:
+            ai_assessment = get_ai_service().generate_change_risk_assessment(
+                target_entity_id=target_entity_id,
+                change_type=change_type,
+                affected_cells=cells,
+                estimated_subscribers=subscriber_estimate,
+                has_redundancy=has_redundancy,
+                topology_nodes=nodes,
+                calculated_risk=risk,
+            )
+        else:
+            ai_assessment = {"risk_level": risk}
 
         recommendation = ai_assessment.get("recommendation") or (
             f"Change Impact Analysis for {change_type} on {target_entity_id}: "
@@ -103,6 +114,10 @@ class ChangePlanningAgent:
             suggested_window=ai_assessment.get("suggested_window"),
             rollback_strategy=ai_assessment.get("rollback_strategy"),
             pre_flight_checks=ai_assessment.get("pre_flight_checks", []),
-            ai_engine_used=ai_assessment.get("engine_used")
+            ai_engine_used=ai_assessment.get("engine_used"),
+            ai_status=ai_assessment.get("ai_status"),
+            ai_model=ai_assessment.get("model_used"),
+            ai_attempts=ai_assessment.get("attempts", []),
+            ai_fallback_reason=ai_assessment.get("fallback_reason"),
         )
 

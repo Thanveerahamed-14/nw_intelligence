@@ -1,9 +1,11 @@
 import React from 'react';
-import { Activity, Zap, GitFork, Search, Terminal, AlertTriangle, LineChart, Sliders, UserCheck, Layers, CheckCircle2, XCircle } from 'lucide-react';
+import { Activity, Zap, GitFork, Search, Terminal, AlertTriangle, LineChart, Sliders, UserCheck, Layers, CheckCircle2, XCircle, Sun, Moon, Sparkles } from 'lucide-react';
 
 export default function Navbar({
   tenant,
   setTenant,
+  theme,
+  onToggleTheme,
   role,
   setRole,
   isInvestigating,
@@ -18,12 +20,16 @@ export default function Navbar({
   const vdb = systemStatus?.vector_db || {};
 
   const isAiConnected = !!ai.connected;
+  const lastAiCall = ai.last_call || null;
+  const aiFellBack = isAiConnected && lastAiCall && lastAiCall.ai_status !== 'LIVE';
+  const aiFailover = isAiConnected && lastAiCall &&
+    (lastAiCall.attempts || []).some((a) => a.status === 'FAILED' || a.status === 'SKIPPED');
   const isNeo4jConnected = !!gdb.connected;
   const isVectorOnline = vdb.status === 'ONLINE';
 
   return (
-    <nav className="bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-4 py-2.5 shadow-2xl mb-4">
-      <div className="max-w-[1680px] mx-auto flex items-center justify-between gap-3 flex-wrap">
+    <nav className="app-navbar bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-4 py-3 shadow-2xl mb-5">
+      <div className="nav-layout max-w-[1680px] mx-auto">
         {/* Left: Brand & Incident Badge */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2.5">
@@ -116,6 +122,40 @@ export default function Navbar({
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
             </button>
 
+            {/* Gemini live / failover / fallback state */}
+            <span
+              title={
+                aiFellBack
+                  ? (lastAiCall.fallback_reason || 'Gemini unavailable — deterministic engine used')
+                  : isAiConnected
+                    ? aiFailover
+                      ? `Google Gemini live via ${lastAiCall?.model_used || ai.model} after ${(lastAiCall?.attempts || []).filter((a) => a.status === 'FAILED' || a.status === 'SKIPPED').length} failed model(s)`
+                      : `Google Gemini live (${lastAiCall?.model_used || ai.model})`
+                    : 'No GEMINI_API_KEY configured — deterministic engine'
+              }
+              className={`px-2 py-1 rounded-lg font-semibold flex items-center gap-1.5 border ${
+                aiFellBack
+                  ? 'bg-amber-950/50 text-amber-300 border-amber-700/60'
+                  : aiFailover
+                    ? 'bg-emerald-950/40 text-emerald-300 border-emerald-700/60'
+                    : isAiConnected
+                      ? 'bg-emerald-950/40 text-emerald-300 border-emerald-800/50'
+                      : 'bg-slate-900/60 text-slate-400 border-slate-800'
+              }`}
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>
+                {aiFellBack
+                  ? 'Gemini Fallback'
+                  : isAiConnected
+                    ? (aiFailover ? 'Gemini · failover' : 'Gemini')
+                    : 'Deterministic'}
+              </span>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                aiFellBack ? 'bg-amber-400' : isAiConnected ? 'bg-emerald-400 shadow-sm shadow-emerald-400/50' : 'bg-slate-500'
+              }`}></span>
+            </span>
+
             {/* ChromaDB Vector Store */}
             <button
               onClick={onOpenVectorSearch}
@@ -167,6 +207,17 @@ export default function Navbar({
               <option value="customer_b" className="bg-slate-900 text-slate-200">Customer B</option>
             </select>
           </div>
+
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            aria-label={`Current theme: ${theme}. Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            title={`Current theme: ${theme}. Click to switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            className="theme-toggle"
+          >
+            {theme === 'dark' ? <Moon className="w-4 h-4" aria-hidden="true" /> : <Sun className="w-4 h-4" aria-hidden="true" />}
+            <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
+          </button>
 
           {/* Main Action Trigger */}
           <button

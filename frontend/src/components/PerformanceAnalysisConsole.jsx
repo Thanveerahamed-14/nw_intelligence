@@ -7,6 +7,32 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
   const [isSimulatingLateData, setIsSimulatingLateData] = useState(false);
   const [lateDataStatus, setLateDataStatus] = useState(null);
 
+  const INCIDENT_START = Date.parse('2026-11-10T10:00:00Z');
+  const records = kpiRecords || [];
+  const inWindow = (record) => {
+    const ts = Date.parse(record?.timestamp || '');
+    if (!Number.isFinite(ts)) return false;
+    const isIncident = ts >= INCIDENT_START;
+    return selectedWindow === 'incident' ? isIncident : !isIncident;
+  };
+  const values = (predicate) => records
+    .filter((r) => inWindow(r) && predicate(r))
+    .map((r) => Number(r.value))
+    .filter(Number.isFinite);
+  const pct = (value) => (value == null ? 'n/a' : `${value.toFixed(2)}%`);
+
+  const cellAvailability = values((r) => r.kpi_name === 'CELL_AVAILABILITY');
+  const primaryLoss = values((r) => r.kpi_name === 'TRANSPORT_PACKET_LOSS' && !/STANDBY/i.test(r.entity_id || ''));
+  const standbyLoss = values((r) => r.kpi_name === 'TRANSPORT_PACKET_LOSS' && /STANDBY/i.test(r.entity_id || ''));
+  const windowRecords = records.filter(inWindow);
+  const completeness = windowRecords.length
+    ? windowRecords.reduce((sum, r) => sum + (Number(r.completeness_score) || 0), 0) / windowRecords.length
+    : null;
+
+  const minAvailability = cellAvailability.length ? Math.min(...cellAvailability) : null;
+  const maxPrimaryLoss = primaryLoss.length ? Math.max(...primaryLoss) : null;
+  const maxStandbyLoss = standbyLoss.length ? Math.max(...standbyLoss) : null;
+
   function handleSimulateLateData() {
     setIsSimulatingLateData(true);
     setTimeout(() => {
@@ -72,14 +98,14 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Primary Fiber (10G)</span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                selectedWindow === 'incident' ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                (maxPrimaryLoss ?? 0) > 5 ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
               }`}>
-                {selectedWindow === 'incident' ? 'CRITICAL' : 'NOMINAL'}
+                {(maxPrimaryLoss ?? 0) > 5 ? 'CRITICAL' : 'NOMINAL'}
               </span>
             </div>
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold font-mono text-white">
-                {selectedWindow === 'incident' ? '94.20%' : '0.04%'}
+                {pct(maxPrimaryLoss)}
               </span>
               <span className="text-xs text-slate-400 font-medium">Packet Loss</span>
             </div>
@@ -95,7 +121,7 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
               </span>
             </div>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-emerald-400">0.02%</span>
+              <span className="text-2xl font-bold font-mono text-emerald-400">{pct(maxStandbyLoss)}</span>
               <span className="text-xs text-slate-400 font-medium">Packet Loss</span>
             </div>
             <p className="text-[11px] text-amber-400 font-mono">LINK_BACKHAUL_STANDBY_09</p>
@@ -106,14 +132,14 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Cell Availability</span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                selectedWindow === 'incident' ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                (minAvailability ?? 100) < 90 ? 'bg-rose-950 text-rose-300 border border-rose-500/40' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
               }`}>
-                {selectedWindow === 'incident' ? 'OFFLINE' : '100% UP'}
+                {(minAvailability ?? 100) < 90 ? 'DEGRADED' : 'HEALTHY'}
               </span>
             </div>
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold font-mono text-white">
-                {selectedWindow === 'incident' ? '0.00%' : '100.00%'}
+                {pct(minAvailability)}
               </span>
               <span className="text-xs text-slate-400 font-medium">Availability</span>
             </div>
@@ -125,14 +151,20 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Evidence Integrity</span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40">
-                100% GENUINE
+                {completeness == null ? 'NO DATA' : `${Math.round(completeness * 100)}% COMPLETE`}
               </span>
             </div>
             <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-emerald-400">1.00</span>
-              <span className="text-xs text-slate-400 font-medium">Completeness (3/3)</span>
+              <span className="text-2xl font-bold font-mono text-emerald-400">
+                {completeness == null ? 'n/a' : completeness.toFixed(2)}
+              </span>
+              <span className="text-xs text-slate-400 font-medium">Completeness ({windowRecords.length} records)</span>
             </div>
-            <p className="text-[11px] text-slate-400">Zero data gaps detected</p>
+            <p className="text-[11px] text-slate-400">
+              {completeness == null
+                ? 'No telemetry in selected window'
+                : completeness >= 0.8 ? 'Sufficient evidence for automated action' : 'Insufficient evidence — agent will decline remediation'}
+            </p>
           </div>
         </div>
 

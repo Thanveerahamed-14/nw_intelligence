@@ -4,7 +4,7 @@ Handles delayed telemetry (up to 2 hours), watermarking, incremental recalculati
 and evidence integrity verification for autonomous agents.
 """
 
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime, timedelta, timezone
 from app.kpi_engine.models import KPIRecord, PerformanceCounterRecord, DataQualityStatus
 from app.kpi_engine.calculator import KPICalculator

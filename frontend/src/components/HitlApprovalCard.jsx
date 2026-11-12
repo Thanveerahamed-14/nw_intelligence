@@ -7,8 +7,14 @@ export default function HitlApprovalCard({
   onReject,
   role
 }) {
-  const [operatorComment, setOperatorComment] = useState('Verified redundant microwave capacity and alarm correlation. Approved.');
+  const [operatorComment, setOperatorComment] = useState('Reviewed deterministic bypass path; accepted reduced standby capacity to restore service.');
   const [isApproving, setIsApproving] = useState(false);
+
+  const bypassPath = action?.bypass_path || null;
+  const capacity = bypassPath?.capacity || null;
+  const capacityConstrained = capacity?.sufficient_for_full_load === false;
+  const pathChecks = bypassPath?.checks || [];
+  const passedPathChecks = pathChecks.filter((check) => check.passed).length;
 
   const isApproved = action?.status === 'APPROVED' || action?.status === 'EXECUTED';
   const isRejected = action?.status === 'REJECTED';
@@ -18,7 +24,7 @@ export default function HitlApprovalCard({
   async function handleApproveClick() {
     setIsApproving(true);
     try {
-      await onApprove();
+      await onApprove(operatorComment);
     } finally {
       setIsApproving(false);
     }
@@ -102,6 +108,46 @@ export default function HitlApprovalCard({
                 <span className="text-rose-300 font-mono block">{action.rollback_procedure}</span>
               </div>
             </div>
+
+            {bypassPath && (
+              <div className="p-3 rounded-lg bg-cyan-950/40 border border-cyan-800/60 space-y-1.5 font-mono text-[11px]">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-cyan-900/60">
+                  <span className="flex items-center gap-1.5 font-bold text-cyan-300">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Deterministic Bypass Resolution
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold ${
+                    bypassPath.feasible
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                      : 'bg-rose-950/80 text-rose-300 border-rose-500/40'
+                  }`}>
+                    {bypassPath.feasible ? 'PATH VERIFIED' : 'NO CONNECTED PATH'}
+                  </span>
+                </div>
+
+                {bypassPath.path?.length > 0 && (
+                  <div className="text-cyan-200">
+                    <span className="text-slate-400">Path: </span>
+                    {bypassPath.path.join(' → ')}
+                  </div>
+                )}
+                {pathChecks.length > 0 && (
+                  <div className={passedPathChecks === pathChecks.length ? 'text-emerald-300' : 'text-amber-300'}>
+                    <span className="text-slate-400">Rule checks: </span>
+                    {passedPathChecks}/{pathChecks.length} passed
+                  </div>
+                )}
+                {capacity && (
+                  <div className={capacityConstrained ? 'text-amber-300' : 'text-emerald-300'}>
+                    <span className="text-slate-400">Capacity: </span>
+                    {capacity.summary}
+                  </div>
+                )}
+                <div className="pt-1 text-[10px] leading-snug text-slate-500">
+                  {bypassPath.selection_rule}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* RBAC Notice if user role isn't operator */}
@@ -119,7 +165,7 @@ export default function HitlApprovalCard({
             <div className="p-4 rounded-xl bg-emerald-950/30 border border-emerald-500/30 space-y-3">
               <div className="flex items-center gap-2 text-emerald-300 font-semibold">
                 <Key className="w-4 h-4 text-emerald-400" />
-                <span>Authorized Sign-off (Caller: lead_operator_sarah)</span>
+                <span>Authorized Sign-off · Human Operator (HITL)</span>
               </div>
 
               <div>
@@ -163,7 +209,8 @@ export default function HitlApprovalCard({
               <div>
                 <strong className="block text-sm font-bold text-emerald-300">Production Reroute Completed &amp; Active!</strong>
                 <p className="text-[11px] text-slate-300 mt-0.5">
-                  Traffic diverted to standby microwave link (LINK_BACKHAUL_STANDBY_09). Cell availability restored across CELL_001, CELL_002, and CELL_003. Immutable cryptographic audit log created.
+                  Traffic diverted to standby link {bypassPath?.standby?.id || 'resolved by the topology engine'}.
+                  Cell availability restored across the affected cells. Immutable cryptographic audit log created.
                 </p>
               </div>
             </div>

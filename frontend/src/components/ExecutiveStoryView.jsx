@@ -14,6 +14,17 @@ export default function ExecutiveStoryView({
   const isApproved = stagedAction?.status === 'APPROVED' || stagedAction?.status === 'EXECUTED';
   const isPending = stagedAction?.status === 'PENDING_APPROVAL';
 
+  const parsePct = (value) => {
+    const parsed = parseFloat(String(value ?? ''));
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  const summary = report?.kpi_summary || {};
+  const availability = parsePct(summary.cell_availability);
+  const packetLoss = parsePct(summary.csr_packet_loss);
+  const availabilityLabel = availability == null ? 'n/a' : `${availability.toFixed(2)}% Availability`;
+  const lossLabel = packetLoss == null ? 'n/a' : `${packetLoss.toFixed(2)}% Packet Drop`;
+  const affectedCellCount = report?.affected_entities?.length ?? 3;
+
   return (
     <div className="space-y-4">
       {/* Interactive App Banner */}
@@ -62,10 +73,10 @@ export default function ExecutiveStoryView({
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-rose-600 uppercase tracking-wider">1. The Alarm</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-              0% Availability
+              {availabilityLabel}
             </span>
           </div>
-          <div className="text-lg font-bold text-slate-900">3 Towers Offline</div>
+          <div className="text-lg font-bold text-slate-900">{affectedCellCount} Towers Offline</div>
           <div className="text-xs text-slate-600 space-y-1 bg-slate-50 p-2.5 rounded-lg border border-slate-200/80 font-mono">
             <div className="flex justify-between"><span>Ericsson 5G:</span><strong className="text-slate-800">CELL_001, CELL_002</strong></div>
             <div className="flex justify-between"><span>Nokia 4G:</span><strong className="text-slate-800">CELL_003</strong></div>
@@ -77,7 +88,7 @@ export default function ExecutiveStoryView({
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wider">2. AI Diagnosis</span>
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-              94.2% Packet Drop
+              {lossLabel}
             </span>
           </div>
           <div className="text-lg font-bold text-slate-900">Physical Fiber Cut</div>
@@ -120,7 +131,7 @@ export default function ExecutiveStoryView({
           <div className="flex flex-col items-center text-center p-3 rounded-lg bg-white border border-rose-200 shadow-sm min-w-[130px]">
             <Radio className="w-6 h-6 text-rose-600 mb-1" />
             <span className="text-xs font-bold text-slate-900">3 Cell Antennas</span>
-            <span className="text-[10px] text-rose-600 font-bold">0% Availability</span>
+            <span className="text-[10px] text-rose-600 font-bold">{availabilityLabel}</span>
             <span className="text-[10px] text-slate-400 font-mono">CELL_001, 002, 003</span>
           </div>
 
@@ -142,7 +153,7 @@ export default function ExecutiveStoryView({
               <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping shrink-0"></span>
               <div className="text-[11px]">
                 <strong className="text-rose-700 block">Primary Fiber (Failing)</strong>
-                <span className="text-slate-500 font-mono text-[10px]">94.2% Packet Drop</span>
+                <span className="text-slate-500 font-mono text-[10px]">{lossLabel}</span>
               </div>
             </div>
 
@@ -150,7 +161,7 @@ export default function ExecutiveStoryView({
               <Wifi className="w-4 h-4 text-emerald-600 shrink-0" />
               <div className="text-[11px]">
                 <strong className="text-emerald-800 block">Backup Microwave (Healthy)</strong>
-                <span className="text-slate-500 font-mono text-[10px]">0.02% Loss &bull; 10G Ready</span>
+                <span className="text-slate-500 font-mono text-[10px]">Standby path ready &bull; 10G</span>
               </div>
             </div>
           </div>

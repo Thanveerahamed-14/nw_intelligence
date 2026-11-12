@@ -1,90 +1,7 @@
 import React from 'react';
-import { Bot, Terminal, CheckCircle2, Clock, Cpu, Zap, ArrowRight, ShieldCheck, Database, Network, Sparkles, Activity, Wrench } from 'lucide-react';
-
-// Formats inline bold (**text**) and inline code (`entity`) into React elements
-function formatInlineMarkdown(text) {
-  if (!text) return null;
-  const parts = [];
-  const regex = /(\*\*[^*]+\*\*|`[^`]+`)/g;
-  let lastIndex = 0;
-  let match;
-
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      parts.push(text.substring(lastIndex, match.index));
-    }
-    const token = match[0];
-    if (token.startsWith('**') && token.endsWith('**')) {
-      parts.push(
-        <strong key={match.index} className="font-semibold text-white">
-          {token.slice(2, -2)}
-        </strong>
-      );
-    } else if (token.startsWith('`') && token.endsWith('`')) {
-      parts.push(
-        <code key={match.index} className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-[11px] font-semibold">
-          {token.slice(1, -1)}
-        </code>
-      );
-    }
-    lastIndex = regex.lastIndex;
-  }
-  if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex));
-  }
-  return parts;
-}
-
-// Renders markdown text as structured blocks with headers, bullet points, and code tags
-function FormattedMarkdownBlock({ text, className = '' }) {
-  if (!text) return null;
-
-  // Clean out leading preamble fluff like "Here is the Root Cause..."
-  const cleanText = text
-    .replace(/^(?:Here is (?:the|a)\s+[^:\n]+:?\s*(?:---\s*)?)/i, '')
-    .replace(/^---\s*/g, '')
-    .trim();
-
-  const lines = cleanText.split('\n');
-
-  return (
-    <div className={`space-y-1.5 text-xs ${className}`}>
-      {lines.map((line, idx) => {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed === '---') return null;
-
-        // Header match
-        const headerMatch = trimmed.match(/^#{1,4}\s*(.*)/);
-        if (headerMatch) {
-          return (
-            <div key={idx} className="font-bold text-slate-100 pt-1 text-xs">
-              {headerMatch[1]}
-            </div>
-          );
-        }
-
-        // Bullet point match (* item, - item, or numbered 1. item)
-        const bulletMatch = trimmed.match(/^[\*\-•]\s*(.*)/);
-        if (bulletMatch) {
-          return (
-            <div key={idx} className="flex items-start gap-2 pl-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 shrink-0 shadow-sm shadow-cyan-400/80" />
-              <span className="text-slate-300 leading-relaxed">
-                {formatInlineMarkdown(bulletMatch[1])}
-              </span>
-            </div>
-          );
-        }
-
-        return (
-          <p key={idx} className="text-slate-300 leading-relaxed">
-            {formatInlineMarkdown(trimmed)}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
+import { Bot, Terminal, CheckCircle2, Clock, Cpu, Zap, ArrowRight, ShieldCheck, Database, Network, Activity, Wrench, AlertTriangle } from 'lucide-react';
+import AiEngineBadge from './AiEngineBadge';
+import FormattedMarkdownBlock from './MarkdownText';
 
 export default function AgentTraceConsole({ report, isInvestigating, onTrigger }) {
   // Helper to render observations in a human-friendly structured manner
@@ -132,35 +49,55 @@ export default function AgentTraceConsole({ report, isInvestigating, onTrigger }
     }
 
     if (step.step_number === 3) {
-      // KPI comparison
+      // KPI comparison — derived from the KPI records collected by the tool.
+      const records = Object.values(obs || {}).flat().filter((r) => r && typeof r === 'object');
+      const numeric = (name) => records
+        .filter((r) => r.kpi_name === name)
+        .map((r) => Number(r.value))
+        .filter(Number.isFinite);
+      const availabilities = numeric('CELL_AVAILABILITY');
+      const losses = numeric('TRANSPORT_PACKET_LOSS');
+      const minAvailability = availabilities.length ? Math.min(...availabilities) : null;
+      const maxLoss = losses.length ? Math.max(...losses) : null;
+      const fmt = (v) => (v == null ? 'n/a' : `${v.toFixed(2)}%`);
+
       return (
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="p-2.5 rounded-lg bg-rose-950/40 border border-rose-500/40 text-rose-200">
             <span className="block text-[10px] font-bold uppercase text-rose-400">Cell Availability</span>
-            <span className="text-base font-bold font-mono text-rose-300">0.0%</span>
-            <span className="text-[11px] text-rose-400/80 block">Collapsed from 100% nominal</span>
+            <span className="text-base font-bold font-mono text-rose-300">{fmt(minAvailability)}</span>
+            <span className="text-[11px] text-rose-400/80 block">
+              {availabilities.length} sampled value(s) · 90% threshold
+            </span>
           </div>
           <div className="p-2.5 rounded-lg bg-amber-950/40 border border-amber-500/40 text-amber-200">
-            <span className="block text-[10px] font-bold uppercase text-amber-400">Router Backhaul Loss</span>
-            <span className="text-base font-bold font-mono text-amber-300">94.2%</span>
-            <span className="text-[11px] text-amber-400/80 block">Interface packet discards</span>
+            <span className="block text-[10px] font-bold uppercase text-amber-400">Transport Packet Loss</span>
+            <span className="text-base font-bold font-mono text-amber-300">{fmt(maxLoss)}</span>
+            <span className="text-[11px] text-amber-400/80 block">
+              {losses.length} sampled value(s) · 5% threshold
+            </span>
           </div>
         </div>
       );
     }
 
     if (step.step_number === 4) {
-      // Data quality
+      // Data quality — summarised from the per-entity verdicts returned by the tool.
+      const entries = Object.values(obs || {}).filter((v) => v && typeof v === 'object');
+      const genuine = entries.filter((v) => v.verdict === 'GENUINE_NETWORK_PROBLEM').length;
+      const uncertain = entries.filter((v) => v.verdict === 'DATA_GAP_OR_UNCERTAINTY' || v.verdict === 'NO_DATA').length;
+      const verdict = genuine > 0 ? 'GENUINE_NETWORK_PROBLEM' : (entries[0]?.verdict || 'UNKNOWN');
       return (
         <div className="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 text-xs space-y-1">
           <div className="flex items-center justify-between font-bold">
             <span className="text-emerald-300">Data Integrity Verdict:</span>
             <span className="px-2 py-0.5 rounded-full bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 text-[10px]">
-              {obs.verdict || 'GENUINE_NETWORK_PROBLEM'}
+              {verdict}
             </span>
           </div>
           <p className="text-[11px] text-emerald-300/80">
-            Completeness score: <strong className="text-white font-mono">100%</strong> ({obs.sample_count || 3} of {obs.expected_samples || 3} counter samples present). Confirmed physical issue, not a telemetry gap.
+            {genuine} of {entries.length} assessed entities confirmed as a genuine network problem
+            {uncertain > 0 ? `; ${uncertain} show telemetry gaps or no data` : ''}.
           </p>
         </div>
       );
@@ -192,7 +129,7 @@ export default function AgentTraceConsole({ report, isInvestigating, onTrigger }
         <div className="space-y-2.5 text-xs">
           {/* Card 1: Root Cause Diagnosis */}
           {diagnosisText && (
-            <div className="p-3 rounded-lg bg-slate-950/90 border border-rose-500/40 shadow-xl space-y-1.5">
+            <div className="ai-response-card ai-diagnosis">
               <div className="flex items-center justify-between pb-1 border-b border-slate-800">
                 <span className="font-bold text-rose-300 flex items-center gap-1.5 text-[11px] tracking-wide uppercase">
                   <Activity className="w-3.5 h-3.5 text-rose-400" />
@@ -208,7 +145,7 @@ export default function AgentTraceConsole({ report, isInvestigating, onTrigger }
 
           {/* Card 2: Safe Remediation Recommendation */}
           {recommendationText && (
-            <div className="p-3 rounded-lg bg-slate-950/90 border border-indigo-500/40 shadow-xl space-y-1.5">
+            <div className="ai-response-card ai-remediation">
               <div className="flex items-center justify-between pb-1 border-b border-slate-800">
                 <span className="font-bold text-indigo-300 flex items-center gap-1.5 text-[11px] tracking-wide uppercase">
                   <Wrench className="w-3.5 h-3.5 text-indigo-400" />
@@ -240,13 +177,14 @@ export default function AgentTraceConsole({ report, isInvestigating, onTrigger }
             </div>
           )}
 
-          {/* AI Engine Badge */}
-          {obs.engine_used && (
-            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-mono pt-0.5">
-              <Sparkles className="w-3 h-3 text-purple-400" />
-              <span>Synthesized by <strong className="text-purple-300">{obs.engine_used}</strong></span>
-            </div>
-          )}
+          {/* AI Engine Badge — reflects the real call outcome, including failures */}
+          <AiEngineBadge
+            status={obs.ai_engine?.status}
+            model={obs.ai_engine?.model}
+            attempts={obs.ai_engine?.attempts}
+            fallbackReason={obs.ai_engine?.fallback_reason}
+            engineUsed={obs.engine_used}
+          />
         </div>
       );
     }
@@ -353,24 +291,47 @@ export default function AgentTraceConsole({ report, isInvestigating, onTrigger }
             })}
 
             {/* Root Cause Conclusion Box */}
-            <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 space-y-2 shadow-2xl">
+            <div className="ai-conclusion">
               <div className="flex items-center justify-between font-bold text-xs text-emerald-300">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span>Synthesized Incident Conclusion:</span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 font-semibold">
-                  SLA TARGET MET
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-md border font-semibold ${
+                  report.sla_target_met
+                    ? 'bg-emerald-900/60 text-emerald-300 border-emerald-500/40'
+                    : 'bg-amber-900/60 text-amber-300 border-amber-500/40'
+                }`}>
+                  {report.sla_target_met ? 'SLA TARGET MET' : 'SLA TARGET MISSED'}
                 </span>
               </div>
               <div className="p-3 rounded-lg bg-slate-950/80 border border-emerald-500/30">
                 <FormattedMarkdownBlock text={report.root_cause_summary} />
               </div>
-              <div className="text-[11px] text-emerald-300 pt-1 font-semibold flex items-center gap-1.5">
-                <ArrowRight className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Remediation Proposed: Switch traffic to Standby Microwave Link (Awaiting Human Operator Sign-off)</span>
-              </div>
+              {report.recommended_action ? (
+                <div className="text-[11px] text-emerald-300 pt-1 font-semibold flex items-center gap-1.5">
+                  <ArrowRight className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>
+                    Remediation staged: {report.recommended_action.action_type} on{' '}
+                    {report.recommended_action.target_entity_id} (Awaiting Human Operator Sign-off)
+                  </span>
+                </div>
+              ) : (
+                <div className="text-[11px] text-slate-400 pt-1 font-semibold flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>No production change staged — decision gate declined remediation.</span>
+                </div>
+              )}
             </div>
+
+            {/* Top-level AI outcome banner, so a fallback is never hidden inside step 5 */}
+            <AiEngineBadge
+              status={report.ai_engine?.status}
+              model={report.ai_engine?.model}
+              attempts={report.ai_engine?.attempts}
+              fallbackReason={report.ai_engine?.fallback_reason}
+              engineUsed={report.ai_engine?.engine_used}
+            />
           </>
         )}
       </div>

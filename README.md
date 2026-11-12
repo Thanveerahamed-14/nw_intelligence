@@ -1,6 +1,6 @@
 # Telecom Network Intelligence Platform for Role-Based AI Agents
 
-[![Tests](https://img.shields.io/badge/Test_Suite-25%2F25_Passing-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Test_Suite-29%2F29_Passing-brightgreen.svg)]()
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)]()
 [![LangGraph](https://img.shields.io/badge/Orchestrator-LangGraph_StateGraph-indigo.svg)]()
 [![Vector DB](https://img.shields.io/badge/Vector_DB-ChromaDB-blueviolet.svg)]()
@@ -39,12 +39,14 @@ An **Alarm Management Agent** investigates:
 2. **Do those entities share transport infrastructure or other dependencies?**  
    $\rightarrow$ The Topology Engine traverses upstream to reveal both nodes route backhaul through Cell Site Router `CSR_ALPHA_01` terminating on Primary Fiber Link `LINK_BACKHAUL_09`.
 3. **What were their KPIs before and during the incident?**  
-   $\rightarrow$ Pre-incident (09:45-10:00) showed 100% nominal availability. At 10:03 UTC, packet loss on `LINK_BACKHAUL_09` surged to **94.2%**, collapsing cell availability to 0%.
+   $\rightarrow$ Pre-incident (09:45-10:00) showed 100% nominal availability. During the 10:00-10:15 window, packet loss on `LINK_BACKHAUL_09` reached **99.86%** and the cell availability KPI fell to **33.33%** (the cells were down for two of the three 5-minute samples).
 4. **Is the apparent degradation a network problem, missing data, or an unresolved uncertainty?**  
    $\rightarrow$ The KPI Engine evaluates counter completeness: `completeness_score = 1.0` (all 3 5-min samples present). The degradation is verified as a **GENUINE_NETWORK_PROBLEM** (physical optical backhaul failure), not a telemetry gap.
    *(In contrast, control cell `CELL_099` with missing telemetry receives a `DATA_GAP_OR_UNCERTAINTY` verdict, prompting the agent to halt and decline action).*
 5. **What action should be recommended, and what evidence supports it?**  
    $\rightarrow$ The agent stages a remediation action: **Reroute backhaul traffic via Standby Microwave Link `LINK_BACKHAUL_STANDBY_09`** into `PENDING_APPROVAL` status. A **Human NOC Lead** inspects the blast radius and authorizes execution.
+
+**Who chooses the bypass path?** Not the LLM. `FailoverPathResolver` (`app/topology_engine/failover.py`) reads the topology snapshot and applies fixed rules: find the failed link's two endpoint routers, require the standby link to terminate on both, prefer explicit `STANDBY`/`PROTECTION` marking, then break ties by capacity and ID. It returns `primary`, `standby`, `path`, rule `checks`, and a capacity verdict. The staged action carries this `bypass_path`, and the UI renders it. For this seed the path is verified (`CSR_ALPHA_01 → LINK_BACKHAUL_STANDBY_09 → AGG_ROUTER_01`), but the resolver flags that the 1G standby cannot carry the full 10G primary load — reachability is restored, throughput is degraded.
 
 ---
 
@@ -65,6 +67,56 @@ An **Alarm Management Agent** investigates:
 - **Bi-Temporal Graph Model**: Tracks `valid_time` (real-world truth) and `system_time` (platform transaction time) to answer: *"What did the network topology look like at 10:05 UTC when the alarm fired?"*
 - Bounded k-hop neighbor traversals with **sub-2.0s p95 latency guarantee**.
 - Common ancestor correlation to detect shared transport and site bottlenecks.
+- **Deterministic failover resolution** (`app/topology_engine/failover.py`) that selects a connected standby path, audits the rule checks, and compares capacity against the failed primary before the agent stages a change.
+
+---
+
+## 🕸️ LangGraph Agent Orchestration
+
+The alarm investigation is a compiled **LangGraph `StateGraph`**, not a hand-written
+loop. Each step is a node; the decision to act is a conditional edge, so the
+"don't touch the network without evidence" rule is enforced by the graph topology.
+
+```mermaid
+flowchart LR
+    S([START]) --> T[topology_discovery]
+    T --> D[shared_dependencies]
+    D --> K[kpi_extraction]
+    K --> E[evidence_integrity]
+    E -->|telemetry gaps| H[halt]
+    E -->|KPIs nominal| N[no_action]
+    E -->|degraded + genuine| Y[synthesize_and_stage]
+    H --> F([END])
+    N --> F
+    Y --> F
+```
+
+| Node | Type | What it does |
+| :--- | :--- | :--- |
+| `topology_discovery` | Deterministic tool | 2-hop neighbourhood of the first alarmed cell. |
+| `shared_dependencies` | Deterministic tool | Finds the common transport path across all alarmed cells. |
+| `kpi_extraction` | Deterministic tool | Pulls pre-incident and incident-window telemetry for every entity. |
+| `evidence_integrity` | Deterministic tool + gate | Scores completeness, computes the measured KPIs, and chooses the route. |
+| `halt` | Decision | Telemetry gap → no action; raises a data-pipeline ticket. |
+| `no_action` | Decision | KPIs within thresholds → no action; nothing is staged. |
+| `synthesize_and_stage` | RAG + LLM + HITL | Retrieves runbooks, synthesises the root cause, and stages the change as `PENDING_APPROVAL`. |
+
+The only node that calls the LLM is `synthesize_and_stage`. The call is made
+against a **cascade of Gemini free-tier models** (configured primary first, then
+`GEMINI_FALLBACK_MODELS`). Each model gets `LLM_REQUEST_TIMEOUT_SECONDS` (15 s)
+and the cascade as a whole is bounded by `LLM_TOTAL_BUDGET_SECONDS` (25 s). A
+retired/rate-limited/unavailable model fails over to the next candidate; only
+when **every** candidate fails does the agent use the deterministic telecom
+reasoning engine. The outcome is never hidden: the report carries
+`ai_engine.status` (`LIVE` / `FALLBACK` / `NOT_INVOKED`), the model that answered,
+every failed attempt with its HTTP status, and a `fallback_reason`, which the UI
+renders as a live-vs-fallback badge. The compiled graph keeps an `InMemorySaver`
+checkpoint per investigation thread (`INV-…`), and `to_mermaid()` renders the
+diagram above.
+
+Implementation: [`app/agents/investigation_graph.py`](app/agents/investigation_graph.py)
+(graph and routing) and [`app/agents/alarm_agent.py`](app/agents/alarm_agent.py)
+(thin facade that assembles the public report).
 
 ---
 
@@ -93,7 +145,7 @@ flowchart TD
 
     subgraph Application["Core Service & AI Gateway"]
         API["Cloud Run: FastAPI + MCP Server (JSON-RPC 2.0)"]
-        Vertex["Google Cloud Vertex AI (Gemini 2.0 Flash)"]
+        Vertex["Google Gemini API (model cascade: 3.5 Flash → 2.5 Flash → Lite)"]
         HITL["Human-In-The-Loop (HITL) Gatekeeper"]
     end
 
@@ -205,7 +257,7 @@ For deep architectural and implementation details, refer to the documentation in
 - [`03_KPI_ENGINE_DATA_QUALITY.md`](docs/03_KPI_ENGINE_DATA_QUALITY.md): 15-min aggregation windows, late data watermarking (2 hours), formula registry, evidence integrity.
 - [`04_API_MCP_SPECIFICATION.md`](docs/04_API_MCP_SPECIFICATION.md): REST API & Model Context Protocol specification, JSON-RPC schemas, query bounds, HITL approval state machine.
 - [`05_AGENT_DESIGN_EVALUATION.md`](docs/05_AGENT_DESIGN_EVALUATION.md): Incident walkthrough, deterministic vs LLM boundaries, multi-agent rationale, stopping conditions, continuous evaluation harness.
-- [`06_EXECUTIVE_SLIDES.md`](docs/06_EXECUTIVE_SLIDES.md): 5-slide executive presentation covering platform vision, architecture, governance, and incident resolution.
+- [`06_EXECUTIVE_SLIDES.md`](docs/06_EXECUTIVE_SLIDES.md) / [**Interactive Presentation (HTML)**](docs/presentation.html): 5-slide executive presentation with visual architecture and topology diagrams, speaker notes, and presentation mode.
 - [`07_ASSUMPTIONS_AND_QUESTIONS.md`](docs/07_ASSUMPTIONS_AND_QUESTIONS.md): Explicit assumptions, architectural challenges (MOCN, burst traffic), and open questions for stakeholders.
 
 ---

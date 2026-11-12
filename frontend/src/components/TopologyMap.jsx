@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Network, Layers } from 'lucide-react';
 
-export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
+export default function TopologyMap({ nodes, edges, latencyMs, packetLoss = null, tenant }) {
   const [selectedNode, setSelectedNode] = useState(null);
+  const lossLabel = packetLoss == null ? 'measured transport loss' : `${Number(packetLoss).toFixed(2)}% Packet Loss`;
 
   // Layout node definitions for clean telecommunication topology visualization
   const layout = {
@@ -13,7 +14,7 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
     NODE_43: { x: 200, y: 250, color: '#3b82f6', type: 'gNodeB Baseband', vendor: 'Nokia', label: 'NODE_43', sub: 'AirScale SM' },
     SITE_ALPHA: { x: 340, y: 65, color: '#8b5cf6', type: 'Tower Site', vendor: 'CrownCastle', label: 'SITE_ALPHA', sub: 'Downtown Tower' },
     CSR_ALPHA_01: { x: 340, y: 180, color: '#f59e0b', type: 'Cell Site Router', vendor: 'Cisco', label: 'CSR_ALPHA_01', sub: 'ASR-903 (Shared)' },
-    LINK_BACKHAUL_09: { x: 475, y: 120, color: '#ef4444', type: 'Fiber Backhaul', vendor: 'Cisco', label: 'FIBER_10G', sub: '94.2% Packet Loss' },
+    LINK_BACKHAUL_09: { x: 475, y: 120, color: '#ef4444', type: 'Fiber Backhaul', vendor: 'Cisco', label: 'FIBER_10G', sub: lossLabel },
     LINK_BACKHAUL_STANDBY_09: { x: 475, y: 240, color: '#eab308', type: 'Standby Microwave', vendor: 'SIAE', label: 'MW_STANDBY', sub: 'Protection Link' },
     AGG_ROUTER_01: { x: 595, y: 180, color: '#10b981', type: 'Agg Router', vendor: 'Juniper', label: 'AGG_01', sub: 'MX960 Core' }
   };
@@ -189,7 +190,7 @@ export default function TopologyMap({ nodes, edges, latencyMs, tenant }) {
         <div className="flex items-center gap-4 flex-wrap text-[11px]">
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span> Affected Cells (001-003)</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span> Shared Router (CSR_ALPHA)</span>
-          <span className="flex items-center gap-1.5"><span className="w-3.5 h-1 bg-rose-500 shadow-sm shadow-rose-500/80"></span> Failing Fiber (94.2% Drop)</span>
+          <span className="flex items-center gap-1.5"><span className="w-3.5 h-1 bg-rose-500 shadow-sm shadow-rose-500/80"></span> Failing Fiber ({lossLabel})</span>
           <span className="flex items-center gap-1.5"><span className="w-3.5 h-1 border-t-2 border-dashed border-amber-400"></span> Standby Microwave</span>
         </div>
         <span className="text-[11px] text-slate-500 font-medium">Click node to inspect</span>

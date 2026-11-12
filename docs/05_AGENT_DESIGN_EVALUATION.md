@@ -60,7 +60,7 @@ To guarantee safety, predictability, and sub-30-second response times, we strict
 The agent framework deliberately avoids tight coupling to any single proprietary AI model. By mediating all tool interactions through the Model Context Protocol (MCP) and abstracting model calls behind an AI Service Interface, the platform seamlessly interoperates with:
 - **Cloud Foundation Models**: Google Cloud Vertex AI (Gemini), Anthropic Claude, OpenAI GPT.
 - **On-Premise / Edge Deployments**: Open-weights domain models (e.g., Llama 3, Mistral, Qwen) hosted via vLLM or Ollama.
-- **Deterministic Domain Fallback**: If external connectivity is severed or API quotas are exhausted, the agent automatically falls back to an embedded deterministic telecom reasoning engine, ensuring uninterrupted incident triage in air-gapped NOC environments.
+- **Deterministic Domain Fallback (explicit, never silent)**: Gemini calls run against a cascade of free-tier models. If external connectivity is severed, the primary model is retired, or API quotas are exhausted, the agent fails over to the next model; only when every candidate fails does it fall back to the embedded deterministic telecom reasoning engine. The fallback — including each failed model and its HTTP status — is returned to the UI, so an air-gapped or quota-limited NOC always knows which engine produced the diagnosis.
 
 ---
 

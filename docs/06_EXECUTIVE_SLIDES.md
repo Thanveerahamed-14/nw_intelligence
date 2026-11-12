@@ -78,7 +78,7 @@ The KPI Engine attaches a `completeness_score` and `quality_status` to every cal
 
 | Metric | Incident Cells (CELL_001..003) | Control Cell (CELL_099) |
 | :--- | :---: | :---: |
-| **Availability / Health** | 0.0% (Catastrophic Drop) | 66.7% (Apparent Drop) |
+| **Availability / Health** | 33.33% (Measured Drop) | 66.7% (Apparent Drop) |
 | **Telemetry Completeness** | **100% (3/3 Samples Arrived)** | **33% (1/3 Samples Arrived)** |
 | **Agent Verdict** | **GENUINE_NETWORK_PROBLEM** | **DATA_GAP_OR_UNCERTAINTY** |
 | **Agent Action** | Propose Standby Backhaul Reroute | **Halt & Decline Remediation** |
@@ -104,11 +104,11 @@ The KPI Engine attaches a `completeness_score` and `quality_status` to every cal
 
 ## Slide 5: The 10:05 UTC Incident Resolution & Phased Roadmap
 
-### Incident Walkthrough (Completed in 4.5ms locally / < 2s on GCP)
+### Incident Walkthrough (Completed in ~13s locally with live Gemini / SLA < 30s)
 1. **10:05 UTC Alarm Ingested**: `CELL_001`, `CELL_002`, `CELL_003` down.
 2. **Topology Discovery**: Discovers cells map to `NODE_42` and `NODE_43` at `SITE_ALPHA`.
 3. **Correlation**: Identifies shared dependency on Cell Site Router `CSR_ALPHA_01` and `LINK_BACKHAUL_09`.
-4. **KPI Inspection**: Validates 94.2% packet loss on backhaul; confirms 100% counter completeness.
+4. **KPI Inspection**: Validates 99.86% packet loss on backhaul; confirms 100% counter completeness.
 5. **Remediation Staged**: Proposes reroute to standby microwave link; NOC Human Lead approves. Alarms clear.
 
 ### Delivery Plan (4 Iterative Phases)

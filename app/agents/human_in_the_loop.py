@@ -5,7 +5,7 @@ Every proposed action is staged in PENDING_APPROVAL and requires human sign-off.
 """
 
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
 import uuid
 from pydantic import BaseModel, Field
@@ -29,6 +29,9 @@ class RemediationAction(BaseModel):
     justification: str
     blast_radius: str
     rollback_procedure: str
+    # Deterministic topology resolution for the bypass path (primary/standby,
+    # checks, capacity). Populated by the agent, never by the LLM.
+    bypass_path: Optional[Dict[str, Any]] = None
     status: ActionStatus = ActionStatus.PENDING_APPROVAL
     staged_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     approved_by: Optional[str] = None
@@ -49,7 +52,8 @@ class HITLManager:
         action_type: str,
         justification: str,
         blast_radius: str,
-        rollback: str
+        rollback: str,
+        bypass_path: Optional[Dict[str, Any]] = None,
     ) -> RemediationAction:
         action_id = f"ACT-{uuid.uuid4().hex[:8].upper()}"
         now = datetime.now(timezone.utc)
@@ -62,6 +66,7 @@ class HITLManager:
             justification=justification,
             blast_radius=blast_radius,
             rollback_procedure=rollback,
+            bypass_path=bypass_path,
             audit_trail=[f"[{now.isoformat()}] Staged by agent '{proposed_by}'."]
         )
         self.actions[action_id] = action

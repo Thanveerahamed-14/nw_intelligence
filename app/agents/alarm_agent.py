@@ -36,9 +36,12 @@ class IncidentInvestigationReport(BaseModel):
     total_duration_ms: float
     sla_target_met: bool
     data_quality_assessment: Dict[str, Any]
+    kpi_summary: Dict[str, str] = Field(default_factory=dict)
     shared_dependencies_found: List[Dict[str, Any]]
     root_cause_summary: str
     recommended_action: Optional[Dict[str, Any]] = None
+    failover_path: Optional[Dict[str, Any]] = None
+    ai_engine: Dict[str, Any] = Field(default_factory=dict)
     execution_steps: List[InvestigationStep] = Field(default_factory=list)
 
 
@@ -82,9 +85,12 @@ class AlarmManagementAgent:
             total_duration_ms=round(total_duration, 2),
             sla_target_met=total_duration <= (settings.AGENT_INVESTIGATION_TIMEOUT_SECONDS * 1000),
             data_quality_assessment=state.get("quality_eval", {}),
+            kpi_summary=state.get("kpi_summary", {}),
             shared_dependencies_found=state.get("shared_entities", []),
             root_cause_summary=state.get("root_cause_summary", ""),
             recommended_action=state.get("staged_action"),
+            failover_path=state.get("failover_path"),
+            ai_engine=state.get("ai_engine", {}),
             execution_steps=[
                 InvestigationStep.model_validate(step)
                 for step in state.get("steps", [])

@@ -53,8 +53,10 @@ class InvestigationState(TypedDict, total=False):
     has_degradation: bool
     decision: str  # "halt" | "no_action" | "propose"
     target_id: Optional[str]
+    failover_path: Optional[Dict[str, Any]]
     root_cause_summary: str
     staged_action: Optional[Dict[str, Any]]
+    ai_engine: Dict[str, Any]
 
     # LangGraph bookkeeping
     thread_id: str
@@ -307,6 +309,14 @@ class InvestigationGraph:
             "root_cause_summary": root_cause,
             "target_id": None,
             "staged_action": None,
+            "ai_engine": {
+                "status": "NOT_INVOKED",
+                "provider": "Google Gemini",
+                "model": None,
+                "attempts": [],
+                "fallback_reason": None,
+                "engine_used": "Deterministic Decision Gate (LLM not required)",
+            },
             "steps": [
                 self._step(
                     5,
@@ -333,6 +343,14 @@ class InvestigationGraph:
             "root_cause_summary": root_cause,
             "target_id": None,
             "staged_action": None,
+            "ai_engine": {
+                "status": "NOT_INVOKED",
+                "provider": "Google Gemini",
+                "model": None,
+                "attempts": [],
+                "fallback_reason": None,
+                "engine_used": "Deterministic Decision Gate (LLM not required)",
+            },
             "steps": [
                 self._step(
                     5,
@@ -350,6 +368,7 @@ class InvestigationGraph:
         started = time.perf_counter()
         from app.vector_store import get_vector_store
         from app.ai import get_ai_service
+        from app.topology_engine.failover import FailoverPathResolver
 
         shared_entities = state.get("shared_entities", [])
 
@@ -379,8 +398,58 @@ class InvestigationGraph:
             kpi_summary=state.get("kpi_summary", {}),
             matched_runbooks=matched_runbooks,
         )
+        ai_engine = {
+            "status": synthesis.get("ai_status", "FALLBACK"),
+            "provider": "Google Gemini",
+            "model": synthesis.get("model_used"),
+            "attempts": synthesis.get("attempts", []),
+            "fallback_reason": synthesis.get("fallback_reason"),
+            "engine_used": synthesis.get("engine_used", "AI Reasoning Engine"),
+        }
 
-        action_type = "REROUTE_STANDBY_MICROWAVE_BACKHAUL"
+        failover_path = FailoverPathResolver(self.registry.topology_service).resolve(
+            tenant_id=state["tenant_id"],
+            primary_entity_id=target_id,
+            as_of=state["incident_time"],
+        )
+        standby = failover_path.get("standby") or {}
+        capacity = failover_path.get("capacity") or {}
+
+        if failover_path.get("feasible"):
+            standby_medium = str(standby.get("medium") or "").lower()
+            if "microwav" in standby_medium:
+                action_type = "REROUTE_STANDBY_MICROWAVE_BACKHAUL"
+            elif "fiber" in standby_medium or "optical" in standby_medium:
+                action_type = "REROUTE_STANDBY_FIBER_BACKHAUL"
+            else:
+                action_type = "REROUTE_STANDBY_BACKHAUL"
+
+            path_label = failover_path.get("path_label") or " -> ".join(
+                failover_path.get("path") or []
+            )
+            justification = (
+                f"Diverts traffic from degraded transport interface on {target_id} "
+                f"to the deterministic standby path {path_label}. "
+                f"{capacity.get('summary') or 'Capacity headroom was not recorded.'} "
+                f"Observed incident KPIs: {state.get('kpi_summary', {})}."
+            )
+            rollback_procedure = (
+                f"Re-enable primary transport interface {target_id} and revert traffic "
+                f"from {standby.get('id') or 'the standby link'} if standby latency "
+                "exceeds 15ms or packet loss exceeds 0.5%."
+            )
+        else:
+            action_type = "DISPATCH_FIELD_ENGINEER"
+            justification = (
+                f"No deterministic standby path is connected for {target_id} "
+                f"({failover_path.get('reason') or 'no bypass available'}). "
+                "Dispatch a field engineer to restore the failed transport path. "
+                f"Observed incident KPIs: {state.get('kpi_summary', {})}."
+            )
+            rollback_procedure = (
+                f"Cancel the dispatch if the transport path {target_id} clears before arrival."
+            )
+
         blast_radius = self._derive_blast_radius(
             tenant_id=state["tenant_id"],
             target_id=target_id,
@@ -395,16 +464,10 @@ class InvestigationGraph:
             {
                 "target_entity_id": target_id,
                 "action_type": action_type,
-                "justification": (
-                    f"Diverts traffic from degraded transport interface on {target_id} "
-                    f"to the standby path to restore {len(state['affected_cells'])} affected cell(s). "
-                    f"Observed incident KPIs: {state.get('kpi_summary', {})}."
-                ),
+                "justification": justification,
                 "blast_radius_summary": blast_radius,
-                "rollback_procedure": (
-                    "Re-enable primary optical backhaul interface and flush BGP neighbor routes "
-                    "if standby link latency exceeds 15ms."
-                ),
+                "rollback_procedure": rollback_procedure,
+                "bypass_path": failover_path,
             },
             self._context(state),
         )
@@ -423,14 +486,18 @@ class InvestigationGraph:
                         "diagnosis": synthesis.get("diagnosis", synthesis["root_cause"]),
                         "recommendation": synthesis.get("recommendation", ""),
                         "staged_action": staged_action,
-                        "engine_used": synthesis.get("engine_used", "Google Gemini"),
+                        "failover_path": failover_path,
+                        "engine_used": synthesis.get("engine_used", "AI Reasoning Engine"),
+                        "ai_engine": ai_engine,
                     },
                     started,
                 )
             ],
             "target_id": target_id,
+            "failover_path": failover_path,
             "root_cause_summary": synthesis["root_cause"],
             "staged_action": staged_action,
+            "ai_engine": ai_engine,
         }
 
     # ------------------------------------------------------------------
@@ -576,6 +643,7 @@ class InvestigationGraph:
                 change_type=action_type,
                 agent_id=agent_id,
                 as_of=incident_time,
+                with_ai=False,
             )
             mapped = ", ".join(assessment.affected_cells) or "none mapped"
             return (

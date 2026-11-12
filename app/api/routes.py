@@ -137,6 +137,26 @@ def system_status(principal: Principal = Depends(get_principal)):
         }
     }
 
+@router.get("/ai/status")
+def ai_status(principal: Principal = Depends(get_principal)):
+    """Reports the configured Gemini model cascade and last observed call."""
+    try:
+        _tenant_context(principal, None, Permission.ALARM_READ)
+        from app.ai import get_ai_service
+        return get_ai_service().get_status()
+    except Exception as e:
+        _raise_http(e)
+
+@router.post("/ai/probe")
+def ai_probe(principal: Principal = Depends(get_principal)):
+    """Actively exercises every model in the cascade (costs one short LLM call)."""
+    try:
+        _tenant_context(principal, None, Permission.ALARM_READ)
+        from app.ai import get_ai_service
+        return get_ai_service().probe()
+    except Exception as e:
+        _raise_http(e)
+
 @router.get("/vector/search")
 def search_vector_runbooks(
     query: str = Query(default="fiber optical transceiver packet loss drop", description="Semantic query text"),
@@ -231,7 +251,7 @@ def get_entity_kpis(
             return {
                 "entity_id": entity_id,
                 "tenant_id": tenant,
-                "records": [r.dict() for r in records],
+                "records": [r.model_dump() for r in records],
                 "count": len(records)
             }
     except Exception as e:
@@ -267,7 +287,7 @@ def run_investigation(req: InvestigationRequest, principal: Principal = Depends(
                 affected_cells=req.affected_cells,
                 incident_time=t
             )
-            return report.dict()
+            return report.model_dump()
     except Exception as e:
         _raise_http(e)
 
@@ -290,7 +310,8 @@ def get_investigation_graph():
                 "tenant_id", "affected_cells", "incident_time", "agent_id",
                 "steps", "shared_entities", "kpi_observations", "quality_eval",
                 "is_genuine", "has_uncertainty", "decision", "target_id",
-                "root_cause_summary", "staged_action"
+                "kpi_summary", "root_cause_summary", "staged_action", "ai_engine",
+                "failover_path"
             ]
         }
     except Exception as e:
@@ -306,7 +327,7 @@ def simulate_change(req: ChangeSimulationRequest, principal: Principal = Depends
                 target_entity_id=req.target_entity_id,
                 change_type=req.change_type
             )
-            return assessment.dict()
+            return assessment.model_dump()
     except Exception as e:
         _raise_http(e)
 
@@ -319,7 +340,7 @@ def list_actions(tenant_id: Optional[str] = None, principal: Principal = Depends
         tenant, context = _tenant_context(principal, tenant_id, Permission.ALARM_READ)
         with TenantContext(tenant):
             actions = hitl_manager.list_actions(tenant)
-            return [a.dict() for a in actions]
+            return [a.model_dump() for a in actions]
     except Exception as e:
         _raise_http(e)
 
@@ -331,7 +352,7 @@ def approve_action(action_id: str, req: ActionApprovalRequest, principal: Princi
             # Identity and role come from the authenticated principal, not the body.
             sec = principal.to_context(tenant)
             action = hitl_manager.approve_and_execute(action_id, sec, comment=req.comment)
-            return action.dict()
+            return action.model_dump()
     except Exception as e:
         _raise_http(e)
 
@@ -343,7 +364,7 @@ def reject_action(action_id: str, req: ActionRejectionRequest, principal: Princi
             # Identity and role come from the authenticated principal, not the body.
             sec = principal.to_context(tenant)
             action = hitl_manager.reject_action(action_id, sec, reason=req.reason)
-            return action.dict()
+            return action.model_dump()
     except Exception as e:
         _raise_http(e)
 

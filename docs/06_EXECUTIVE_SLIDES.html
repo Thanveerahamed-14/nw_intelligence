@@ -388,7 +388,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </ul>
 </li>
 <li><a href="#slide-5-the-1005-utc-incident-resolution-phased-roadmap">Slide 5: The 10:05 UTC Incident Resolution &amp; Phased Roadmap</a><ul>
-<li><a href="#incident-walkthrough-completed-in-45ms-locally-2s-on-gcp">Incident Walkthrough (Completed in 4.5ms locally / &lt; 2s on GCP)</a></li>
+<li><a href="#incident-walkthrough-completed-in-13s-locally-with-live-gemini-sla-30s">Incident Walkthrough (Completed in ~13s locally with live Gemini / SLA &lt; 30s)</a></li>
 <li><a href="#delivery-plan-4-iterative-phases">Delivery Plan (4 Iterative Phases)</a></li>
 </ul>
 </li>
@@ -472,7 +472,7 @@ flowchart TD
 <tbody>
 <tr>
 <td style="text-align: left;"><strong>Availability / Health</strong></td>
-<td style="text-align: center;">0.0% (Catastrophic Drop)</td>
+<td style="text-align: center;">33.33% (Measured Drop)</td>
 <td style="text-align: center;">66.7% (Apparent Drop)</td>
 </tr>
 <tr>
@@ -548,12 +548,12 @@ flowchart TD
 </ul>
 <hr />
 <h2 id="slide-5-the-1005-utc-incident-resolution-phased-roadmap">Slide 5: The 10:05 UTC Incident Resolution &amp; Phased Roadmap</h2>
-<h3 id="incident-walkthrough-completed-in-45ms-locally-2s-on-gcp">Incident Walkthrough (Completed in 4.5ms locally / &lt; 2s on GCP)</h3>
+<h3 id="incident-walkthrough-completed-in-13s-locally-with-live-gemini-sla-30s">Incident Walkthrough (Completed in ~13s locally with live Gemini / SLA &lt; 30s)</h3>
 <ol>
 <li><strong>10:05 UTC Alarm Ingested</strong>: <code>CELL_001</code>, <code>CELL_002</code>, <code>CELL_003</code> down.</li>
 <li><strong>Topology Discovery</strong>: Discovers cells map to <code>NODE_42</code> and <code>NODE_43</code> at <code>SITE_ALPHA</code>.</li>
 <li><strong>Correlation</strong>: Identifies shared dependency on Cell Site Router <code>CSR_ALPHA_01</code> and <code>LINK_BACKHAUL_09</code>.</li>
-<li><strong>KPI Inspection</strong>: Validates 94.2% packet loss on backhaul; confirms 100% counter completeness.</li>
+<li><strong>KPI Inspection</strong>: Validates 99.86% packet loss on backhaul; confirms 100% counter completeness.</li>
 <li><strong>Remediation Staged</strong>: Proposes reroute to standby microwave link; NOC Human Lead approves. Alarms clear.</li>
 </ol>
 <h3 id="delivery-plan-4-iterative-phases">Delivery Plan (4 Iterative Phases)</h3>
