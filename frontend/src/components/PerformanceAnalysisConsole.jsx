@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { LineChart, Activity, Clock, AlertTriangle, CheckCircle2, RefreshCw, BarChart2, ShieldCheck, Database } from 'lucide-react';
 import KpiTable from './KpiTable';
 
+// CELL_099 is a deliberate control fixture (telemetry-gap branch on SITE_BETA).
+// It is shown in the raw KPI table, but must never be averaged into the
+// incident's aggregate health, otherwise it drags the headline completeness
+// down and falsely implies the incident investigation should be declined.
+const CONTROL_ENTITY_IDS = new Set(['CELL_099']);
+
 export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
   const [selectedWindow, setSelectedWindow] = useState('incident'); // 'nominal' | 'incident'
   const [isSimulatingLateData, setIsSimulatingLateData] = useState(false);
@@ -9,14 +15,18 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
 
   const INCIDENT_START = Date.parse('2026-11-10T10:00:00Z');
   const records = kpiRecords || [];
+  const isControl = (record) => CONTROL_ENTITY_IDS.has(record?.entity_id);
   const inWindow = (record) => {
     const ts = Date.parse(record?.timestamp || '');
     if (!Number.isFinite(ts)) return false;
     const isIncident = ts >= INCIDENT_START;
     return selectedWindow === 'incident' ? isIncident : !isIncident;
   };
+  // Headline tiles describe the incident scope only; the control cell is
+  // reported separately in the table.
+  const inIncidentScope = (record) => inWindow(record) && !isControl(record);
   const values = (predicate) => records
-    .filter((r) => inWindow(r) && predicate(r))
+    .filter((r) => inIncidentScope(r) && predicate(r))
     .map((r) => Number(r.value))
     .filter(Number.isFinite);
   const pct = (value) => (value == null ? 'n/a' : `${value.toFixed(2)}%`);
@@ -25,8 +35,10 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
   const primaryLoss = values((r) => r.kpi_name === 'TRANSPORT_PACKET_LOSS' && !/STANDBY/i.test(r.entity_id || ''));
   const standbyLoss = values((r) => r.kpi_name === 'TRANSPORT_PACKET_LOSS' && /STANDBY/i.test(r.entity_id || ''));
   const windowRecords = records.filter(inWindow);
-  const completeness = windowRecords.length
-    ? windowRecords.reduce((sum, r) => sum + (Number(r.completeness_score) || 0), 0) / windowRecords.length
+  const incidentWindowRecords = windowRecords.filter((r) => !isControl(r));
+  const controlWindowRecords = windowRecords.filter(isControl);
+  const completeness = incidentWindowRecords.length
+    ? incidentWindowRecords.reduce((sum, r) => sum + (Number(r.completeness_score) || 0), 0) / incidentWindowRecords.length
     : null;
 
   const minAvailability = cellAvailability.length ? Math.min(...cellAvailability) : null;
@@ -120,11 +132,20 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
                 READY
               </span>
             </div>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-bold font-mono text-emerald-400">{pct(maxStandbyLoss)}</span>
-              <span className="text-xs text-slate-400 font-medium">Packet Loss</span>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className={`font-mono text-emerald-400 ${maxStandbyLoss == null ? 'text-sm font-semibold' : 'text-2xl font-bold'}`}>
+                {maxStandbyLoss == null ? 'No incident telemetry' : pct(maxStandbyLoss)}
+              </span>
+              <span className="text-xs text-slate-400 font-medium shrink-0">
+                {maxStandbyLoss == null ? 'Idle / protection' : 'Packet Loss'}
+              </span>
             </div>
             <p className="text-[11px] text-amber-400 font-mono">LINK_BACKHAUL_STANDBY_09</p>
+            <p className="text-[10px] text-slate-500 leading-snug">
+              {maxStandbyLoss == null
+                ? 'Protection path is not carrying traffic before cutover, so no loss counters are expected.'
+                : 'Standby path is armed and ready for cutover.'}
+            </p>
           </div>
 
           {/* Tile 3: 5G & 4G Cell Towers */}
@@ -158,13 +179,18 @@ export default function PerformanceAnalysisConsole({ kpiRecords, tenant }) {
               <span className="text-2xl font-bold font-mono text-emerald-400">
                 {completeness == null ? 'n/a' : completeness.toFixed(2)}
               </span>
-              <span className="text-xs text-slate-400 font-medium">Completeness ({windowRecords.length} records)</span>
+              <span className="text-xs text-slate-400 font-medium">Completeness ({incidentWindowRecords.length} records)</span>
             </div>
             <p className="text-[11px] text-slate-400">
               {completeness == null
                 ? 'No telemetry in selected window'
                 : completeness >= 0.8 ? 'Sufficient evidence for automated action' : 'Insufficient evidence — agent will decline remediation'}
             </p>
+            {controlWindowRecords.length > 0 && (
+              <p className="text-[10px] text-amber-400 font-mono leading-snug">
+                Control cell CELL_099 excluded from aggregate (deliberate telemetry-gap fixture on SITE_BETA).
+              </p>
+            )}
           </div>
         </div>
 

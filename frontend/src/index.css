@@ -488,6 +488,40 @@ html[data-theme="light"] body {
 .theme-light [class~="fill-slate-400"] { fill: #475569 !important; }
 .theme-light pattern#cyberGrid path { stroke: #e2e8f0 !important; }
 
+/* Full tenant topology view + its entry buttons */
+.theme-light [class*="bg-cyan-950"],
+.theme-light [class*="bg-cyan-900"] {
+  background-color: #ecfeff !important;
+  border-color: #a5f3fc !important;
+}
+.theme-light button[class*="bg-cyan-950"]:hover,
+.theme-light button[class*="hover:bg-cyan-900"]:hover {
+  background-color: #cffafe !important;
+}
+.theme-light [class~="fill-slate-300"] { fill: #334155 !important; }
+.theme-light [class~="fill-slate-500"] { fill: #475569 !important; }
+.theme-light [class~="fill-amber-400"] { fill: #b45309 !important; }
+.theme-light pattern#fullGrid path { stroke: #e2e8f0 !important; }
+.theme-light .full-topology-canvas {
+  background: linear-gradient(180deg, #f8fafc, #eef2f7) !important;
+  border-color: #e2e8f0 !important;
+}
+.theme-light .full-topology-component-box {
+  stroke: #cbd5e1 !important;
+  fill: rgba(248, 250, 252, 0.72) !important;
+}
+.theme-light .full-topology-component-isolated {
+  stroke: #d97706 !important;
+  fill: rgba(255, 251, 235, 0.7) !important;
+}
+.theme-light .full-topology-edge { stroke: #cbd5e1 !important; }
+.theme-light .full-topology-inventory > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+.theme-light .full-topology-inventory tr:hover {
+  background-color: #f8fafc !important;
+}
+
 /* Console & Intro Card Adaptations */
 .theme-light .workspace-intro {
   border-color: #e2e8f0;
@@ -613,3 +647,224 @@ html[data-theme="light"] body { background-color: #f4f6fa; background-image: rad
 .theme-light .approval-code { color: #6b21a8 !important; background: #f3e8ff !important; border-color: #d8b4fe !important; }
 .theme-light .topology-canvas + div { background: #f8fafc !important; border-color: #e2e8f0 !important; }
 .theme-light .topology-canvas + div strong { color: #0f172a !important; }
+
+/* --------------------------------------------------------------------------
+   Command deck refresh
+   A layer of editorial hierarchy over the live operational components. These
+   rules deliberately style existing controls only: all data and interactions
+   continue to be supplied by their original React components.
+   -------------------------------------------------------------------------- */
+:root {
+  --deck-ink: #060b16;
+  --deck-panel: rgba(13, 23, 42, 0.78);
+  --deck-line: rgba(148, 163, 184, 0.16);
+  --deck-cyan: #22d3ee;
+  --deck-violet: #818cf8;
+}
+
+body {
+  background-color: var(--deck-ink);
+  background-image:
+    radial-gradient(ellipse 70% 44% at 48% -18%, rgba(34, 211, 238, 0.13), transparent 71%),
+    radial-gradient(ellipse 42% 35% at 100% 19%, rgba(129, 140, 248, 0.12), transparent 74%),
+    linear-gradient(rgba(148, 163, 184, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.025) 1px, transparent 1px);
+  background-size: auto, auto, 34px 34px, 34px 34px;
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+.app-shell::before {
+  content: '';
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent 0, rgba(255,255,255,0.018) 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, transparent 42%);
+}
+
+.command-navbar {
+  padding-top: 0.78rem !important;
+  padding-bottom: 0.78rem !important;
+  background: rgba(6, 11, 22, 0.82) !important;
+  border-bottom-color: rgba(148, 163, 184, 0.14) !important;
+  box-shadow: 0 15px 36px -28px rgba(0, 0, 0, 0.95) !important;
+}
+.command-navbar::after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: -1px;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34,211,238,.58), rgba(129,140,248,.48), transparent);
+  opacity: .8;
+}
+.nav-brand > div:first-child > div:first-child {
+  position: relative;
+  border-radius: 11px !important;
+  background: linear-gradient(135deg, #0891b2, #4f46e5) !important;
+  box-shadow: 0 0 0 1px rgba(103,232,249,.32), 0 9px 20px -8px rgba(34,211,238,.62) !important;
+}
+.nav-brand > div:first-child > div:first-child::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  z-index: -1;
+  border-radius: 14px;
+  background: rgba(34,211,238,.17);
+  filter: blur(9px);
+}
+.nav-brand > span {
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, rgba(136,19,55,.55), rgba(76,5,25,.24)) !important;
+  border-color: rgba(251,113,133,.32) !important;
+}
+.workspace-switcher {
+  padding: 0.27rem !important;
+  border-radius: 13px !important;
+  background: rgba(15, 23, 42, 0.68) !important;
+  border-color: rgba(148, 163, 184, 0.15) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035), 0 7px 19px -17px #000;
+}
+.workspace-switcher button {
+  min-height: 2.15rem;
+  border: 1px solid transparent;
+  border-radius: 9px !important;
+}
+.workspace-switcher button[class*="bg-rose"],
+.workspace-switcher button[class*="bg-blue"],
+.workspace-switcher button[class*="bg-indigo"],
+.workspace-switcher button[class*="bg-emerald"] {
+  background: linear-gradient(135deg, rgba(30, 41, 59, .88), rgba(30, 41, 59, .52)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 5px 12px -10px rgba(0,0,0,.85) !important;
+}
+.workspace-switcher button[class*="bg-rose"] { border-color: rgba(251,113,133,.4) !important; }
+.workspace-switcher button[class*="bg-blue"] { border-color: rgba(96,165,250,.4) !important; }
+.workspace-switcher button[class*="bg-indigo"] { border-color: rgba(129,140,248,.4) !important; }
+.workspace-switcher button[class*="bg-emerald"] { border-color: rgba(52,211,153,.4) !important; }
+.nav-controls > button:last-child {
+  min-height: 2.1rem;
+  border-radius: 10px !important;
+  background: linear-gradient(110deg, #0891b2, #2563eb 50%, #4f46e5) !important;
+  box-shadow: 0 10px 20px -11px rgba(34,211,238,.68) !important;
+}
+
+.app-main { padding-top: 0.45rem; }
+.workspace-frame { animation: deck-enter .48s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes deck-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.workspace-intro {
+  position: relative;
+  overflow: hidden;
+  min-height: 116px;
+  padding: 1.35rem 1.5rem !important;
+  border-color: rgba(125, 211, 252, 0.19) !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(108deg, rgba(9, 18, 36, .96), rgba(12, 28, 50, .88) 58%, rgba(31, 35, 77, .7)) !important;
+  box-shadow: 0 20px 42px -30px rgba(0,0,0,.96), inset 0 1px rgba(255,255,255,.075) !important;
+}
+.workspace-intro::before {
+  content: 'NETWORK OPERATIONS';
+  position: absolute;
+  right: 19rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(125, 211, 252, .055);
+  font: 800 clamp(1.5rem, 4vw, 4rem) var(--font-sans);
+  letter-spacing: -.07em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.workspace-intro::after {
+  content: '';
+  position: absolute;
+  width: 19rem;
+  height: 19rem;
+  right: -6rem;
+  top: -8rem;
+  border: 1px solid rgba(34,211,238,.16);
+  border-radius: 50%;
+  box-shadow: 0 0 0 26px rgba(34,211,238,.025), 0 0 0 54px rgba(129,140,248,.025);
+  pointer-events: none;
+}
+.workspace-intro > * { position: relative; z-index: 1; }
+.workspace-eyebrow { color: #67e8f9 !important; letter-spacing: .14em !important; }
+.workspace-intro h1 { font-size: clamp(1.5rem, 2.3vw, 2rem) !important; }
+.workspace-intro h1 span { color: #94a3b8 !important; }
+.workspace-intro p { font-size: .8rem !important; }
+.incident-summary {
+  min-width: 250px !important;
+  padding: .78rem .95rem !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(76,5,25,.45), rgba(30, 12, 32, .5)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 12px 24px -21px #000;
+}
+
+.metric-grid { gap: .9rem !important; }
+.metric-card {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem 1.05rem !important;
+  border-color: rgba(148,163,184,.17) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, rgba(18, 30, 51, .92), rgba(8, 15, 30, .9)) !important;
+  box-shadow: 0 14px 28px -25px #000, inset 0 1px rgba(255,255,255,.055) !important;
+}
+.metric-card::after {
+  content: '';
+  position: absolute;
+  width: 5.5rem;
+  height: 5.5rem;
+  right: -2.5rem;
+  bottom: -3.4rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: .12;
+}
+.metric-card:hover { transform: translateY(-4px) !important; border-color: rgba(125,211,252,.38) !important; }
+.metric-topline { text-transform: uppercase; letter-spacing: .075em; }
+.metric-reading strong { font-size: 1.55rem !important; }
+.metric-detail { padding-top: .55rem; border-top: 1px solid rgba(148,163,184,.1); }
+.clean-card {
+  border-color: rgba(148,163,184,.16) !important;
+  border-radius: 18px !important;
+  background: rgba(11, 20, 37, .82) !important;
+  box-shadow: 0 17px 30px -28px rgba(0,0,0,.95), inset 0 1px rgba(255,255,255,.04) !important;
+}
+.clean-card:hover { border-color: rgba(125,211,252,.28) !important; }
+
+html[data-theme="light"] body {
+  background-color: #f6f8fc;
+  background-image: radial-gradient(ellipse 68% 40% at 50% -20%, rgba(6,182,212,.10), transparent 70%), linear-gradient(rgba(30,41,59,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(30,41,59,.035) 1px, transparent 1px);
+  background-size: auto, 34px 34px, 34px 34px;
+}
+.theme-light .command-navbar { background: rgba(255,255,255,.84) !important; }
+.theme-light .workspace-switcher { background: #f8fafc !important; border-color: #e2e8f0 !important; }
+.theme-light .workspace-switcher button[class*="bg-"] { background: #fff !important; }
+.theme-light .workspace-intro {
+  background: linear-gradient(108deg, #fff, #f0f9ff 58%, #eef2ff) !important;
+  border-color: #cbd5e1 !important;
+}
+.theme-light .workspace-intro::before { color: rgba(14,116,144,.07); }
+.theme-light .incident-summary { background: linear-gradient(135deg, #fff1f2, #fff) !important; }
+.theme-light .metric-card {
+  background: linear-gradient(145deg, #fff, #f8fafc) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 14px 26px -24px rgba(15,23,42,.28), inset 0 1px #fff !important;
+}
+.theme-light .clean-card { background: rgba(255,255,255,.92) !important; border-color: #e2e8f0 !important; }
+
+@media (max-width: 760px) {
+  .workspace-intro { min-height: auto; padding: 1.1rem !important; }
+  .workspace-intro::before { display: none; }
+  .workspace-intro::after { right: -11rem; }
+  .command-navbar { margin-bottom: 1rem !important; }
+}

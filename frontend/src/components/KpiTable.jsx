@@ -1,6 +1,11 @@
 import React from 'react';
 import { BarChart3, HelpCircle, ShieldAlert, Cpu } from 'lucide-react';
 
+// Seeded control fixture: a separate branch (SITE_BETA) whose telemetry is
+// deliberately incomplete. It demonstrates the evidence-integrity gate and is
+// not part of the 10:05 UTC incident being remediated.
+const CONTROL_ENTITY_IDS = new Set(['CELL_099']);
+
 export default function KpiTable({ records }) {
   return (
     <div className="clean-card p-5 border border-slate-800/80 bg-slate-900/80 backdrop-blur-md rounded-xl shadow-2xl flex flex-col h-[440px]">
@@ -53,6 +58,11 @@ export default function KpiTable({ records }) {
                   <td className="py-2.5 px-3 font-bold text-cyan-300 tracking-wide flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400"></span>
                     {r.entity_id}
+                    {CONTROL_ENTITY_IDS.has(r.entity_id) && (
+                      <span className="px-1.5 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-500/40 text-[9px] font-bold tracking-wide">
+                        CONTROL
+                      </span>
+                    )}
                   </td>
                   <td className="py-2.5 px-3 text-slate-400 text-[11px]">{timeStr}</td>
                   <td className="py-2.5 px-3 font-sans text-slate-200 font-medium">{r.kpi_name}</td>

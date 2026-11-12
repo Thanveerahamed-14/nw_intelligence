@@ -215,6 +215,24 @@ def get_topology_neighborhood(
     except Exception as e:
         _raise_http(e)
 
+@router.get("/topology/graph")
+def get_full_topology_graph(
+    as_of: Optional[str] = None,
+    tenant_id: Optional[str] = None,
+    principal: Principal = Depends(get_principal)
+):
+    """
+    Tenant-wide topology inventory: every active entity and relationship,
+    including disconnected branches that incident-scoped queries exclude.
+    """
+    try:
+        tenant, context = _tenant_context(principal, tenant_id, Permission.TOPOLOGY_READ)
+        as_of_dt = parser.isoparse(as_of) if as_of else datetime(2026, 11, 10, 10, 5, 0, tzinfo=timezone.utc)
+        with TenantContext(tenant):
+            return traversal_service.get_full_snapshot(as_of_dt, tenant)
+    except Exception as e:
+        _raise_http(e)
+
 @router.get("/topology/shared-dependencies")
 def get_shared_dependencies(
     entity_ids: List[str] = Query(default=["CELL_001", "CELL_002", "CELL_003"]),

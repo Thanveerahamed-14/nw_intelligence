@@ -74,6 +74,24 @@ export default function IncidentPathStrip({
   const isPending = stagedAction?.status === 'PENDING_APPROVAL';
   const isOperator = role === 'human_operator';
 
+  // A bypass is only "resolved" once this incident has actually been
+  // investigated. A staged action can survive a page reload (the backend keeps
+  // the audit record), so we must not treat its presence alone as proof that a
+  // path has been selected for the current incident.
+  const hasInvestigation = Boolean(report);
+  const hasResolvedPath = Boolean(
+    stagedAction?.bypass_path?.primary && stagedAction?.bypass_path?.standby
+  );
+  const pathValidated = hasResolvedPath && (hasInvestigation || isApproved);
+  const bypassState = isApproved
+    ? 'active'
+    : isPending && pathValidated
+      ? 'proposed'
+      : hasInvestigation
+        ? 'not_proposed'
+        : 'not_investigated';
+  const bypassResolved = bypassState === 'proposed' || bypassState === 'active';
+
   const summary = report?.kpi_summary || {};
   const availabilityValue = parsePct(availability) ?? parsePct(summary.cell_availability);
   const packetLossValue = parsePct(packetLoss) ?? parsePct(summary.csr_packet_loss);
@@ -106,9 +124,7 @@ export default function IncidentPathStrip({
   // The resolver runs server-side and attaches the verified path to the staged
   // action. The UI renders that decision; it only falls back to topology
   // heuristics for legacy actions that predate the resolver.
-  const resolvedBypass = stagedAction?.bypass_path?.primary && stagedAction?.bypass_path?.standby
-    ? stagedAction.bypass_path
-    : null;
+  const resolvedBypass = pathValidated ? stagedAction.bypass_path : null;
   const resolvedPrimaryId = resolvedBypass?.primary?.id;
   const resolvedStandbyId = resolvedBypass?.standby?.id;
   const primaryLink = (resolvedPrimaryId && byId.get(resolvedPrimaryId))
@@ -268,10 +284,16 @@ export default function IncidentPathStrip({
       healthy = true;
     } else if (isLink) {
       if (isStandby) {
-        status = isApproved
+        status = bypassState === 'active'
           ? 'ACTIVE BACKHAUL CARRIER'
-          : isPending ? 'ARMED & READY FOR CUTOVER' : 'STANDBY PROTECTION READY';
-        telemetry = `${medium} ${capacityText}standby • configured (${props.status || 'standby'}) • no incident telemetry on this path`;
+          : bypassState === 'proposed'
+            ? 'ARMED & READY FOR CUTOVER'
+            : bypassState === 'not_proposed'
+              ? 'STANDBY — NO BYPASS PROPOSED'
+              : 'STANDBY CANDIDATE — NOT SELECTED';
+        telemetry = bypassResolved
+          ? `${medium} ${capacityText}standby • configured (${props.status || 'standby'}) • selected by the deterministic resolver`
+          : `${medium} ${capacityText}standby • configured (${props.status || 'standby'}) • not selected — run investigation to evaluate this path`;
         healthy = true;
       } else {
         status = isApproved ? 'BYPASSED & ISOLATED' : 'CRITICAL LINK FAILURE';
@@ -299,12 +321,32 @@ export default function IncidentPathStrip({
   const linkPathStyle = (link) => {
     const isStandby = link === standbyLink;
     if (isStandby) {
+      if (bypassState === 'active') {
+        return {
+          stroke: '#10b981',
+          strokeWidth: 3.5,
+          strokeDasharray: undefined,
+          filter: 'url(#glowGreen)',
+          className: 'flow-dash'
+        };
+      }
+      if (bypassState === 'proposed') {
+        return {
+          stroke: '#fbbf24',
+          strokeWidth: 2.5,
+          strokeDasharray: '6 4',
+          filter: 'url(#glowAmber)',
+          className: 'flow-dash'
+        };
+      }
+      // Candidate only: physically present, but never presented as a selected
+      // escape path until an investigation has resolved it.
       return {
-        stroke: isApproved ? '#10b981' : isPending ? '#fbbf24' : '#0284c7',
-        strokeWidth: isApproved ? 3.5 : 2.5,
-        strokeDasharray: isApproved ? undefined : '6 4',
-        filter: isApproved ? 'url(#glowGreen)' : isPending ? 'url(#glowAmber)' : 'none',
-        className: isApproved || isPending ? 'flow-dash' : ''
+        stroke: bypassState === 'not_proposed' ? '#64748b' : '#0284c7',
+        strokeWidth: 2.5,
+        strokeDasharray: undefined,
+        filter: 'none',
+        className: ''
       };
     }
     return {
@@ -330,8 +372,43 @@ export default function IncidentPathStrip({
     return { stroke: '#f43f5e', strokeWidth: 2, filter: 'none', className: '' };
   };
 
-  const primaryMedium = primaryLink ? mediumLabel(primaryLink) : 'TRANSPORT';
   const standbyMedium = standbyLink ? mediumLabel(standbyLink) : 'STANDBY';
+
+  const standbyTone = bypassState === 'active'
+    ? { fill: '#064e3b', stroke: '#10b981', title: '#a7f3d0', value: '#fff' }
+    : bypassState === 'proposed'
+      ? { fill: '#451a03', stroke: '#f59e0b', title: '#fde68a', value: '#fbbf24' }
+      : bypassState === 'not_proposed'
+        ? { fill: '#1e293b', stroke: '#64748b', title: '#cbd5e1', value: '#94a3b8' }
+        : { fill: '#082f49', stroke: '#0284c7', title: '#bae6fd', value: '#7dd3fc' };
+
+  const bypassBadge = bypassState === 'active'
+    ? {
+        label: `✓ ${standbyMedium} BYPASS ACTIVE`,
+        className: 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+      }
+    : bypassState === 'proposed'
+      ? {
+          label: '⚠️ FAILOVER PROPOSAL READY',
+          className: 'bg-amber-950/80 text-amber-300 border-amber-500/40 animate-pulse'
+        }
+      : bypassState === 'not_proposed'
+        ? {
+            label: 'NO BYPASS PATH PROPOSED',
+            className: 'bg-slate-800/80 text-slate-300 border-slate-600/60'
+          }
+        : {
+            label: 'BYPASS NOT RESOLVED — RUN INVESTIGATION',
+            className: 'bg-slate-800/80 text-slate-300 border-slate-600/60'
+          };
+
+  const indicatorClass = bypassState === 'active'
+    ? 'bg-emerald-400'
+    : bypassState === 'proposed'
+      ? 'bg-amber-400'
+      : bypassState === 'not_proposed'
+        ? 'bg-slate-400'
+        : 'bg-rose-500';
 
   const headEndPosition = headEndRouter ? positions.get(headEndRouter.id) : null;
   const primaryPosition = primaryLink ? positions.get(primaryLink.id) : null;
@@ -365,12 +442,8 @@ export default function IncidentPathStrip({
       <div className="px-4 py-2.5 bg-slate-950/80 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div className="flex items-center gap-2.5">
           <span className="relative flex h-2.5 w-2.5">
-            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-              isApproved ? 'bg-emerald-400' : isPending ? 'bg-amber-400' : 'bg-rose-500'
-            }`}></span>
-            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${
-              isApproved ? 'bg-emerald-500' : isPending ? 'bg-amber-500' : 'bg-rose-500'
-            }`}></span>
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${indicatorClass}`}></span>
+            <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${indicatorClass}`}></span>
           </span>
 
           <span className="font-bold text-slate-100 tracking-wider uppercase text-[11px] font-mono flex items-center gap-1.5">
@@ -381,18 +454,8 @@ export default function IncidentPathStrip({
             </span>
           </span>
 
-          <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full font-mono border ${
-            isApproved
-              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
-              : isPending
-              ? 'bg-amber-950/80 text-amber-300 border-amber-500/40 animate-pulse'
-              : 'bg-rose-950/80 text-rose-300 border-rose-500/40'
-          }`}>
-            {isApproved
-              ? `✓ ${standbyMedium} BYPASS ACTIVE`
-              : isPending
-              ? '⚠️ FAILOVER PROPOSAL READY'
-              : `CRITICAL ${primaryMedium} PATH FAILURE (${lossLabel})`}
+          <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full font-mono border ${bypassBadge.className}`}>
+            {bypassBadge.label}
           </span>
 
           {capacityConstrained && (
@@ -652,9 +715,17 @@ export default function IncidentPathStrip({
               if (!position) return null;
               const standby = link === standbyLink;
               const capacity = capacityLabel(link);
-              const topLine = `${standby ? 'STANDBY' : 'PRIMARY'} ${mediumLabel(link)}${capacity ? ` · ${capacity}` : ''}`;
+              const topLine = standby && bypassState === 'not_investigated'
+                ? 'STANDBY CANDIDATE'
+                : `${standby ? 'STANDBY' : 'PRIMARY'} ${mediumLabel(link)}${capacity ? ` · ${capacity}` : ''}`;
               const bottomLine = standby
-                ? (isApproved ? '✅ DIVERTER ACTIVE' : isPending ? '⚡ REROUTE ARMED' : 'STANDBY READY')
+                ? (bypassState === 'active'
+                    ? '✅ DIVERTER ACTIVE'
+                    : bypassState === 'proposed'
+                      ? '⚡ REROUTE ARMED'
+                      : bypassState === 'not_proposed'
+                        ? 'NO BYPASS PROPOSED'
+                        : 'NOT SELECTED')
                 : (isApproved ? 'BYPASSED / OFF-LINE' : `❌ ${lossLabel.toUpperCase()}`);
               return (
                 <g
@@ -669,20 +740,14 @@ export default function IncidentPathStrip({
                     width="180"
                     height="38"
                     rx="8"
-                    fill={standby
-                      ? (isApproved ? '#064e3b' : isPending ? '#451a03' : '#082f49')
-                      : (isApproved ? '#1e293b' : '#450a0a')}
-                    stroke={standby
-                      ? (isApproved ? '#10b981' : isPending ? '#f59e0b' : '#0284c7')
-                      : (isApproved ? '#475569' : '#ef4444')}
+                    fill={standby ? standbyTone.fill : (isApproved ? '#1e293b' : '#450a0a')}
+                    stroke={standby ? standbyTone.stroke : (isApproved ? '#475569' : '#ef4444')}
                     strokeWidth="1.6"
                   />
                   <text
                     x="0"
                     y="-3"
-                    fill={standby
-                      ? (isApproved ? '#a7f3d0' : isPending ? '#fde68a' : '#bae6fd')
-                      : (isApproved ? '#94a3b8' : '#fca5a5')}
+                    fill={standby ? standbyTone.title : (isApproved ? '#94a3b8' : '#fca5a5')}
                     fontSize="8.5"
                     fontWeight="bold"
                     textAnchor="middle"
@@ -693,9 +758,7 @@ export default function IncidentPathStrip({
                   <text
                     x="0"
                     y="10"
-                    fill={standby
-                      ? (isApproved ? '#fff' : isPending ? '#fbbf24' : '#7dd3fc')
-                      : (isApproved ? '#64748b' : '#fff')}
+                    fill={standby ? standbyTone.value : (isApproved ? '#64748b' : '#fff')}
                     fontSize="8"
                     fontWeight="bold"
                     textAnchor="middle"
@@ -798,7 +861,7 @@ export default function IncidentPathStrip({
       </div>
 
       {/* 2b. DETERMINISTIC PATH RESOLUTION SUMMARY — always visible, not LLM-generated */}
-      {resolvedBypass && (
+      {resolvedBypass ? (
         <div className="px-4 py-1.5 bg-slate-950/70 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-2 text-[10px] font-mono">
           <span className={`flex items-center gap-1.5 ${resolvedBypass.feasible ? 'text-cyan-300' : 'text-rose-300'}`}>
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -811,6 +874,15 @@ export default function IncidentPathStrip({
                 : `Capacity verified · ${capacityAssessment.standby_gbps}G / ${capacityAssessment.primary_gbps}G`}
             </span>
           )}
+        </div>
+      ) : (
+        <div className="px-4 py-1.5 bg-slate-950/70 border-t border-slate-800/60 flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+          <Info className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+          <span>
+            {bypassState === 'not_proposed'
+              ? 'Deterministic resolver found no connected standby path for this incident. Manual recovery is required.'
+              : 'The failover path is selected only after investigation, by the deterministic resolver. AI explains the result; the operator approves the change.'}
+          </span>
         </div>
       )}
 
@@ -906,7 +978,7 @@ export default function IncidentPathStrip({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
-          {stagedAction && isPending && isOperator && (
+          {stagedAction && bypassState === 'proposed' && isOperator && (
             <>
               <button
                 onClick={onReject}
@@ -926,7 +998,7 @@ export default function IncidentPathStrip({
             </>
           )}
 
-          {stagedAction && isPending && !isOperator && (
+          {stagedAction && bypassState === 'proposed' && !isOperator && (
             <div className="approval-required flex flex-wrap items-center gap-2 text-[11px] font-semibold text-purple-200 bg-purple-950/60 border border-purple-500/40 px-3 py-1.5 rounded-lg">
               <Lock className="w-3.5 h-3.5 text-purple-400" />
               <span>
@@ -950,9 +1022,15 @@ export default function IncidentPathStrip({
             </div>
           )}
 
-          {!stagedAction && (
+          {!isApproved && bypassState === 'not_investigated' && (
             <span className="text-xs text-slate-400 font-mono">
-              Ready for Agent Remediation Staging
+              Run the investigation to resolve a bypass path
+            </span>
+          )}
+
+          {!isApproved && bypassState === 'not_proposed' && (
+            <span className="text-xs text-slate-400 font-mono">
+              No bypass path proposed — manual recovery required
             </span>
           )}
         </div>

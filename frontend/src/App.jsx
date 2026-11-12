@@ -9,7 +9,23 @@ import ChangePlanningConsole from './components/ChangePlanningConsole';
 import VectorSearchModal from './components/VectorSearchModal';
 import Neo4jExplorerModal from './components/Neo4jExplorerModal';
 import LangGraphModal from './components/LangGraphModal';
+import FullTopologyModal from './components/FullTopologyModal';
 import KpiMetricsRow from './components/KpiMetricsRow';
+
+// Control fixtures are seeded to prove the data-quality gate. They live on a
+// separate branch and must not influence the incident headline metrics.
+const CONTROL_ENTITY_IDS = new Set(['CELL_099']);
+
+// The 10:05 UTC incident scope. Every affected cell is fetched so the
+// performance console reflects the whole incident, not just the seed cell.
+const INCIDENT_CELLS = ['CELL_001', 'CELL_002', 'CELL_003'];
+const KPI_ENTITIES = [
+  ...INCIDENT_CELLS,
+  'CSR_ALPHA_01',
+  'LINK_BACKHAUL_09',
+  'LINK_BACKHAUL_STANDBY_09',
+  'CELL_099'
+];
 
 export default function App() {
   const [tenant, setTenant] = useState('customer_a');
@@ -25,6 +41,7 @@ export default function App() {
   const [isVectorModalOpen, setIsVectorModalOpen] = useState(false);
   const [isNeo4jModalOpen, setIsNeo4jModalOpen] = useState(false);
   const [isLangGraphModalOpen, setIsLangGraphModalOpen] = useState(false);
+  const [isFullTopologyModalOpen, setIsFullTopologyModalOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -88,21 +105,15 @@ export default function App() {
 
   async function loadKPIs() {
     try {
-      const resCell = await fetch(`/api/v1/kpi/entity?entity_id=CELL_001&tenant_id=${tenant}`);
-      const dataCell = resCell.ok ? await resCell.json() : { records: [] };
-
-      const resRouter = await fetch(`/api/v1/kpi/entity?entity_id=CSR_ALPHA_01&tenant_id=${tenant}`);
-      const dataRouter = resRouter.ok ? await resRouter.json() : { records: [] };
-
-      const resCtrl = await fetch(`/api/v1/kpi/entity?entity_id=CELL_099&tenant_id=${tenant}`);
-      const dataCtrl = resCtrl.ok ? await resCtrl.json() : { records: [] };
-
-      const combined = [
-        ...(dataCell.records || []),
-        ...(dataRouter.records || []),
-        ...(dataCtrl.records || [])
-      ];
-      setKpiRecords(combined);
+      const responses = await Promise.all(
+        KPI_ENTITIES.map((entityId) =>
+          fetch(`/api/v1/kpi/entity?entity_id=${encodeURIComponent(entityId)}&tenant_id=${tenant}`)
+        )
+      );
+      const payloads = await Promise.all(
+        responses.map((res) => (res.ok ? res.json() : { records: [] }))
+      );
+      setKpiRecords(payloads.flatMap((payload) => payload.records || []));
     } catch (e) {
       console.error('Failed to load KPIs', e);
     }
@@ -138,7 +149,7 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenant_id: tenant,
-          affected_cells: ['CELL_001', 'CELL_002', 'CELL_003'],
+          affected_cells: INCIDENT_CELLS,
           incident_time: '2026-11-10T10:05:00Z'
         })
       });
@@ -215,7 +226,7 @@ export default function App() {
   const derivedMetrics = useMemo(() => {
     const records = kpiRecords || [];
     const numeric = (name) => records
-      .filter((r) => r.kpi_name === name)
+      .filter((r) => r.kpi_name === name && !CONTROL_ENTITY_IDS.has(r.entity_id))
       .map((r) => Number(r.value))
       .filter(Number.isFinite);
     const availabilities = numeric('CELL_AVAILABILITY');
@@ -243,7 +254,10 @@ export default function App() {
         }
       : null;
 
-    const topologyCellCount = (topologyData.nodes || []).filter(
+    // Prefer the expanded incident topology so the count includes every cell
+    // in the CSR neighbourhood (CELL_001-003), not just the seed cell's 2-hop.
+    const topologyNodes = bypassTopology.nodes?.length ? bypassTopology.nodes : topologyData.nodes;
+    const topologyCellCount = (topologyNodes || []).filter(
       (n) => (n.type || n.entity_type) === 'cell'
     ).length;
 
@@ -253,7 +267,7 @@ export default function App() {
       telemetry,
       affectedCells: investigationReport?.affected_entities?.length || topologyCellCount || 0
     };
-  }, [kpiRecords, investigationReport, topologyData]);
+  }, [kpiRecords, investigationReport, topologyData, bypassTopology]);
 
   return (
     <div className={`app-shell min-h-screen bg-[#070b13] text-slate-100 font-sans antialiased selection:bg-indigo-500 selection:text-white theme-${theme}`}>
@@ -274,10 +288,10 @@ export default function App() {
       />
 
       {/* 2. Main High-Density Workspace Container */}
-      <main className="max-w-[1680px] mx-auto px-4 pb-6">
+      <main className="app-main max-w-[1680px] mx-auto px-4 pb-10">
         {/* WORKSPACE 1: ALARM MANAGEMENT AGENT */}
         {role === 'alarm_management' && (
-          <div className="space-y-4">
+          <div className="workspace-frame space-y-4">
             <section className="workspace-intro" aria-labelledby="workspace-title">
               <div>
                 <div className="workspace-eyebrow"><span className={tenant === 'customer_a' ? 'status-pulse' : 'status-pulse status-neutral'} /> {tenant === 'customer_a' ? 'LIVE INCIDENT · CUSTOMER A' : 'CUSTOMER B · ISOLATED TENANT'}</div>
@@ -303,7 +317,7 @@ export default function App() {
                 latencyMs={topologyData.latency_ms}
               />
             )}
-            {tenant === 'customer_a' && (stagedAction?.status === 'APPROVED' || stagedAction?.status === 'EXECUTED') && (
+            {tenant === 'customer_a' && investigationReport && (stagedAction?.status === 'APPROVED' || stagedAction?.status === 'EXECUTED') && (
               <p className="metric-snapshot-note text-[11px] text-slate-400 font-mono px-1">
                 Post-change telemetry is pending the next 15-minute KPI aggregation &mdash; the metrics above are the
                 10:05 UTC pre-remediation snapshot.
@@ -312,27 +326,60 @@ export default function App() {
             {/* Sleek Incident Path Bypass Strip */}
             {tenant === 'customer_a' ? (
               <>
-                <IncidentPathStrip
-                  theme={theme}
-                  stagedAction={stagedAction}
-                  report={investigationReport}
-                  topology={bypassTopology}
-                  availability={derivedMetrics.availability}
-                  packetLoss={derivedMetrics.packetLoss}
-                  onApprove={handleApproveAction}
-                  onReject={handleRejectAction}
-                  role={role}
-                  onRequestApproval={() => setRole('human_operator')}
-                />
+                {investigationReport ? (
+                  <IncidentPathStrip
+                    theme={theme}
+                    stagedAction={stagedAction}
+                    report={investigationReport}
+                    topology={bypassTopology}
+                    availability={derivedMetrics.availability}
+                    packetLoss={derivedMetrics.packetLoss}
+                    onApprove={handleApproveAction}
+                    onReject={handleRejectAction}
+                    role={role}
+                    onRequestApproval={() => setRole('human_operator')}
+                  />
+                ) : (
+                  <section className="clean-card relative overflow-hidden border border-cyan-500/20 bg-slate-900/80 px-5 py-5">
+                    <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-rose-500 via-amber-400 to-cyan-400" />
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div>
+                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-300">
+                          Recovery workflow · Step 1 of 3
+                        </p>
+                        <h2 className="mt-1 text-sm font-bold text-white">Awaiting AI investigation</h2>
+                        <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-400">
+                          The topology shows the active alert only. A bypass path is not selected until the investigation
+                          correlates telemetry and the deterministic resolver verifies a safe route.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleRunInvestigation}
+                        disabled={isInvestigating}
+                        className={`shrink-0 rounded-lg px-4 py-2 text-xs font-bold transition-all active:scale-95 ${
+                          isInvestigating
+                            ? 'cursor-not-allowed border border-blue-700/50 bg-blue-900/60 text-blue-300'
+                            : 'border border-cyan-400/30 bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-lg shadow-cyan-500/15 hover:from-cyan-500 hover:to-indigo-500'
+                        }`}
+                      >
+                        {isInvestigating ? 'Investigating alert…' : 'Investigate alert'}
+                      </button>
+                    </div>
+                  </section>
+                )}
 
                 {/* Side-by-Side Dual Console */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <TopologyMap
-                    nodes={topologyData.nodes}
-                    edges={topologyData.edges}
+                    nodes={bypassTopology.nodes?.length ? bypassTopology.nodes : topologyData.nodes}
+                    edges={bypassTopology.edges?.length ? bypassTopology.edges : topologyData.edges}
                     latencyMs={topologyData.latency_ms}
                     packetLoss={derivedMetrics.packetLoss}
                     tenant={tenant}
+                    stagedAction={stagedAction}
+                    investigated={Boolean(investigationReport)}
+                    onOpenFullGraph={() => setIsFullTopologyModalOpen(true)}
                   />
                   <AgentTraceConsole
                     report={investigationReport}
@@ -407,6 +454,13 @@ export default function App() {
       <LangGraphModal
         isOpen={isLangGraphModalOpen}
         onClose={() => setIsLangGraphModalOpen(false)}
+      />
+
+      {/* Full Tenant Topology Inventory Modal */}
+      <FullTopologyModal
+        isOpen={isFullTopologyModalOpen}
+        onClose={() => setIsFullTopologyModalOpen(false)}
+        tenant={tenant}
       />
     </div>
   );

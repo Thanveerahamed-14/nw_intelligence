@@ -30,7 +30,7 @@ export default function AgentTraceConsole({ report, isInvestigating, onTrigger }
 
     if (step.step_number === 2) {
       // Shared dependencies
-      const shared = Array.isArray(obs) ? obs : obs.shared_entities || [];
+      const shared = Array.isArray(obs) ? obs : (obs.shared_dependencies || obs.shared_entities || []);
       return (
         <div className="space-y-1 text-xs">
           <div className="font-semibold text-slate-300">

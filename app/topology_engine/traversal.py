@@ -100,6 +100,88 @@ class TopologyTraversalService:
         result.latency_ms = total_latency_ms
         return result
 
+    def get_full_snapshot(
+        self,
+        as_of: datetime,
+        tenant_id: str
+    ) -> Dict[str, Any]:
+        """
+        Returns every active entity and every active relationship for the tenant
+        at 'as_of', including disconnected components. This is the tenant-wide
+        inventory view; the incident-scoped neighborhood lookup stays bounded.
+
+        Weakly-connected components are numbered so the UI can group isolated
+        branches (e.g. the CELL_099 -> SITE_BETA control fixture) without
+        pretending they are wired into the incident.
+        """
+        start_time = time.perf_counter()
+        G = self.graph.build_snapshot_graph(as_of, tenant_id)
+        build_ms = (time.perf_counter() - start_time) * 1000
+
+        nodes: List[Dict[str, Any]] = []
+        for nid, data in G.nodes(data=True):
+            nodes.append({
+                "id": nid,
+                "name": data.get("name", nid),
+                "entity_type": data.get("entity_type"),
+                "vendor": data.get("vendor"),
+                "properties": data.get("properties", {}),
+                "in_degree": int(G.in_degree(nid)),
+                "out_degree": int(G.out_degree(nid)),
+                "degree": int(G.degree(nid))
+            })
+
+        edges: List[Dict[str, Any]] = []
+        for u, v, data in G.edges(data=True):
+            edges.append({
+                "source": u,
+                "target": v,
+                "rel_type": data.get("rel_type"),
+                "properties": data.get("properties", {})
+            })
+
+        # Assign component IDs over the undirected projection: a directed graph
+        # with one-way HOSTED_ON edges still represents a single physical island.
+        component_summaries: List[Dict[str, Any]] = []
+        node_component: Dict[str, int] = {}
+        if G.number_of_nodes() > 0:
+            undirected = G.to_undirected(as_view=True)
+            components = sorted(
+                nx.connected_components(undirected),
+                key=lambda comp: (-len(comp), sorted(comp)[0])
+            )
+            for idx, comp in enumerate(components, start=1):
+                member_ids = sorted(comp)
+                for nid in member_ids:
+                    node_component[nid] = idx
+                component_summaries.append({
+                    "id": idx,
+                    "node_count": len(member_ids),
+                    "edge_count": int(G.subgraph(member_ids).number_of_edges()),
+                    "node_ids": member_ids,
+                    # Human label: the component contains the incident router?
+                    "is_incident_component": "CSR_ALPHA_01" in comp,
+                    "isolated": len(comp) <= 2
+                })
+
+        for node in nodes:
+            node["component_id"] = node_component.get(node["id"])
+
+        total_latency_ms = (time.perf_counter() - start_time) * 1000
+        return {
+            "as_of": as_of.isoformat(),
+            "tenant_id": tenant_id,
+            "latency_ms": round(total_latency_ms, 2),
+            "build_time_ms": round(build_ms, 2),
+            "sla_met": total_latency_ms <= (settings.TOPOLOGY_QUERY_TIMEOUT_SECONDS * 1000),
+            "node_count": len(nodes),
+            "edge_count": len(edges),
+            "component_count": len(component_summaries),
+            "components": component_summaries,
+            "nodes": nodes,
+            "edges": edges
+        }
+
     def find_shared_dependencies(
         self,
         entity_ids: List[str],

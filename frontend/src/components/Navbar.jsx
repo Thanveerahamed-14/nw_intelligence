@@ -28,10 +28,10 @@ export default function Navbar({
   const isVectorOnline = vdb.status === 'ONLINE';
 
   return (
-    <nav className="app-navbar bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-4 py-3 shadow-2xl mb-5">
+    <nav className="app-navbar command-navbar bg-slate-950/85 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-40 px-4 py-3 shadow-2xl mb-5">
       <div className="nav-layout max-w-[1680px] mx-auto">
         {/* Left: Brand & Incident Badge */}
-        <div className="flex items-center gap-3">
+        <div className="nav-brand flex items-center gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 shrink-0">
               <Activity className="w-4 h-4" />
@@ -53,7 +53,7 @@ export default function Navbar({
         </div>
 
         {/* Center: Agent Workspace Segmented Switcher */}
-        <div className="flex items-center p-1 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs font-semibold">
+        <div className="workspace-switcher flex items-center p-1 rounded-xl bg-slate-900/90 border border-slate-800/80 text-xs font-semibold">
           <button
             onClick={() => setRole('alarm_management')}
             className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
@@ -108,7 +108,7 @@ export default function Navbar({
         </div>
 
         {/* Right: Real Technology Status & Main Investigation CTA */}
-        <div className="flex items-center gap-2">
+        <div className="nav-controls flex items-center gap-2">
           {/* Real Technology Status Badges */}
           <div className="hidden lg:flex items-center gap-1.5 text-[11px]">
             {/* LangGraph Active */}
